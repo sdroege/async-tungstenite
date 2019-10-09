@@ -13,7 +13,7 @@ edition = "2018"
 
 [features]
 default = ["connect", "tls"]
-connect = ["tokio-dns-unofficial", "tokio-net", "stream"]
+connect = ["tokio-net", "stream"]
 tls = ["tokio-tls", "native-tls", "stream", "tungstenite/tls"]
 stream = ["bytes"]
 
@@ -36,11 +36,6 @@ version = "0.4.8"
 [dependencies.native-tls]
 optional = true
 version = "0.2.0"
-
-[dependencies.tokio-dns-unofficial]
-optional = true
-#version = "0.4.0"
-git = "https://github.com/sbstp/tokio-dns.git"
 
 [dependencies.tokio-net]
 optional = true

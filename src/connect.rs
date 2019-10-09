@@ -125,7 +125,7 @@ where
         .port_or_known_default()
         .expect("Bug: port unknown");
 
-    let try_socket = tokio_dns::TcpStream::connect((domain.as_str(), port)).await;
+    let try_socket = TcpStream::connect((domain.as_str(), port)).await;
     let socket = try_socket.map_err(Error::Io)?;
     client_async_tls(request, socket).await
 }

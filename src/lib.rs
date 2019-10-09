@@ -355,6 +355,5 @@ mod tests {
 
         is_unpin::<WebSocketStream<tokio::net::TcpStream>>();
         is_unpin::<WebSocketStream<AutoStream<tokio::net::TcpStream>>>();
-        is_unpin::<WebSocketStream<AutoStream<tokio_dns::TcpStream>>>();
     }
 }
