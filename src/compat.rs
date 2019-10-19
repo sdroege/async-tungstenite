@@ -7,16 +7,16 @@ use tokio_io::{AsyncRead, AsyncWrite};
 use tungstenite::{Error as WsError, WebSocket};
 
 pub(crate) trait HasContext {
-    fn set_context(&mut self, context: *mut ());
+    fn set_context(&mut self, context: (bool, *mut ()));
 }
 #[derive(Debug)]
 pub struct AllowStd<S> {
     pub(crate) inner: S,
-    pub(crate) context: *mut (),
+    pub(crate) context: (bool, *mut ()),
 }
 
 impl<S> HasContext for AllowStd<S> {
-    fn set_context(&mut self, context: *mut ()) {
+    fn set_context(&mut self, context: (bool, *mut ())) {
         self.context = context;
     }
 }
@@ -26,7 +26,7 @@ pub(crate) struct Guard<'a, S>(pub(crate) &'a mut WebSocket<AllowStd<S>>);
 impl<S> Drop for Guard<'_, S> {
     fn drop(&mut self) {
         trace!("{}:{} Guard.drop", file!(), line!());
-        (self.0).get_mut().context = std::ptr::null_mut();
+        (self.0).get_mut().context = (true, std::ptr::null_mut());
     }
 }
 
@@ -38,14 +38,18 @@ impl<S> AllowStd<S>
 where
     S: Unpin,
 {
-    fn with_context<F, R>(&mut self, f: F) -> R
+    fn with_context<F, R>(&mut self, f: F) -> Poll<std::io::Result<R>>
     where
-        F: FnOnce(&mut Context<'_>, Pin<&mut S>) -> R,
+        F: FnOnce(&mut Context<'_>, Pin<&mut S>) -> Poll<std::io::Result<R>>,
     {
         trace!("{}:{} AllowStd.with_context", file!(), line!());
         unsafe {
-            assert!(!self.context.is_null());
-            let waker = &mut *(self.context as *mut _);
+            if !self.context.0 {
+                //was called by start_send without context
+                return Poll::Pending
+            }
+            assert!(!self.context.1.is_null());
+            let waker = &mut *(self.context.1 as *mut _);
             f(waker, Pin::new(&mut self.inner))
         }
     }

@@ -28,7 +28,7 @@ pub mod stream;
 use std::io::{Read, Write};
 
 use compat::{cvt, AllowStd};
-use futures::Stream;
+use futures::{Stream, Sink};
 use log::*;
 use pin_project::pin_project;
 use std::future::Future;
@@ -214,14 +214,17 @@ impl<S> WebSocketStream<S> {
         WebSocketStream { inner: ws }
     }
 
-    fn with_context<F, R>(&mut self, ctx: &mut Context<'_>, f: F) -> R
+    fn with_context<F, R>(&mut self, ctx: Option<&mut Context<'_>>, f: F) -> R
     where
         S: Unpin,
         F: FnOnce(&mut WebSocket<AllowStd<S>>) -> R,
         AllowStd<S>: Read + Write,
     {
         trace!("{}:{} WebSocketStream.with_context", file!(), line!());
-        self.inner.get_mut().context = ctx as *mut _ as *mut ();
+        self.inner.get_mut().context = match ctx {
+            None => (false, std::ptr::null_mut()),
+            Some(cx) => (true, cx as *mut _ as *mut ()),
+        };
         let mut g = compat::Guard(&mut self.inner);
         f(&mut (g.0))
     }
@@ -276,7 +279,7 @@ where
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         trace!("{}:{} Stream.poll_next", file!(), line!());
-        match futures::ready!(self.with_context(cx, |s| {
+        match futures::ready!(self.with_context(Some(cx), |s| {
             trace!(
                 "{}:{} Stream.with_context poll_next -> read_message()",
                 file!(),
@@ -287,6 +290,48 @@ where
             Ok(v) => Poll::Ready(Some(Ok(v))),
             Err(WsError::AlreadyClosed) | Err(WsError::ConnectionClosed) => Poll::Ready(None),
             Err(e) => Poll::Ready(Some(Err(e))),
+        }
+    }
+}
+
+impl<T> Sink<Message> for WebSocketStream<T>
+    where
+        T: AsyncRead + AsyncWrite + Unpin,
+        AllowStd<T>: Read + Write,
+{
+    type Error = WsError;
+
+    fn poll_ready(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        (*self).with_context(Some(cx), |s| cvt(s.write_pending()))
+    }
+
+    fn start_send(mut self: Pin<&mut Self>, item: Message) -> Result<(), Self::Error> {
+        match (*self).with_context(None, |s| s.write_message(item)) {
+            Ok(()) => Ok(()),
+            Err(::tungstenite::Error::Io(ref err)) if err.kind() == std::io::ErrorKind::WouldBlock => {
+                // the message was accepted and queued
+                // isn't an error.
+                Ok(())
+            }
+            Err(e) => {
+                debug!("websocket start_send error: {}", e);
+                Err(e)
+            }
+        }
+    }
+
+    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        (*self).with_context(Some(cx), |s| cvt(s.write_pending()))
+    }
+
+    fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        match (*self).with_context(Some(cx), |s| s.close(None)) {
+            Ok(()) => Poll::Ready(Ok(())),
+            Err(::tungstenite::Error::ConnectionClosed) => Poll::Ready(Ok(())),
+            Err(err) => {
+                debug!("websocket close error: {}", err);
+                Poll::Ready(Err(err))
+            }
         }
     }
 }
@@ -307,7 +352,7 @@ where
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let this = self.project();
         let message = this.message.take().expect("Cannot poll twice");
-        Poll::Ready(this.stream.with_context(cx, |s| s.write_message(message)))
+        Poll::Ready(this.stream.with_context(Some(cx), |s| s.write_message(message)))
     }
 }
 
@@ -327,7 +372,7 @@ where
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let this = self.project();
         let message = this.message.take().expect("Cannot poll twice");
-        Poll::Ready(this.stream.with_context(cx, |s| s.close(message)))
+        Poll::Ready(this.stream.with_context(Some(cx), |s| s.close(message)))
     }
 }
 

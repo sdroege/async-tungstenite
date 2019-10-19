@@ -47,7 +47,7 @@ where
         trace!("Setting context when skipping handshake");
         let stream = AllowStd {
             inner: inner.stream,
-            context: ctx as *mut _ as *mut (),
+            context: (true, ctx as *mut _ as *mut ()),
         };
 
         Poll::Ready((inner.f)(stream))
@@ -137,14 +137,14 @@ where
         trace!("Setting ctx when starting handshake");
         let stream = AllowStd {
             inner: inner.stream,
-            context: ctx as *mut _ as *mut (),
+            context: (true, ctx as *mut _ as *mut ()),
         };
 
         match (inner.f)(stream) {
             Ok(r) => Poll::Ready(Ok(StartedHandshake::Done(r))),
             Err(Error::Interrupted(mut mid)) => {
                 let machine = mid.get_mut();
-                machine.get_mut().set_context(std::ptr::null_mut());
+                machine.get_mut().set_context((true, std::ptr::null_mut()));
                 Poll::Ready(Ok(StartedHandshake::Mid(mid)))
             }
             Err(Error::Failure(e)) => Poll::Ready(Err(Error::Failure(e))),
@@ -165,14 +165,14 @@ where
 
         let machine = s.get_mut();
         trace!("Setting context in handshake");
-        machine.get_mut().set_context(cx as *mut _ as *mut ());
+        machine.get_mut().set_context((true, cx as *mut _ as *mut ()));
 
         match s.handshake() {
             Ok(stream) => Poll::Ready(Ok(stream)),
             Err(Error::Failure(e)) => Poll::Ready(Err(Error::Failure(e))),
             Err(Error::Interrupted(mut mid)) => {
                 let machine = mid.get_mut();
-                machine.get_mut().set_context(std::ptr::null_mut());
+                machine.get_mut().set_context((true, std::ptr::null_mut()));
                 *this.0 = Some(mid);
                 Poll::Pending
             }
