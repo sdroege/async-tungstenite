@@ -40,6 +40,7 @@ version = "0.2.0"
 [dependencies.tokio-net]
 optional = true
 version = "0.2.0-alpha.6"
+features = ["tcp"]
 
 [dependencies.tokio-tls]
 optional = true
