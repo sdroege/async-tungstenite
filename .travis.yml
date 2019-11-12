@@ -1,6 +1,8 @@
 language: rust
 rust:
-  - nightly-2019-09-05
+  - stable
+  - beta
+  - nightly
 
 before_script:
   - export PATH="$PATH:$HOME/.cargo/bin"

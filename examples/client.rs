@@ -11,17 +11,17 @@
 //! You can use this example together with the `server` example.
 
 use std::env;
-use std::io::{self, Write};
 
 use futures::StreamExt;
 use log::*;
 use tungstenite::protocol::Message;
 
-use tokio::io::AsyncReadExt;
-use tokio_tungstenite::connect_async;
+use async_std::prelude::*;
+use async_std::io;
+use async_std::task;
+use async_tungstenite::connect_async;
 
-#[tokio::main]
-async fn main() {
+async fn run() {
     let _ = env_logger::try_init();
 
     // Specify the server address to which the client will be connecting.
@@ -31,12 +31,10 @@ async fn main() {
 
     let url = url::Url::parse(&connect_addr).unwrap();
 
-    // Right now Tokio doesn't support a handle to stdin running on the event
-    // loop, so we farm out that work to a separate thread. This thread will
-    // read data from stdin and then send it to the event loop over a standard
-    // futures channel.
+    // Spawn a new task that will will read data from stdin and then send it to the event loop over
+    // a standard futures channel.
     let (stdin_tx, mut stdin_rx) = futures::channel::mpsc::unbounded();
-    tokio::spawn(read_stdin(stdin_tx));
+    task::spawn(read_stdin(stdin_tx));
 
     // After the TCP connection has been established, we set up our client to
     // start forwarding data.
@@ -61,7 +59,7 @@ async fn main() {
         ws_stream.send(msg).await.expect("Failed to send request");
         if let Some(msg) = ws_stream.next().await {
             let msg = msg.expect("Failed to get response");
-            stdout.write_all(&msg.into_data()).unwrap();
+            stdout.write_all(&msg.into_data()).await.unwrap();
         }
     }
 }
@@ -69,7 +67,7 @@ async fn main() {
 // Our helper method which will read data from stdin and send it along the
 // sender provided.
 async fn read_stdin(tx: futures::channel::mpsc::UnboundedSender<Message>) {
-    let mut stdin = tokio::io::stdin();
+    let mut stdin = io::stdin();
     loop {
         let mut buf = vec![0; 1024];
         let n = match stdin.read(&mut buf).await {
@@ -79,4 +77,8 @@ async fn read_stdin(tx: futures::channel::mpsc::UnboundedSender<Message>) {
         buf.truncate(n);
         tx.unbounded_send(Message::binary(buf)).unwrap();
     }
+}
+
+fn main() {
+    task::block_on(run())
 }

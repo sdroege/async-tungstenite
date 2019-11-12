@@ -23,8 +23,9 @@ use std::io::Error;
 use futures::channel::mpsc::{UnboundedReceiver, UnboundedSender};
 use futures::StreamExt;
 use log::*;
-use std::net::{SocketAddr, ToSocketAddrs};
-use tokio::net::{TcpListener, TcpStream};
+use async_std::task;
+use async_std::net::{SocketAddr, ToSocketAddrs};
+use async_std::net::{TcpListener, TcpStream};
 use tungstenite::protocol::Message;
 
 struct Connection {
@@ -50,7 +51,7 @@ async fn accept_connection(stream: TcpStream) {
         .expect("connected streams should have a peer address");
     info!("Peer address: {}", addr);
 
-    let mut ws_stream = tokio_tungstenite::accept_async(stream)
+    let mut ws_stream = async_tungstenite::accept_async(stream)
         .await
         .expect("Error during the websocket handshake occurred");
 
@@ -66,7 +67,7 @@ async fn accept_connection(stream: TcpStream) {
         rx: msg_rx,
         tx: response_tx,
     };
-    tokio::spawn(handle_connection(c));
+    task::spawn(handle_connection(c));
 
     while let Some(message) = ws_stream.next().await {
         let message = message.expect("Failed to get request");
@@ -78,12 +79,13 @@ async fn accept_connection(stream: TcpStream) {
         }
     }
 }
-#[tokio::main]
-async fn main() -> Result<(), Error> {
+
+async fn run() -> Result<(), Error> {
     let _ = env_logger::try_init();
     let addr = env::args().nth(1).unwrap_or("127.0.0.1:8080".to_string());
     let addr = addr
         .to_socket_addrs()
+        .await
         .expect("Not a valid address")
         .next()
         .expect("Not a socket address");
@@ -96,8 +98,12 @@ async fn main() -> Result<(), Error> {
 
     while let Some(stream) = incoming.next().await {
         let stream = stream.expect("Failed to accept stream");
-        tokio::spawn(accept_connection(stream));
+        task::spawn(accept_connection(stream));
     }
 
     Ok(())
+}
+
+fn main() -> Result<(), Error> {
+    task::block_on(run())
 }

@@ -1,6 +1,6 @@
 use futures::StreamExt;
 use log::*;
-use tokio_tungstenite::{connect_async, tungstenite::Result};
+use async_tungstenite::{connect_async, tungstenite::Result};
 use url::Url;
 
 const AGENT: &'static str = "Tungstenite";
@@ -43,8 +43,7 @@ async fn run_test(case: u32) {
     }
 }
 
-#[tokio::main]
-async fn main() {
+async fn run() {
     env_logger::init();
 
     let total = get_case_count().await.unwrap();
@@ -54,4 +53,8 @@ async fn main() {
     }
 
     update_reports().await.unwrap();
+}
+
+fn main() {
+    async_std::task::block_on(run());
 }

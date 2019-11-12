@@ -1,9 +1,8 @@
-use futures::{SinkExt, StreamExt};
+use futures::{SinkExt, StreamExt, AsyncRead, AsyncWrite};
 use log::*;
-use std::net::ToSocketAddrs;
-use tokio::io::{AsyncRead, AsyncWrite};
-use tokio::net::tcp::{TcpListener, TcpStream};
-use tokio_tungstenite::{accept_async, client_async, WebSocketStream};
+use async_std::task;
+use async_std::net::{TcpListener, TcpStream, ToSocketAddrs};
+use async_tungstenite::{accept_async, client_async, WebSocketStream};
 use tungstenite::Message;
 
 async fn run_connection<S>(
@@ -23,7 +22,7 @@ async fn run_connection<S>(
     msg_tx.send(messages).expect("Failed to send results");
 }
 
-#[tokio::test]
+#[async_std::test]
 async fn communication() {
     let _ = env_logger::try_init();
 
@@ -33,6 +32,7 @@ async fn communication() {
     let f = async move {
         let address = "0.0.0.0:12345"
             .to_socket_addrs()
+            .await
             .expect("Not a valid address")
             .next()
             .expect("No address resolved");
@@ -48,13 +48,14 @@ async fn communication() {
         run_connection(stream, msg_tx).await;
     };
 
-    tokio::spawn(f);
+    task::spawn(f);
 
     info!("Waiting for server to be ready");
 
     con_rx.await.expect("Server not ready");
     let address = "0.0.0.0:12345"
         .to_socket_addrs()
+        .await
         .expect("Not a valid address")
         .next()
         .expect("No address resolved");
@@ -78,7 +79,7 @@ async fn communication() {
     assert_eq!(messages.len(), 10);
 }
 
-#[tokio::test]
+#[async_std::test]
 async fn split_communication() {
     let _ = env_logger::try_init();
 
@@ -88,6 +89,7 @@ async fn split_communication() {
     let f = async move {
         let address = "0.0.0.0:12346"
             .to_socket_addrs()
+            .await
             .expect("Not a valid address")
             .next()
             .expect("No address resolved");
@@ -103,13 +105,14 @@ async fn split_communication() {
         run_connection(stream, msg_tx).await;
     };
 
-    tokio::spawn(f);
+    task::spawn(f);
 
     info!("Waiting for server to be ready");
 
     con_rx.await.expect("Server not ready");
     let address = "0.0.0.0:12346"
         .to_socket_addrs()
+        .await
         .expect("Not a valid address")
         .next()
         .expect("No address resolved");

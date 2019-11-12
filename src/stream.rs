@@ -2,11 +2,11 @@
 //!
 //!  There is no dependency on actual TLS implementations. Everything like
 //! `native_tls` or `openssl` will work as long as there is a TLS stream supporting standard
-//! `Read + Write` traits.
+//! `AsyncRead + AsyncWrite` traits.
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-use tokio_io::{AsyncRead, AsyncWrite};
+use futures::io::{AsyncRead, AsyncWrite};
 
 /// Stream, either plain TCP or TLS.
 pub enum Stream<S, T> {
@@ -69,18 +69,18 @@ impl<S: AsyncWrite + Unpin, T: AsyncWrite + Unpin> AsyncWrite for Stream<S, T> {
         }
     }
 
-    fn poll_shutdown(
+    fn poll_close(
         mut self: Pin<&mut Self>,
         cx: &mut Context<'_>,
     ) -> Poll<Result<(), std::io::Error>> {
         match *self {
             Stream::Plain(ref mut s) => {
                 let pinned = unsafe { Pin::new_unchecked(s) };
-                pinned.poll_shutdown(cx)
+                pinned.poll_close(cx)
             }
             Stream::Tls(ref mut s) => {
                 let pinned = unsafe { Pin::new_unchecked(s) };
-                pinned.poll_shutdown(cx)
+                pinned.poll_close(cx)
             }
         }
     }

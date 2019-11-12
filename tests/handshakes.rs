@@ -1,15 +1,16 @@
 use futures::StreamExt;
-use std::net::ToSocketAddrs;
-use tokio::net::tcp::{TcpListener, TcpStream};
-use tokio_tungstenite::{accept_async, client_async};
+use async_std::task;
+use async_std::net::{TcpListener, TcpStream, ToSocketAddrs};
+use async_tungstenite::{accept_async, client_async};
 
-#[tokio::test]
+#[async_std::test]
 async fn handshakes() {
     let (tx, rx) = futures::channel::oneshot::channel();
 
     let f = async move {
         let address = "0.0.0.0:12345"
             .to_socket_addrs()
+            .await
             .expect("Not a valid address")
             .next()
             .expect("No address resolved");
@@ -23,11 +24,12 @@ async fn handshakes() {
         }
     };
 
-    tokio::spawn(f);
+    task::spawn(f);
 
     rx.await.expect("Failed to wait for server to be ready");
     let address = "0.0.0.0:12345"
         .to_socket_addrs()
+        .await
         .expect("Not a valid address")
         .next()
         .expect("No address resolved");

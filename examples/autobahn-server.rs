@@ -1,8 +1,7 @@
 use futures::StreamExt;
 use log::*;
-use std::net::{SocketAddr, ToSocketAddrs};
-use tokio::net::{TcpListener, TcpStream};
-use tokio_tungstenite::accept_async;
+use async_std::net::{TcpListener, TcpStream, SocketAddr, ToSocketAddrs};
+use async_tungstenite::accept_async;
 
 async fn accept_connection(peer: SocketAddr, stream: TcpStream) {
     let mut ws_stream = accept_async(stream).await.expect("Failed to accept");
@@ -17,12 +16,12 @@ async fn accept_connection(peer: SocketAddr, stream: TcpStream) {
     }
 }
 
-#[tokio::main]
-async fn main() {
+async fn run() {
     env_logger::init();
 
     let addr = "127.0.0.1:9002"
         .to_socket_addrs()
+        .await
         .expect("Not a valid address")
         .next()
         .expect("Not a socket address");
@@ -37,6 +36,10 @@ async fn main() {
             .expect("connected streams should have a peer address");
         info!("Peer address: {}", peer);
 
-        tokio::spawn(accept_connection(peer, stream));
+        async_std::task::spawn(accept_connection(peer, stream));
     }
+}
+
+fn main() {
+    async_std::task::block_on(run());
 }

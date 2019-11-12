@@ -1,22 +1,21 @@
 //! Connection helper.
-use tokio_io::{AsyncRead, AsyncWrite};
-use tokio_net::tcp::TcpStream;
-
 use tungstenite::client::url_mode;
 use tungstenite::handshake::client::Response;
 use tungstenite::Error;
+
+use futures::io::{AsyncRead, AsyncWrite};
 
 use super::{client_async, Request, WebSocketStream};
 
 #[cfg(feature = "tls")]
 pub(crate) mod encryption {
-    use native_tls::TlsConnector;
-    use tokio_tls::{TlsConnector as TokioTlsConnector, TlsStream};
-
-    use tokio_io::{AsyncRead, AsyncWrite};
+    use async_tls::TlsConnector as AsyncTlsConnector;
+    use async_tls::client::TlsStream;
 
     use tungstenite::stream::Mode;
     use tungstenite::Error;
+
+    use futures::io::{AsyncRead, AsyncWrite};
 
     use crate::stream::Stream as StreamSwitcher;
 
@@ -36,12 +35,10 @@ pub(crate) mod encryption {
         match mode {
             Mode::Plain => Ok(StreamSwitcher::Plain(socket)),
             Mode::Tls => {
-                let try_connector = TlsConnector::new();
-                let connector = try_connector.map_err(Error::Tls)?;
-                let stream = TokioTlsConnector::from(connector);
-                let connected = stream.connect(&domain, socket).await;
+                let stream = AsyncTlsConnector::new();
+                let connected = stream.connect(&domain, socket)?.await;
                 match connected {
-                    Err(e) => Err(Error::Tls(e)),
+                    Err(e) => Err(Error::Io(e)),
                     Ok(s) => Ok(StreamSwitcher::Tls(s)),
                 }
             }
@@ -55,7 +52,7 @@ pub use self::encryption::MaybeTlsStream;
 #[cfg(not(feature = "tls"))]
 pub(crate) mod encryption {
     use futures::{future, Future};
-    use tokio_io::{AsyncRead, AsyncWrite};
+    use futures::io::{AsyncRead, AsyncWrite};
 
     use tungstenite::stream::Mode;
     use tungstenite::Error;
@@ -110,22 +107,31 @@ where
     client_async(request, stream).await
 }
 
-/// Connect to a given URL.
-pub async fn connect_async<R>(
-    request: R,
-) -> Result<(WebSocketStream<AutoStream<TcpStream>>, Response), Error>
-where
-    R: Into<Request<'static>> + Unpin,
-{
-    let request: Request = request.into();
+#[cfg(feature = "async_std_runtime")]
+pub(crate) mod async_std_runtime {
+    use super::*;
+    use async_std::net::TcpStream;
 
-    let domain = domain(&request)?;
-    let port = request
-        .url
-        .port_or_known_default()
-        .expect("Bug: port unknown");
+    /// Connect to a given URL.
+    pub async fn connect_async<R>(
+        request: R,
+    ) -> Result<(WebSocketStream<AutoStream<TcpStream>>, Response), Error>
+    where
+        R: Into<Request<'static>> + Unpin,
+    {
+        let request: Request = request.into();
 
-    let try_socket = TcpStream::connect((domain.as_str(), port)).await;
-    let socket = try_socket.map_err(Error::Io)?;
-    client_async_tls(request, socket).await
+        let domain = domain(&request)?;
+        let port = request
+            .url
+            .port_or_known_default()
+            .expect("Bug: port unknown");
+
+        let try_socket = TcpStream::connect((domain.as_str(), port)).await;
+        let socket = try_socket.map_err(Error::Io)?;
+        client_async_tls(request, socket).await
+    }
 }
+
+#[cfg(feature = "async_std_runtime")]
+pub use async_std_runtime::connect_async;

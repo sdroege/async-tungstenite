@@ -3,7 +3,7 @@ use std::io::{Read, Write};
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-use tokio_io::{AsyncRead, AsyncWrite};
+use futures::io::{AsyncRead, AsyncWrite};
 use tungstenite::{Error as WsError, WebSocket};
 
 pub(crate) trait HasContext {

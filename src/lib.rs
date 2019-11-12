@@ -2,7 +2,7 @@
 //!
 //! This library is an implementation of WebSocket handshakes and streams. It
 //! is based on the crate which implements all required WebSocket protocol
-//! logic. So this crate basically just brings tokio support / tokio integration
+//! logic. So this crate basically just brings async_std support / async_std integration
 //! to it.
 //!
 //! Each WebSocket stream implements the required `Stream` and `Sink` traits,
@@ -34,7 +34,7 @@ use pin_project::pin_project;
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
-use tokio_io::{AsyncRead, AsyncWrite};
+use futures::io::{AsyncRead, AsyncWrite};
 
 use tungstenite::{
     error::Error as WsError,
@@ -47,7 +47,9 @@ use tungstenite::{
 };
 
 #[cfg(feature = "connect")]
-pub use connect::{client_async_tls, connect_async};
+pub use connect::client_async_tls;
+#[cfg(feature = "async_std_runtime")]
+pub use connect::connect_async;
 
 #[cfg(all(feature = "connect", feature = "tls"))]
 pub use connect::MaybeTlsStream;
@@ -382,7 +384,7 @@ mod tests {
     use crate::connect::encryption::AutoStream;
     use crate::WebSocketStream;
     use std::io::{Read, Write};
-    use tokio_io::{AsyncReadExt, AsyncWriteExt};
+    use futures::io::{AsyncReadExt, AsyncWriteExt};
 
     fn is_read<T: Read>() {}
     fn is_write<T: Write>() {}
@@ -392,13 +394,13 @@ mod tests {
 
     #[test]
     fn web_socket_stream_has_traits() {
-        is_read::<AllowStd<tokio::net::TcpStream>>();
-        is_write::<AllowStd<tokio::net::TcpStream>>();
+        is_read::<AllowStd<async_std::net::TcpStream>>();
+        is_write::<AllowStd<async_std::net::TcpStream>>();
 
-        is_async_read::<AutoStream<tokio::net::TcpStream>>();
-        is_async_write::<AutoStream<tokio::net::TcpStream>>();
+        is_async_read::<AutoStream<async_std::net::TcpStream>>();
+        is_async_write::<AutoStream<async_std::net::TcpStream>>();
 
-        is_unpin::<WebSocketStream<tokio::net::TcpStream>>();
-        is_unpin::<WebSocketStream<AutoStream<tokio::net::TcpStream>>>();
+        is_unpin::<WebSocketStream<async_std::net::TcpStream>>();
+        is_unpin::<WebSocketStream<AutoStream<async_std::net::TcpStream>>>();
     }
 }
