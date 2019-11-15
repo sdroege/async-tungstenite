@@ -92,12 +92,10 @@ async fn run() -> Result<(), Error> {
 
     // Create the event loop and TCP listener we'll accept connections on.
     let try_socket = TcpListener::bind(&addr).await;
-    let socket = try_socket.expect("Failed to bind");
-    let mut incoming = socket.incoming();
+    let listener = try_socket.expect("Failed to bind");
     info!("Listening on: {}", addr);
 
-    while let Some(stream) = incoming.next().await {
-        let stream = stream.expect("Failed to accept stream");
+    while let Ok((stream, _)) = listener.accept().await {
         task::spawn(accept_connection(stream));
     }
 

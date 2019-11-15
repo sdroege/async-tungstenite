@@ -25,12 +25,10 @@ async fn run() {
         .expect("Not a valid address")
         .next()
         .expect("Not a socket address");
-    let socket = TcpListener::bind(&addr).await.unwrap();
-    let mut incoming = socket.incoming();
+    let listener = TcpListener::bind(&addr).await.unwrap();
     info!("Listening on: {}", addr);
 
-    while let Some(stream) = incoming.next().await {
-        let stream = stream.expect("Failed to get stream");
+    while let Ok((stream, _)) = listener.accept().await {
         let peer = stream
             .peer_addr()
             .expect("connected streams should have a peer address");

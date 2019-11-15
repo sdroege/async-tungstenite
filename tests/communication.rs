@@ -37,12 +37,10 @@ async fn communication() {
             .next()
             .expect("No address resolved");
         let listener = TcpListener::bind(&address).await.unwrap();
-        let mut connections = listener.incoming();
         info!("Server ready");
         con_tx.send(()).unwrap();
         info!("Waiting on next connection");
-        let connection = connections.next().await.expect("No connections to accept");
-        let connection = connection.expect("Failed to accept connection");
+        let (connection, _) = listener.accept().await.expect("No connections to accept");
         let stream = accept_async(connection).await;
         let stream = stream.expect("Failed to handshake with connection");
         run_connection(stream, msg_tx).await;
@@ -94,12 +92,10 @@ async fn split_communication() {
             .next()
             .expect("No address resolved");
         let listener = TcpListener::bind(&address).await.unwrap();
-        let mut connections = listener.incoming();
         info!("Server ready");
         con_tx.send(()).unwrap();
         info!("Waiting on next connection");
-        let connection = connections.next().await.expect("No connections to accept");
-        let connection = connection.expect("Failed to accept connection");
+        let (connection, _) = listener.accept().await.expect("No connections to accept");
         let stream = accept_async(connection).await;
         let stream = stream.expect("Failed to handshake with connection");
         run_connection(stream, msg_tx).await;

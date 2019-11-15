@@ -19,7 +19,7 @@ stream = ["bytes"]
 
 [dependencies]
 log = "0.4"
-futures = { version = "0.3", features = ["async-await"] }
+futures = "0.3"
 pin-project = "0.4"
 
 [dependencies.tungstenite]

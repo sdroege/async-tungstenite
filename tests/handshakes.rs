@@ -1,4 +1,3 @@
-use futures::StreamExt;
 use async_std::task;
 use async_std::net::{TcpListener, TcpStream, ToSocketAddrs};
 use async_tungstenite::{accept_async, client_async};
@@ -15,10 +14,8 @@ async fn handshakes() {
             .next()
             .expect("No address resolved");
         let listener = TcpListener::bind(&address).await.unwrap();
-        let mut connections = listener.incoming();
         tx.send(()).unwrap();
-        while let Some(connection) = connections.next().await {
-            let connection = connection.expect("Failed to accept connection");
+        while let Ok((connection, _)) = listener.accept().await {
             let stream = accept_async(connection).await;
             stream.expect("Failed to handshake with connection");
         }
