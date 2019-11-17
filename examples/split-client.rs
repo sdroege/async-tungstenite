@@ -12,13 +12,13 @@
 
 use std::env;
 
+use async_std::io;
+use async_std::prelude::*;
+use async_std::task;
+use async_tungstenite::connect_async;
 use futures::{SinkExt, StreamExt};
 use log::*;
 use tungstenite::protocol::Message;
-use async_std::prelude::*;
-use async_std::io;
-use async_std::task;
-use async_tungstenite::connect_async;
 
 async fn run() {
     let _ = env_logger::try_init();

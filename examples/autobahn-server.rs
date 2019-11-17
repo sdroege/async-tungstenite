@@ -1,7 +1,7 @@
+use async_std::net::{SocketAddr, TcpListener, TcpStream, ToSocketAddrs};
+use async_tungstenite::accept_async;
 use futures::StreamExt;
 use log::*;
-use async_std::net::{TcpListener, TcpStream, SocketAddr, ToSocketAddrs};
-use async_tungstenite::accept_async;
 
 async fn accept_connection(peer: SocketAddr, stream: TcpStream) {
     let mut ws_stream = accept_async(stream).await.expect("Failed to accept");

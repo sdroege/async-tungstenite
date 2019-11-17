@@ -46,7 +46,7 @@ where
         unsafe {
             if !self.context.0 {
                 //was called by start_send without context
-                return Poll::Pending
+                return Poll::Pending;
             }
             assert!(!self.context.1.is_null());
             let waker = &mut *(self.context.1 as *mut _);

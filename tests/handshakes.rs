@@ -1,5 +1,5 @@
-use async_std::task;
 use async_std::net::{TcpListener, TcpStream, ToSocketAddrs};
+use async_std::task;
 use async_tungstenite::{accept_async, client_async};
 
 #[async_std::test]

@@ -1,8 +1,8 @@
-use futures::{SinkExt, StreamExt, AsyncRead, AsyncWrite};
-use log::*;
-use async_std::task;
 use async_std::net::{TcpListener, TcpStream, ToSocketAddrs};
+use async_std::task;
 use async_tungstenite::{accept_async, client_async, WebSocketStream};
+use futures::{AsyncRead, AsyncWrite, SinkExt, StreamExt};
+use log::*;
 use tungstenite::Message;
 
 async fn run_connection<S>(
@@ -67,7 +67,10 @@ async fn communication() {
 
     for i in 1..10 {
         info!("Sending message");
-        stream.send(Message::Text(format!("{}", i))).await.expect("Failed to send message");
+        stream
+            .send(Message::Text(format!("{}", i)))
+            .await
+            .expect("Failed to send message");
     }
 
     stream.close(None).await.expect("Failed to close");
@@ -123,7 +126,9 @@ async fn split_communication() {
 
     for i in 1..10 {
         info!("Sending message");
-        tx.send(Message::Text(format!("{}", i))).await.expect("Failed to send message");
+        tx.send(Message::Text(format!("{}", i)))
+            .await
+            .expect("Failed to send message");
     }
 
     tx.close().await.expect("Failed to close");

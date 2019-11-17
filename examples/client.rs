@@ -16,8 +16,8 @@ use futures::StreamExt;
 use log::*;
 use tungstenite::protocol::Message;
 
-use async_std::prelude::*;
 use async_std::io;
+use async_std::prelude::*;
 use async_std::task;
 use async_tungstenite::connect_async;
 
