@@ -9,8 +9,8 @@ use super::{client_async, Request, WebSocketStream};
 
 #[cfg(feature = "tls")]
 pub(crate) mod encryption {
-    use async_tls::TlsConnector as AsyncTlsConnector;
     use async_tls::client::TlsStream;
+    use async_tls::TlsConnector as AsyncTlsConnector;
 
     use tungstenite::stream::Mode;
     use tungstenite::Error;
@@ -51,8 +51,8 @@ pub use self::encryption::MaybeTlsStream;
 
 #[cfg(not(feature = "tls"))]
 pub(crate) mod encryption {
-    use futures::{future, Future};
     use futures::io::{AsyncRead, AsyncWrite};
+    use futures::{future, Future};
 
     use tungstenite::stream::Mode;
     use tungstenite::Error;

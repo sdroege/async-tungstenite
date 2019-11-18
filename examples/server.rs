@@ -20,12 +20,12 @@
 use std::env;
 use std::io::Error;
 
+use async_std::net::{SocketAddr, ToSocketAddrs};
+use async_std::net::{TcpListener, TcpStream};
+use async_std::task;
 use futures::channel::mpsc::{UnboundedReceiver, UnboundedSender};
 use futures::StreamExt;
 use log::*;
-use async_std::task;
-use async_std::net::{SocketAddr, ToSocketAddrs};
-use async_std::net::{TcpListener, TcpStream};
 use tungstenite::protocol::Message;
 
 struct Connection {

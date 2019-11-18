@@ -1,6 +1,6 @@
+use async_tungstenite::{connect_async, tungstenite::Result};
 use futures::StreamExt;
 use log::*;
-use async_tungstenite::{connect_async, tungstenite::Result};
 use url::Url;
 
 const AGENT: &'static str = "Tungstenite";

@@ -1,12 +1,12 @@
 use crate::compat::{AllowStd, HasContext};
 use crate::WebSocketStream;
+use futures::io::{AsyncRead, AsyncWrite};
 use log::*;
 use pin_project::pin_project;
 use std::future::Future;
 use std::io::{Read, Write};
 use std::pin::Pin;
 use std::task::{Context, Poll};
-use futures::io::{AsyncRead, AsyncWrite};
 use tungstenite::handshake::client::Response;
 use tungstenite::handshake::server::Callback;
 use tungstenite::handshake::{HandshakeError as Error, HandshakeRole, MidHandshake as WsHandshake};
@@ -165,7 +165,9 @@ where
 
         let machine = s.get_mut();
         trace!("Setting context in handshake");
-        machine.get_mut().set_context((true, cx as *mut _ as *mut ()));
+        machine
+            .get_mut()
+            .set_context((true, cx as *mut _ as *mut ()));
 
         match s.handshake() {
             Ok(stream) => Poll::Ready(Ok(stream)),
