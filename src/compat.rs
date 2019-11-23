@@ -46,7 +46,6 @@ where
         unsafe {
             if !self.context.0 {
                 //was called by start_send without context
-                debug!("start_send without context");
                 return Poll::Pending
             }
             assert!(!self.context.1.is_null());
