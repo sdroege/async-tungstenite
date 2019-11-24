@@ -14,7 +14,7 @@ pub(crate) enum ContextWaker {
 }
 
 #[derive(Debug)]
-pub struct AllowStd<S> {
+pub(crate) struct AllowStd<S> {
     inner: S,
     // We have the problem that external read operations (i.e. the Stream impl)
     // can trigger both read (AsyncRead) and write (AsyncWrite) operations on
