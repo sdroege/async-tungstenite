@@ -27,7 +27,7 @@ pub mod stream;
 
 use std::io::{Read, Write};
 
-use compat::{cvt, AllowStd};
+use compat::{cvt, AllowStd, ContextWaker};
 use futures::io::{AsyncRead, AsyncWrite};
 use futures::{Sink, Stream};
 use log::*;
@@ -216,19 +216,17 @@ impl<S> WebSocketStream<S> {
         WebSocketStream { inner: ws }
     }
 
-    fn with_context<F, R>(&mut self, ctx: Option<&mut Context<'_>>, f: F) -> R
+    fn with_context<F, R>(&mut self, ctx: Option<(ContextWaker, &mut Context<'_>)>, f: F) -> R
     where
         S: Unpin,
         F: FnOnce(&mut WebSocket<AllowStd<S>>) -> R,
         AllowStd<S>: Read + Write,
     {
         trace!("{}:{} WebSocketStream.with_context", file!(), line!());
-        self.inner.get_mut().context = match ctx {
-            None => (false, std::ptr::null_mut()),
-            Some(cx) => (true, cx as *mut _ as *mut ()),
-        };
-        let mut g = compat::Guard(&mut self.inner);
-        f(&mut (g.0))
+        if let Some((kind, ctx)) = ctx {
+            self.inner.get_mut().set_waker(kind, &ctx.waker());
+        }
+        f(&mut self.inner)
     }
 
     /// Returns a shared reference to the inner stream.
@@ -281,7 +279,7 @@ where
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         trace!("{}:{} Stream.poll_next", file!(), line!());
-        match futures::ready!(self.with_context(Some(cx), |s| {
+        match futures::ready!(self.with_context(Some((ContextWaker::Read, cx)), |s| {
             trace!(
                 "{}:{} Stream.with_context poll_next -> read_message()",
                 file!(),
@@ -304,7 +302,7 @@ where
     type Error = WsError;
 
     fn poll_ready(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        (*self).with_context(Some(cx), |s| cvt(s.write_pending()))
+        (*self).with_context(Some((ContextWaker::Write, cx)), |s| cvt(s.write_pending()))
     }
 
     fn start_send(mut self: Pin<&mut Self>, item: Message) -> Result<(), Self::Error> {
@@ -325,11 +323,11 @@ where
     }
 
     fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        (*self).with_context(Some(cx), |s| cvt(s.write_pending()))
+        (*self).with_context(Some((ContextWaker::Write, cx)), |s| cvt(s.write_pending()))
     }
 
     fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        match (*self).with_context(Some(cx), |s| s.close(None)) {
+        match (*self).with_context(Some((ContextWaker::Write, cx)), |s| s.close(None)) {
             Ok(()) => Poll::Ready(Ok(())),
             Err(::tungstenite::Error::ConnectionClosed) => Poll::Ready(Ok(())),
             Err(err) => {
@@ -358,7 +356,9 @@ where
         let message = this.message.take().expect("Cannot poll twice");
         Poll::Ready(
             this.stream
-                .with_context(Some(cx), |s| s.write_message(message)),
+                .with_context(Some((ContextWaker::Write, cx)), |s| {
+                    s.write_message(message)
+                }),
         )
     }
 }
@@ -379,7 +379,10 @@ where
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let this = self.project();
         let message = this.message.take().expect("Cannot poll twice");
-        Poll::Ready(this.stream.with_context(Some(cx), |s| s.close(message)))
+        Poll::Ready(
+            this.stream
+                .with_context(Some((ContextWaker::Write, cx)), |s| s.close(message)),
+        )
     }
 }
 
