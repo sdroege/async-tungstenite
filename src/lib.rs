@@ -243,18 +243,6 @@ impl<S> WebSocketStream<S> {
         self.inner.get_mut().get_mut()
     }
 
-    /// Send a message to this websocket
-    pub async fn send(&mut self, msg: Message) -> Result<(), WsError>
-    where
-        S: AsyncWrite + AsyncRead + Unpin,
-    {
-        let f = SendFuture {
-            stream: self,
-            message: Some(msg),
-        };
-        f.await
-    }
-
     /// Close the underlying web socket
     pub async fn close(&mut self, msg: Option<CloseFrame<'_>>) -> Result<(), WsError>
     where
@@ -333,31 +321,6 @@ where
                 Poll::Ready(Err(err))
             }
         }
-    }
-}
-
-#[pin_project]
-struct SendFuture<'a, T> {
-    stream: &'a mut WebSocketStream<T>,
-    message: Option<Message>,
-}
-
-impl<'a, T> Future for SendFuture<'a, T>
-where
-    T: AsyncRead + AsyncWrite + Unpin,
-    AllowStd<T>: Read + Write,
-{
-    type Output = Result<(), WsError>;
-
-    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-        let this = self.project();
-        let message = this.message.take().expect("Cannot poll twice");
-        Poll::Ready(
-            this.stream
-                .with_context(Some((ContextWaker::Write, cx)), |s| {
-                    s.write_message(message)
-                }),
-        )
     }
 }
 

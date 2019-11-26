@@ -1,6 +1,6 @@
 use async_std::net::{SocketAddr, TcpListener, TcpStream, ToSocketAddrs};
 use async_tungstenite::accept_async;
-use futures::StreamExt;
+use futures::{SinkExt, StreamExt};
 use log::*;
 
 async fn accept_connection(peer: SocketAddr, stream: TcpStream) {

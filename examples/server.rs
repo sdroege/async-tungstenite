@@ -24,7 +24,7 @@ use async_std::net::{SocketAddr, ToSocketAddrs};
 use async_std::net::{TcpListener, TcpStream};
 use async_std::task;
 use futures::channel::mpsc::{UnboundedReceiver, UnboundedSender};
-use futures::StreamExt;
+use futures::{SinkExt, StreamExt};
 use log::*;
 use tungstenite::protocol::Message;
 

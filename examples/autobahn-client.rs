@@ -1,5 +1,5 @@
 use async_tungstenite::{connect_async, tungstenite::Result};
-use futures::StreamExt;
+use futures::{SinkExt, StreamExt};
 use log::*;
 use url::Url;
 

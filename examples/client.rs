@@ -12,7 +12,7 @@
 
 use std::env;
 
-use futures::StreamExt;
+use futures::{SinkExt, StreamExt};
 use log::*;
 use tungstenite::protocol::Message;
 
