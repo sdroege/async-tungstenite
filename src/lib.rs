@@ -176,9 +176,7 @@ where
 /// through the respective `Stream` and `Sink`. Check more information about
 /// them in `futures-rs` crate documentation or have a look on the examples
 /// and unit tests for this crate.
-#[pin_project]
 pub struct WebSocketStream<S> {
-    #[pin]
     inner: WebSocket<AllowStd<S>>,
 }
 
