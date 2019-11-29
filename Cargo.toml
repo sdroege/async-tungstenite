@@ -7,7 +7,7 @@ authors = ["Sebastian Dröge <sebastian@centricular.com>"]
 license = "MIT"
 homepage = "https://github.com/sdroege/async-tungstenite"
 repository = "https://github.com/sdroege/async-tungstenite"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2018"
 
 [features]
