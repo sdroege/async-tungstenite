@@ -46,8 +46,15 @@ use tungstenite::{
 
 #[cfg(feature = "connect")]
 pub use connect::client_async_tls;
+#[cfg(all(feature = "connect", any(feature = "tls", feature = "native-tls")))]
+pub use connect::client_async_tls_with_connector;
 #[cfg(feature = "async_std_runtime")]
 pub use connect::connect_async;
+#[cfg(all(
+    feature = "async_std_runtime",
+    any(feature = "tls", feature = "native-tls")
+))]
+pub use connect::connect_async_with_tls_connector;
 
 #[cfg(all(feature = "connect", feature = "tls-base"))]
 pub use connect::MaybeTlsStream;
