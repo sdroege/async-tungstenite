@@ -6,9 +6,12 @@ rust:
 
 before_script:
   - export PATH="$PATH:$HOME/.cargo/bin"
+  - sudo apt-get install libssl-dev
 
 script:
+  - cargo check --release --no-default-features
   - cargo test --release
+  - cargo test --release --no-default-features --features=native-tls,connect,async_std_runtime
 
 after_success:
   - sudo apt-get install python-unittest2
