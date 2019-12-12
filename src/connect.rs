@@ -1,11 +1,12 @@
 //! Connection helper.
 use tungstenite::client::url_mode;
 use tungstenite::handshake::client::Response;
+use tungstenite::protocol::WebSocketConfig;
 use tungstenite::Error;
 
 use futures::io::{AsyncRead, AsyncWrite};
 
-use super::{client_async, Request, WebSocketStream};
+use super::{client_async_with_config, Request, WebSocketStream};
 
 #[cfg(feature = "tls-base")]
 pub(crate) mod encryption {
@@ -119,7 +120,23 @@ where
     S: 'static + AsyncRead + AsyncWrite + Send + Unpin,
     AutoStream<S>: Unpin,
 {
-    client_async_tls_with_connector(request, stream, None).await
+    client_async_tls_with_connector_and_config(request, stream, None, None).await
+}
+
+/// Creates a WebSocket handshake from a request and a stream,
+/// upgrading the stream to TLS if required and using the given
+/// WebSocket configuration.
+pub async fn client_async_tls_with_config<R, S>(
+    request: R,
+    stream: S,
+    config: Option<WebSocketConfig>,
+) -> Result<(WebSocketStream<AutoStream<S>>, Response), Error>
+where
+    R: Into<Request<'static>> + Unpin,
+    S: 'static + AsyncRead + AsyncWrite + Send + Unpin,
+    AutoStream<S>: Unpin,
+{
+    client_async_tls_with_connector_and_config(request, stream, None, config).await
 }
 
 /// Creates a WebSocket handshake from a request and a stream,
@@ -135,6 +152,23 @@ where
     S: 'static + AsyncRead + AsyncWrite + Send + Unpin,
     AutoStream<S>: Unpin,
 {
+    client_async_tls_with_connector_and_config(request, stream, connector, None).await
+}
+
+/// Creates a WebSocket handshake from a request and a stream,
+/// upgrading the stream to TLS if required and using the given
+/// connector and WebSocket configuration.
+pub async fn client_async_tls_with_connector_and_config<R, S>(
+    request: R,
+    stream: S,
+    connector: Option<self::encryption::Connector>,
+    config: Option<WebSocketConfig>,
+) -> Result<(WebSocketStream<AutoStream<S>>, Response), Error>
+where
+    R: Into<Request<'static>> + Unpin,
+    S: 'static + AsyncRead + AsyncWrite + Send + Unpin,
+    AutoStream<S>: Unpin,
+{
     let request: Request = request.into();
 
     let domain = domain(&request)?;
@@ -143,7 +177,7 @@ where
     let mode = url_mode(&request.url)?;
 
     let stream = self::encryption::wrap_stream(stream, domain, connector, mode).await?;
-    client_async(request, stream).await
+    client_async_with_config(request, stream, config).await
 }
 
 #[cfg(feature = "async_std_runtime")]
@@ -158,24 +192,13 @@ pub(crate) mod async_std_runtime {
     where
         R: Into<Request<'static>> + Unpin,
     {
-        let request: Request = request.into();
-
-        let domain = domain(&request)?;
-        let port = request
-            .url
-            .port_or_known_default()
-            .expect("Bug: port unknown");
-
-        let try_socket = TcpStream::connect((domain.as_str(), port)).await;
-        let socket = try_socket.map_err(Error::Io)?;
-        client_async_tls(request, socket).await
+        connect_async_with_config(request, None).await
     }
 
-    #[cfg(any(feature = "tls", feature = "native-tls"))]
-    /// Connect to a given URL using the provided TLS connector.
-    pub async fn connect_async_with_tls_connector<R>(
+    /// Connect to a given URL with a given WebSocket configuration.
+    pub async fn connect_async_with_config<R>(
         request: R,
-        connector: Option<super::encryption::Connector>,
+        config: Option<WebSocketConfig>,
     ) -> Result<(WebSocketStream<AutoStream<TcpStream>>, Response), Error>
     where
         R: Into<Request<'static>> + Unpin,
@@ -190,14 +213,51 @@ pub(crate) mod async_std_runtime {
 
         let try_socket = TcpStream::connect((domain.as_str(), port)).await;
         let socket = try_socket.map_err(Error::Io)?;
-        client_async_tls_with_connector(request, socket, connector).await
+        client_async_tls_with_config(request, socket, config).await
+    }
+
+    #[cfg(any(feature = "tls", feature = "native-tls"))]
+    /// Connect to a given URL using the provided TLS connector.
+    pub async fn connect_async_with_tls_connector<R>(
+        request: R,
+        connector: Option<super::encryption::Connector>,
+    ) -> Result<(WebSocketStream<AutoStream<TcpStream>>, Response), Error>
+    where
+        R: Into<Request<'static>> + Unpin,
+    {
+        connect_async_with_tls_connector_and_config(request, connector, None).await
+    }
+
+    #[cfg(any(feature = "tls", feature = "native-tls"))]
+    /// Connect to a given URL using the provided TLS connector.
+    pub async fn connect_async_with_tls_connector_and_config<R>(
+        request: R,
+        connector: Option<super::encryption::Connector>,
+        config: Option<WebSocketConfig>,
+    ) -> Result<(WebSocketStream<AutoStream<TcpStream>>, Response), Error>
+    where
+        R: Into<Request<'static>> + Unpin,
+    {
+        let request: Request = request.into();
+
+        let domain = domain(&request)?;
+        let port = request
+            .url
+            .port_or_known_default()
+            .expect("Bug: port unknown");
+
+        let try_socket = TcpStream::connect((domain.as_str(), port)).await;
+        let socket = try_socket.map_err(Error::Io)?;
+        client_async_tls_with_connector_and_config(request, socket, connector, config).await
     }
 }
 
 #[cfg(feature = "async_std_runtime")]
-pub use async_std_runtime::connect_async;
+pub use async_std_runtime::{connect_async, connect_async_with_config};
 #[cfg(all(
     feature = "async_std_runtime",
     any(feature = "tls", feature = "native-tls")
 ))]
-pub use async_std_runtime::connect_async_with_tls_connector;
+pub use async_std_runtime::{
+    connect_async_with_tls_connector, connect_async_with_tls_connector_and_config,
+};
