@@ -7,10 +7,17 @@ use futures::io::{AsyncRead, AsyncWrite};
 
 use super::{client_async, Request, WebSocketStream};
 
-#[cfg(feature = "tls")]
+#[cfg(feature = "tls-base")]
 pub(crate) mod encryption {
+    #[cfg(feature = "tls")]
     use async_tls::client::TlsStream;
+    #[cfg(feature = "tls")]
     use async_tls::TlsConnector as AsyncTlsConnector;
+
+    #[cfg(feature = "native-tls")]
+    use async_native_tls::TlsConnector as AsyncTlsConnector;
+    #[cfg(feature = "native-tls")]
+    use async_native_tls::TlsStream;
 
     use tungstenite::stream::Mode;
     use tungstenite::Error;
@@ -35,21 +42,28 @@ pub(crate) mod encryption {
         match mode {
             Mode::Plain => Ok(StreamSwitcher::Plain(socket)),
             Mode::Tls => {
-                let stream = AsyncTlsConnector::new();
-                let connected = stream.connect(&domain, socket)?.await;
-                match connected {
-                    Err(e) => Err(Error::Io(e)),
-                    Ok(s) => Ok(StreamSwitcher::Tls(s)),
-                }
+                #[cfg(feature = "tls")]
+                let stream = {
+                    let connector = AsyncTlsConnector::new();
+                    connector.connect(&domain, socket)?.await?
+                };
+                #[cfg(feature = "native-tls")]
+                let stream = {
+                    let builder = real_native_tls::TlsConnector::builder();
+                    let connector = builder.build()?;
+                    let connector = AsyncTlsConnector::from(connector);
+                    connector.connect(&domain, socket).await?
+                };
+                Ok(StreamSwitcher::Tls(stream))
             }
         }
     }
 }
 
-#[cfg(feature = "tls")]
+#[cfg(feature = "tls-base")]
 pub use self::encryption::MaybeTlsStream;
 
-#[cfg(not(feature = "tls"))]
+#[cfg(not(feature = "tls-base"))]
 pub(crate) mod encryption {
     use futures::io::{AsyncRead, AsyncWrite};
     use futures::{future, Future};

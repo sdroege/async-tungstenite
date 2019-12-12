@@ -49,7 +49,7 @@ pub use connect::client_async_tls;
 #[cfg(feature = "async_std_runtime")]
 pub use connect::connect_async;
 
-#[cfg(all(feature = "connect", feature = "tls"))]
+#[cfg(all(feature = "connect", feature = "tls-base"))]
 pub use connect::MaybeTlsStream;
 use std::error::Error;
 use tungstenite::protocol::CloseFrame;

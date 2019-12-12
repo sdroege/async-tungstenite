@@ -14,8 +14,10 @@ edition = "2018"
 [features]
 default = ["connect", "tls", "async_std_runtime"]
 connect = ["stream"]
-async_std_runtime = ["connect", "tls", "async-std"]
-tls = ["async-tls", "stream"]
+async_std_runtime = ["connect", "async-std"]
+tls-base = ["stream"]
+tls = ["async-tls", "tls-base"]
+native-tls = ["async-native-tls", "real-native-tls", "tls-base", "tungstenite/tls"]
 stream = []
 
 [dependencies]
@@ -34,6 +36,15 @@ version = "1.0"
 [dependencies.async-tls]
 optional = true
 version = "0.6.0"
+
+[dependencies.async-native-tls]
+optional = true
+version = "0.1.0"
+
+[dependencies.real-native-tls]
+optional = true
+version = "0.2"
+package = "native-tls"
 
 [dev-dependencies]
 url = "2.0.0"
