@@ -1,4 +1,4 @@
-use async_std::net::{SocketAddr, TcpListener, TcpStream, ToSocketAddrs};
+use async_std::net::{SocketAddr, TcpListener, TcpStream};
 use async_tungstenite::accept_async;
 use futures::{SinkExt, StreamExt};
 use log::*;
@@ -19,12 +19,7 @@ async fn accept_connection(peer: SocketAddr, stream: TcpStream) {
 async fn run() {
     env_logger::init();
 
-    let addr = "127.0.0.1:9002"
-        .to_socket_addrs()
-        .await
-        .expect("Not a valid address")
-        .next()
-        .expect("Not a socket address");
+    let addr = "127.0.0.1:9002";
     let listener = TcpListener::bind(&addr).await.unwrap();
     info!("Listening on: {}", addr);
 

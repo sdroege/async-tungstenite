@@ -1,4 +1,4 @@
-use async_std::net::{TcpListener, TcpStream, ToSocketAddrs};
+use async_std::net::{TcpListener, TcpStream};
 use async_std::task;
 use async_tungstenite::{accept_async, client_async, WebSocketStream};
 use futures::{AsyncRead, AsyncWrite, SinkExt, StreamExt};
@@ -30,13 +30,7 @@ async fn communication() {
     let (msg_tx, msg_rx) = futures::channel::oneshot::channel();
 
     let f = async move {
-        let address = "0.0.0.0:12345"
-            .to_socket_addrs()
-            .await
-            .expect("Not a valid address")
-            .next()
-            .expect("No address resolved");
-        let listener = TcpListener::bind(&address).await.unwrap();
+        let listener = TcpListener::bind("0.0.0.0:12345").await.unwrap();
         info!("Server ready");
         con_tx.send(()).unwrap();
         info!("Waiting on next connection");
@@ -51,13 +45,7 @@ async fn communication() {
     info!("Waiting for server to be ready");
 
     con_rx.await.expect("Server not ready");
-    let address = "0.0.0.0:12345"
-        .to_socket_addrs()
-        .await
-        .expect("Not a valid address")
-        .next()
-        .expect("No address resolved");
-    let tcp = TcpStream::connect(&address)
+    let tcp = TcpStream::connect("0.0.0.0:12345")
         .await
         .expect("Failed to connect");
     let url = url::Url::parse("ws://localhost:12345/").unwrap();
@@ -88,13 +76,7 @@ async fn split_communication() {
     let (msg_tx, msg_rx) = futures::channel::oneshot::channel();
 
     let f = async move {
-        let address = "0.0.0.0:12346"
-            .to_socket_addrs()
-            .await
-            .expect("Not a valid address")
-            .next()
-            .expect("No address resolved");
-        let listener = TcpListener::bind(&address).await.unwrap();
+        let listener = TcpListener::bind("0.0.0.0:12346").await.unwrap();
         info!("Server ready");
         con_tx.send(()).unwrap();
         info!("Waiting on next connection");
@@ -109,13 +91,7 @@ async fn split_communication() {
     info!("Waiting for server to be ready");
 
     con_rx.await.expect("Server not ready");
-    let address = "0.0.0.0:12346"
-        .to_socket_addrs()
-        .await
-        .expect("Not a valid address")
-        .next()
-        .expect("No address resolved");
-    let tcp = TcpStream::connect(&address)
+    let tcp = TcpStream::connect("0.0.0.0:12346")
         .await
         .expect("Failed to connect");
     let url = url::Url::parse("ws://localhost:12345/").unwrap();
