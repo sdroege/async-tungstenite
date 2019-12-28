@@ -3,7 +3,7 @@ use futures::{SinkExt, StreamExt};
 use log::*;
 use url::Url;
 
-const AGENT: &'static str = "Tungstenite";
+const AGENT: &str = "Tungstenite";
 
 async fn get_case_count() -> Result<u32> {
     let (mut socket, _) =
@@ -48,7 +48,7 @@ async fn run() {
 
     let total = get_case_count().await.unwrap();
 
-    for case in 1..(total + 1) {
+    for case in 1..=total {
         run_test(case).await
     }
 

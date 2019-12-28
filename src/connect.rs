@@ -50,7 +50,7 @@ pub(crate) mod encryption {
             Mode::Tls => {
                 #[cfg(feature = "tls")]
                 let stream = {
-                    let connector = connector.unwrap_or_else(|| AsyncTlsConnector::new());
+                    let connector = connector.unwrap_or_else(AsyncTlsConnector::new);
                     connector.connect(&domain, socket)?.await?
                 };
                 #[cfg(feature = "native-tls")]
