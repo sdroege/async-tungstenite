@@ -1,24 +1,28 @@
 [package]
 name = "async-tungstenite"
-description = "async-std binding for Tungstenite, the Lightweight stream-based WebSocket implementation"
+description = "Async binding for Tungstenite, the Lightweight stream-based WebSocket implementation"
 categories = ["web-programming::websocket", "network-programming", "asynchronous", "concurrency"]
-keywords = ["websocket", "io", "web"]
+keywords = ["websocket", "io", "web", "tokio", "async-std"]
 authors = ["Sebastian Dröge <sebastian@centricular.com>"]
 license = "MIT"
 homepage = "https://github.com/sdroege/async-tungstenite"
 repository = "https://github.com/sdroege/async-tungstenite"
 documentation = "https://docs.rs/async-tungstenite"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2018"
+readme = "README.md"
 
 [features]
-default = ["connect", "tls", "async_std_runtime"]
-connect = ["stream"]
-async_std_runtime = ["connect", "async-std"]
-tls-base = ["stream"]
-tls = ["async-tls", "tls-base"]
-native-tls = ["async-native-tls", "real-native-tls", "tls-base", "tungstenite/tls"]
-stream = []
+default = []
+async-std-runtime = ["async-std"]
+tokio-runtime = ["tokio"]
+gio-runtime = ["gio", "glib"]
+async-tls = ["real-async-tls"]
+async-native-tls = ["async-std-runtime", "real-async-native-tls"]
+tokio-tls = ["tokio-runtime", "real-tokio-tls", "real-native-tls", "tungstenite/tls"]
+
+[package.metadata.docs.rs]
+features = ["async-std-runtime", "tokio-runtime", "gio-runtime", "async-tls", "async-native-tls", "tokio-tls"]
 
 [dependencies]
 log = "0.4"
@@ -33,20 +37,64 @@ default-features = false
 optional = true
 version = "1.0"
 
-[dependencies.async-tls]
+[dependencies.real-async-tls]
 optional = true
 version = "0.6.0"
+package = "async-tls"
 
-[dependencies.async-native-tls]
+[dependencies.real-async-native-tls]
 optional = true
-version = "0.1.0"
+version = "0.3.0"
+package = "async-native-tls"
 
 [dependencies.real-native-tls]
 optional = true
 version = "0.2"
 package = "native-tls"
 
+[dependencies.tokio]
+optional = true
+version = "0.2"
+features = ["tcp", "dns"]
+
+[dependencies.real-tokio-tls]
+optional = true
+version = "0.3"
+package = "tokio-tls"
+
+[dependencies.gio]
+optional = true
+version = "0.8"
+
+[dependencies.glib]
+optional = true
+version = "0.9"
+
 [dev-dependencies]
 url = "2.0.0"
 env_logger = "0.7"
 async-std = { version = "1.0", features = ["attributes"] }
+
+[[example]]
+name = "autobahn-client"
+required-features = ["async-std-runtime"]
+
+[[example]]
+name = "client"
+required-features = ["async-std-runtime"]
+
+[[example]]
+name = "autobahn-server"
+required-features = ["async-std-runtime"]
+
+[[example]]
+name = "echo-server"
+required-features = ["async-std-runtime"]
+
+[[example]]
+name = "gio-echo"
+required-features = ["gio-runtime"]
+
+[[example]]
+name = "tokio-echo"
+required-features = ["tokio-runtime"]

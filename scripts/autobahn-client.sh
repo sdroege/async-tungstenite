@@ -23,10 +23,10 @@ function test_diff() {
     fi
 }
 
-cargo build --release --example autobahn-client
+cargo build --release --features async-std-runtime --example autobahn-client
 
 wstest -m fuzzingserver -s 'autobahn/fuzzingserver.json' & FUZZINGSERVER_PID=$!
 sleep 3
 echo "Server PID: ${FUZZINGSERVER_PID}"
-cargo run --release --example autobahn-client
+cargo run --release --features async-std-runtime --example autobahn-client
 test_diff

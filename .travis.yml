@@ -9,9 +9,18 @@ before_script:
   - sudo apt-get install libssl-dev
 
 script:
-  - cargo check --release --no-default-features
-  - cargo test --release
-  - cargo test --release --no-default-features --features=native-tls,connect,async_std_runtime
+  - cargo check
+  - cargo check --features async-tls
+  - cargo check --features async-std-runtime,async-tls
+  - cargo check --features async-std-runtime,async-native-tls
+  - cargo check --features async-std-runtime,async-tls,async-native-tls
+  - cargo check --features tokio-runtime,async-tls
+  - cargo check --features tokio-runtime,tokio-tls
+  - cargo check --features tokio-runtime,async-tls,tokio-tls
+  - cargo check --features gio-runtime
+  - cargo check --features gio-runtime,async-tls
+  - cargo check --features async-std-runtime,async-tls,async-native-tls,tokio-runtime,tokio-tls,gio-runtime
+  - cargo test --features async-std-runtime
 
 after_success:
   - sudo apt-get install python-unittest2

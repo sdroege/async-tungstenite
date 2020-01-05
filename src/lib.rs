@@ -1,12 +1,28 @@
-//! Async WebSocket usage.
+//! Async WebSockets.
 //!
-//! This library is an implementation of WebSocket handshakes and streams. It
-//! is based on the crate which implements all required WebSocket protocol
-//! logic. So this crate basically just brings async_std support / async_std integration
-//! to it.
+//! This crate is based on [tungstenite](https://crates.io/crates/tungstenite)
+//! Rust WebSocket library and provides async bindings and wrappers for it, so you
+//! can use it with non-blocking/asynchronous `TcpStream`s from and couple it
+//! together with other crates from the async stack. In addition, optional
+//! integration with various other crates can be enabled via feature flags
+//!
+//!  * `async-tls`: Enables the `async_tls` module, which provides integration
+//!    with the [async-tls](https://crates.io/crates/async-tls) TLS stack and can
+//!    be used independent of any async runtime.
+//!  * `async-std-runtime`: Enables the `async_std` module, which provides
+//!    integration with the [async-std](https://async.rs) runtime.
+//!  * `async-native-tls`: Enables the additional functions in the `async_std`
+//!    module to implement TLS via
+//!    [async-native-tls](https://crates.io/crates/async-native-tls).
+//!  * `tokio-runtime`: Enables the `tokio` module, which provides integration
+//!    with the [tokio](https://tokio.rs) runtime.
+//!  * `tokio-tls`: Enables the additional functions in the `tokio` module to
+//!    implement TLS via [tokio-tls](https://crates.io/crates/tokio-tls).
+//!  * `gio-runtime`: Enables the `gio` module, which provides integration with
+//!    the [gio](https://www.gtk-rs.org) runtime.
 //!
 //! Each WebSocket stream implements the required `Stream` and `Sink` traits,
-//! so the socket is just a stream of messages coming in and going out.
+//! making the socket a stream of WebSocket messages coming in and going out.
 
 #![deny(
     missing_docs,
@@ -19,11 +35,14 @@
 pub use tungstenite;
 
 mod compat;
-#[cfg(feature = "connect")]
-mod connect;
 mod handshake;
-#[cfg(feature = "stream")]
-pub mod stream;
+
+#[cfg(any(
+    feature = "async-tls",
+    feature = "async-native-tls",
+    feature = "tokio-tls",
+))]
+mod stream;
 
 use std::io::{Read, Write};
 
@@ -44,20 +63,15 @@ use tungstenite::{
     server,
 };
 
-#[cfg(feature = "connect")]
-pub use connect::{client_async_tls, client_async_tls_with_config};
-#[cfg(all(feature = "connect", any(feature = "tls", feature = "native-tls")))]
-pub use connect::{client_async_tls_with_connector, client_async_tls_with_connector_and_config};
-#[cfg(feature = "async_std_runtime")]
-pub use connect::{connect_async, connect_async_with_config};
-#[cfg(all(
-    feature = "async_std_runtime",
-    any(feature = "tls", feature = "native-tls")
-))]
-pub use connect::{connect_async_with_tls_connector, connect_async_with_tls_connector_and_config};
+#[cfg(feature = "async-std-runtime")]
+pub mod async_std;
+#[cfg(feature = "async-tls")]
+pub mod async_tls;
+#[cfg(feature = "gio-runtime")]
+pub mod gio;
+#[cfg(feature = "tokio-runtime")]
+pub mod tokio;
 
-#[cfg(all(feature = "connect", feature = "tls-base"))]
-pub use connect::MaybeTlsStream;
 use std::error::Error;
 use tungstenite::protocol::CloseFrame;
 
@@ -324,33 +338,17 @@ where
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use crate::compat::AllowStd;
-    #[cfg(feature = "connect")]
-    use crate::connect::encryption::AutoStream;
-    use crate::WebSocketStream;
-    use futures::io::{AsyncReadExt, AsyncWriteExt};
-    use std::io::{Read, Write};
-
-    fn is_read<T: Read>() {}
-    fn is_write<T: Write>() {}
-    fn is_async_read<T: AsyncReadExt>() {}
-    fn is_async_write<T: AsyncWriteExt>() {}
-    fn is_unpin<T: Unpin>() {}
-
-    #[test]
-    fn web_socket_stream_has_traits() {
-        is_read::<AllowStd<async_std::net::TcpStream>>();
-        is_write::<AllowStd<async_std::net::TcpStream>>();
-
-        #[cfg(feature = "connect")]
-        is_async_read::<AutoStream<async_std::net::TcpStream>>();
-        #[cfg(feature = "connect")]
-        is_async_write::<AutoStream<async_std::net::TcpStream>>();
-
-        is_unpin::<WebSocketStream<async_std::net::TcpStream>>();
-        #[cfg(feature = "connect")]
-        is_unpin::<WebSocketStream<AutoStream<async_std::net::TcpStream>>>();
+#[cfg(any(
+    feature = "async-tls",
+    feature = "async-std-runtime",
+    feature = "tokio-runtime",
+    feature = "gio-runtime"
+))]
+/// Get a domain from an URL.
+#[inline]
+pub(crate) fn domain(request: &Request) -> Result<String, tungstenite::Error> {
+    match request.url.host_str() {
+        Some(d) => Ok(d.to_string()),
+        None => Err(tungstenite::Error::Url("no host name in the url".into())),
     }
 }

@@ -1,4 +1,4 @@
-use async_tungstenite::{connect_async, tungstenite::Result};
+use async_tungstenite::{async_std::connect_async, tungstenite::Result};
 use futures::{SinkExt, StreamExt};
 use log::*;
 use url::Url;
