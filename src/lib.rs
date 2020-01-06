@@ -42,7 +42,7 @@ mod handshake;
     feature = "async-native-tls",
     feature = "tokio-tls",
 ))]
-mod stream;
+pub mod stream;
 
 use std::io::{Read, Write};
 
