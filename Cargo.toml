@@ -88,6 +88,10 @@ name = "autobahn-server"
 required-features = ["async-std-runtime"]
 
 [[example]]
+name = "server"
+required-features = ["async-std-runtime"]
+
+[[example]]
 name = "echo-server"
 required-features = ["async-std-runtime"]
 
