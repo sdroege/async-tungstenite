@@ -13,7 +13,6 @@
 use std::env;
 
 use futures::{future, pin_mut, StreamExt};
-use log::info;
 use tungstenite::protocol::Message;
 
 use async_std::io;
@@ -22,8 +21,6 @@ use async_std::task;
 use async_tungstenite::async_std::connect_async;
 
 async fn run() {
-    let _ = env_logger::try_init();
-
     let connect_addr = env::args()
         .nth(1)
         .unwrap_or_else(|| panic!("this program requires at least one argument"));
@@ -34,7 +31,7 @@ async fn run() {
     task::spawn(read_stdin(stdin_tx));
 
     let (ws_stream, _) = connect_async(url).await.expect("Failed to connect");
-    info!("WebSocket handshake has been successfully completed");
+    println!("WebSocket handshake has been successfully completed");
 
     let (write, read) = ws_stream.split();
 
