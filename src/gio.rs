@@ -7,12 +7,11 @@ use gio::prelude::*;
 
 use futures::io::{AsyncRead, AsyncWrite};
 
-use tungstenite::client::url_mode;
+use tungstenite::client::{uri_mode, IntoClientRequest};
+use tungstenite::handshake::client::Request;
 use tungstenite::stream::Mode;
 
-use crate::{
-    client_async_with_config, domain, Request, Response, WebSocketConfig, WebSocketStream,
-};
+use crate::{client_async_with_config, domain, port, Response, WebSocketConfig, WebSocketStream};
 
 type MaybeTlsStream = IOStreamAsyncReadWrite<gio::SocketConnection>;
 
@@ -21,7 +20,7 @@ pub async fn connect_async<R>(
     request: R,
 ) -> Result<(WebSocketStream<MaybeTlsStream>, Response), Error>
 where
-    R: Into<Request<'static>> + Unpin,
+    R: IntoClientRequest + Unpin,
 {
     connect_async_with_config(request, None).await
 }
@@ -32,20 +31,17 @@ pub async fn connect_async_with_config<R>(
     config: Option<WebSocketConfig>,
 ) -> Result<(WebSocketStream<MaybeTlsStream>, Response), Error>
 where
-    R: Into<Request<'static>> + Unpin,
+    R: IntoClientRequest + Unpin,
 {
-    let request: Request = request.into();
+    let request: Request = request.into_client_request()?;
 
     let domain = domain(&request)?;
-    let port = request
-        .url
-        .port_or_known_default()
-        .expect("Bug: port unknown");
+    let port = port(&request)?;
 
     let client = gio::SocketClient::new();
 
     // Make sure we check domain and mode first. URL must be valid.
-    let mode = url_mode(&request.url)?;
+    let mode = uri_mode(request.uri())?;
     if let Mode::Tls = mode {
         client.set_tls(true);
     } else {

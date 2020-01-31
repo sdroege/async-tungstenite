@@ -1,12 +1,12 @@
 //! `async-tls` integration.
-use tungstenite::client::url_mode;
-use tungstenite::handshake::client::Response;
+use tungstenite::client::{uri_mode, IntoClientRequest};
+use tungstenite::handshake::client::{Request, Response};
 use tungstenite::protocol::WebSocketConfig;
 use tungstenite::Error;
 
 use futures::io::{AsyncRead, AsyncWrite};
 
-use super::{client_async_with_config, Request, WebSocketStream};
+use super::{client_async_with_config, WebSocketStream};
 
 use async_tls::client::TlsStream;
 use async_tls::TlsConnector as AsyncTlsConnector;
@@ -49,7 +49,7 @@ pub async fn client_async_tls<R, S>(
     stream: S,
 ) -> Result<(WebSocketStream<AutoStream<S>>, Response), Error>
 where
-    R: Into<Request<'static>> + Unpin,
+    R: IntoClientRequest + Unpin,
     S: 'static + AsyncRead + AsyncWrite + Unpin,
     AutoStream<S>: Unpin,
 {
@@ -65,7 +65,7 @@ pub async fn client_async_tls_with_config<R, S>(
     config: Option<WebSocketConfig>,
 ) -> Result<(WebSocketStream<AutoStream<S>>, Response), Error>
 where
-    R: Into<Request<'static>> + Unpin,
+    R: IntoClientRequest + Unpin,
     S: 'static + AsyncRead + AsyncWrite + Unpin,
     AutoStream<S>: Unpin,
 {
@@ -81,7 +81,7 @@ pub async fn client_async_tls_with_connector<R, S>(
     connector: Option<AsyncTlsConnector>,
 ) -> Result<(WebSocketStream<AutoStream<S>>, Response), Error>
 where
-    R: Into<Request<'static>> + Unpin,
+    R: IntoClientRequest + Unpin,
     S: 'static + AsyncRead + AsyncWrite + Unpin,
     AutoStream<S>: Unpin,
 {
@@ -98,16 +98,16 @@ pub async fn client_async_tls_with_connector_and_config<R, S>(
     config: Option<WebSocketConfig>,
 ) -> Result<(WebSocketStream<AutoStream<S>>, Response), Error>
 where
-    R: Into<Request<'static>> + Unpin,
+    R: IntoClientRequest + Unpin,
     S: 'static + AsyncRead + AsyncWrite + Unpin,
     AutoStream<S>: Unpin,
 {
-    let request: Request = request.into();
+    let request: Request = request.into_client_request()?;
 
     let domain = domain(&request)?;
 
     // Make sure we check domain and mode first. URL must be valid.
-    let mode = url_mode(&request.url)?;
+    let mode = uri_mode(request.uri())?;
 
     let stream = wrap_stream(stream, domain, connector, mode).await?;
     client_async_with_config(request, stream, config).await

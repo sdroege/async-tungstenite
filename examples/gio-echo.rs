@@ -2,7 +2,7 @@ use async_tungstenite::{gio::connect_async, tungstenite::Message};
 use futures::prelude::*;
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let url = url::Url::parse("wss://echo.websocket.org").unwrap();
+    let url = "wss://echo.websocket.org";
 
     let (mut ws_stream, _) = connect_async(url).await?;
 

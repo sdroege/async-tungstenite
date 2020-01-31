@@ -25,23 +25,21 @@ async fn run() {
         .nth(1)
         .unwrap_or_else(|| panic!("this program requires at least one argument"));
 
-    let url = url::Url::parse(&connect_addr).unwrap();
-
     let (stdin_tx, stdin_rx) = futures::channel::mpsc::unbounded();
     task::spawn(read_stdin(stdin_tx));
 
-    let (ws_stream, _) = connect_async(url).await.expect("Failed to connect");
+    let (ws_stream, _) = connect_async(&connect_addr)
+        .await
+        .expect("Failed to connect");
     println!("WebSocket handshake has been successfully completed");
 
     let (write, read) = ws_stream.split();
 
     let stdin_to_ws = stdin_rx.map(Ok).forward(write);
     let ws_to_stdout = {
-        read.for_each(|message| {
-            async {
-                let data = message.unwrap().into_data();
-                async_std::io::stdout().write_all(&data).await.unwrap();
-            }
+        read.for_each(|message| async {
+            let data = message.unwrap().into_data();
+            async_std::io::stdout().write_all(&data).await.unwrap();
         })
     };
 

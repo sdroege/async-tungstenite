@@ -1,11 +1,12 @@
 //! `async-std` integration.
-use tungstenite::handshake::client::Response;
+use tungstenite::client::IntoClientRequest;
+use tungstenite::handshake::client::{Request, Response};
 use tungstenite::protocol::WebSocketConfig;
 use tungstenite::Error;
 
 use async_std::net::TcpStream;
 
-use super::{domain, Request, WebSocketStream};
+use super::{domain, port, WebSocketStream};
 
 #[cfg(feature = "async-native-tls")]
 use futures::io::{AsyncRead, AsyncWrite};
@@ -16,7 +17,8 @@ pub(crate) mod async_native_tls {
     use async_native_tls::TlsStream;
     use real_async_native_tls as async_native_tls;
 
-    use tungstenite::client::url_mode;
+    use tungstenite::client::uri_mode;
+    use tungstenite::handshake::client::Request;
     use tungstenite::stream::Mode;
     use tungstenite::Error;
 
@@ -24,7 +26,8 @@ pub(crate) mod async_native_tls {
 
     use crate::stream::Stream as StreamSwitcher;
     use crate::{
-        client_async_with_config, domain, Request, Response, WebSocketConfig, WebSocketStream,
+        client_async_with_config, domain, IntoClientRequest, Response, WebSocketConfig,
+        WebSocketStream,
     };
 
     /// A stream that might be protected with TLS.
@@ -72,16 +75,16 @@ pub(crate) mod async_native_tls {
         config: Option<WebSocketConfig>,
     ) -> Result<(WebSocketStream<AutoStream<S>>, Response), Error>
     where
-        R: Into<Request<'static>> + Unpin,
+        R: IntoClientRequest + Unpin,
         S: 'static + AsyncRead + AsyncWrite + Unpin,
         AutoStream<S>: Unpin,
     {
-        let request: Request = request.into();
+        let request: Request = request.into_client_request()?;
 
         let domain = domain(&request)?;
 
         // Make sure we check domain and mode first. URL must be valid.
-        let mode = url_mode(&request.url)?;
+        let mode = uri_mode(request.uri())?;
 
         let stream = wrap_stream(stream, domain, connector, mode).await?;
         client_async_with_config(request, stream, config).await
@@ -92,13 +95,12 @@ pub(crate) mod async_native_tls {
 pub(crate) mod dummy_tls {
     use futures::io::{AsyncRead, AsyncWrite};
 
-    use tungstenite::client::url_mode;
+    use tungstenite::client::{uri_mode, IntoClientRequest};
+    use tungstenite::handshake::client::Request;
     use tungstenite::stream::Mode;
     use tungstenite::Error;
 
-    use crate::{
-        client_async_with_config, domain, Request, Response, WebSocketConfig, WebSocketStream,
-    };
+    use crate::{client_async_with_config, domain, Response, WebSocketConfig, WebSocketStream};
 
     pub type AutoStream<S> = S;
     type Connector = ();
@@ -125,16 +127,16 @@ pub(crate) mod dummy_tls {
         config: Option<WebSocketConfig>,
     ) -> Result<(WebSocketStream<AutoStream<S>>, Response), Error>
     where
-        R: Into<Request<'static>> + Unpin,
+        R: IntoClientRequest + Unpin,
         S: 'static + AsyncRead + AsyncWrite + Unpin,
         AutoStream<S>: Unpin,
     {
-        let request: Request = request.into();
+        let request: Request = request.into_client_request()?;
 
         let domain = domain(&request)?;
 
         // Make sure we check domain and mode first. URL must be valid.
-        let mode = url_mode(&request.url)?;
+        let mode = uri_mode(request.uri())?;
 
         let stream = wrap_stream(stream, domain, connector, mode).await?;
         client_async_with_config(request, stream, config).await
@@ -160,7 +162,7 @@ pub async fn client_async_tls<R, S>(
     stream: S,
 ) -> Result<(WebSocketStream<AutoStream<S>>, Response), Error>
 where
-    R: Into<Request<'static>> + Unpin,
+    R: IntoClientRequest + Unpin,
     S: 'static + AsyncRead + AsyncWrite + Unpin,
     AutoStream<S>: Unpin,
 {
@@ -177,7 +179,7 @@ pub async fn client_async_tls_with_config<R, S>(
     config: Option<WebSocketConfig>,
 ) -> Result<(WebSocketStream<AutoStream<S>>, Response), Error>
 where
-    R: Into<Request<'static>> + Unpin,
+    R: IntoClientRequest + Unpin,
     S: 'static + AsyncRead + AsyncWrite + Unpin,
     AutoStream<S>: Unpin,
 {
@@ -194,7 +196,7 @@ pub async fn client_async_tls_with_connector<R, S>(
     connector: Option<Connector>,
 ) -> Result<(WebSocketStream<AutoStream<S>>, Response), Error>
 where
-    R: Into<Request<'static>> + Unpin,
+    R: IntoClientRequest + Unpin,
     S: 'static + AsyncRead + AsyncWrite + Unpin,
     AutoStream<S>: Unpin,
 {
@@ -206,7 +208,7 @@ pub async fn connect_async<R>(
     request: R,
 ) -> Result<(WebSocketStream<AutoStream<TcpStream>>, Response), Error>
 where
-    R: Into<Request<'static>> + Unpin,
+    R: IntoClientRequest + Unpin,
 {
     connect_async_with_config(request, None).await
 }
@@ -217,15 +219,12 @@ pub async fn connect_async_with_config<R>(
     config: Option<WebSocketConfig>,
 ) -> Result<(WebSocketStream<AutoStream<TcpStream>>, Response), Error>
 where
-    R: Into<Request<'static>> + Unpin,
+    R: IntoClientRequest + Unpin,
 {
-    let request: Request = request.into();
+    let request: Request = request.into_client_request()?;
 
     let domain = domain(&request)?;
-    let port = request
-        .url
-        .port_or_known_default()
-        .expect("Bug: port unknown");
+    let port = port(&request)?;
 
     let try_socket = TcpStream::connect((domain.as_str(), port)).await;
     let socket = try_socket.map_err(Error::Io)?;
@@ -239,7 +238,7 @@ pub async fn connect_async_with_tls_connector<R>(
     connector: Option<Connector>,
 ) -> Result<(WebSocketStream<AutoStream<TcpStream>>, Response), Error>
 where
-    R: Into<Request<'static>> + Unpin,
+    R: IntoClientRequest + Unpin,
 {
     connect_async_with_tls_connector_and_config(request, connector, None).await
 }
@@ -252,15 +251,12 @@ pub async fn connect_async_with_tls_connector_and_config<R>(
     config: Option<WebSocketConfig>,
 ) -> Result<(WebSocketStream<AutoStream<TcpStream>>, Response), Error>
 where
-    R: Into<Request<'static>> + Unpin,
+    R: IntoClientRequest + Unpin,
 {
-    let request: Request = request.into();
+    let request: Request = request.into_client_request()?;
 
     let domain = domain(&request)?;
-    let port = request
-        .url
-        .port_or_known_default()
-        .expect("Bug: port unknown");
+    let port = port(&request)?;
 
     let try_socket = TcpStream::connect((domain.as_str(), port)).await;
     let socket = try_socket.map_err(Error::Io)?;

@@ -1,15 +1,11 @@
 use async_tungstenite::{async_std::connect_async, tungstenite::Error, tungstenite::Result};
 use futures::{SinkExt, StreamExt};
 use log::*;
-use url::Url;
 
 const AGENT: &str = "Tungstenite";
 
 async fn get_case_count() -> Result<u32> {
-    let (mut socket, _) = connect_async(
-        Url::parse("ws://localhost:9001/getCaseCount").expect("Can't connect to case count URL"),
-    )
-    .await?;
+    let (mut socket, _) = connect_async("ws://localhost:9001/getCaseCount").await?;
     let msg = socket.next().await.expect("Can't fetch case count")?;
     socket.close(None).await?;
     Ok(msg
@@ -19,13 +15,10 @@ async fn get_case_count() -> Result<u32> {
 }
 
 async fn update_reports() -> Result<()> {
-    let (mut socket, _) = connect_async(
-        Url::parse(&format!(
-            "ws://localhost:9001/updateReports?agent={}",
-            AGENT
-        ))
-        .expect("Can't update reports"),
-    )
+    let (mut socket, _) = connect_async(&format!(
+        "ws://localhost:9001/updateReports?agent={}",
+        AGENT
+    ))
     .await?;
     socket.close(None).await?;
     Ok(())
@@ -33,11 +26,7 @@ async fn update_reports() -> Result<()> {
 
 async fn run_test(case: u32) -> Result<()> {
     info!("Running test case {}", case);
-    let case_url = Url::parse(&format!(
-        "ws://localhost:9001/runCase?case={}&agent={}",
-        case, AGENT
-    ))
-    .expect("Bad testcase URL");
+    let case_url = &format!("ws://localhost:9001/runCase?case={}&agent={}", case, AGENT);
 
     let (mut ws_stream, _) = connect_async(case_url).await?;
     while let Some(msg) = ws_stream.next().await {

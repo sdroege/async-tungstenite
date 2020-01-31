@@ -54,9 +54,10 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 
 use tungstenite::{
+    client::IntoClientRequest,
     error::Error as WsError,
     handshake::{
-        client::{ClientHandshake, Request, Response},
+        client::{ClientHandshake, Response},
         server::{Callback, NoCallback},
     },
     protocol::{Message, Role, WebSocket, WebSocketConfig},
@@ -92,7 +93,7 @@ pub async fn client_async<'a, R, S>(
     stream: S,
 ) -> Result<(WebSocketStream<S>, Response), WsError>
 where
-    R: Into<Request<'a>> + Unpin,
+    R: IntoClientRequest + Unpin,
     S: AsyncRead + AsyncWrite + Unpin,
 {
     client_async_with_config(request, stream, None).await
@@ -106,11 +107,12 @@ pub async fn client_async_with_config<'a, R, S>(
     config: Option<WebSocketConfig>,
 ) -> Result<(WebSocketStream<S>, Response), WsError>
 where
-    R: Into<Request<'a>> + Unpin,
+    R: IntoClientRequest + Unpin,
     S: AsyncRead + AsyncWrite + Unpin,
 {
     let f = handshake::client_handshake(stream, move |allow_std| {
-        let cli_handshake = ClientHandshake::start(allow_std, request.into(), config);
+        let request = request.into_client_request()?;
+        let cli_handshake = ClientHandshake::start(allow_std, request, config)?;
         cli_handshake.handshake()
     });
     f.await.map_err(|e| {
@@ -346,9 +348,33 @@ where
 ))]
 /// Get a domain from an URL.
 #[inline]
-pub(crate) fn domain(request: &Request) -> Result<String, tungstenite::Error> {
-    match request.url.host_str() {
+pub(crate) fn domain(
+    request: &tungstenite::handshake::client::Request,
+) -> Result<String, tungstenite::Error> {
+    match request.uri().host() {
         Some(d) => Ok(d.to_string()),
         None => Err(tungstenite::Error::Url("no host name in the url".into())),
     }
+}
+
+#[cfg(any(
+    feature = "async-tls",
+    feature = "async-std-runtime",
+    feature = "tokio-runtime",
+    feature = "gio-runtime"
+))]
+/// Get the port from an URL.
+#[inline]
+pub(crate) fn port(
+    request: &tungstenite::handshake::client::Request,
+) -> Result<u16, tungstenite::Error> {
+    request
+        .uri()
+        .port_u16()
+        .or_else(|| match request.uri().scheme_str() {
+            Some("wss") => Some(443),
+            Some("ws") => Some(80),
+            _ => None,
+        })
+        .ok_or(tungstenite::Error::Url("Url scheme not supported".into()))
 }
