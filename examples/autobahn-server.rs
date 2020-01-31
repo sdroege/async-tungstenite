@@ -1,12 +1,15 @@
 use async_std::net::{SocketAddr, TcpListener, TcpStream};
-use async_tungstenite::accept_async;
+use async_tungstenite::{accept_async, tungstenite::Error};
 use futures::{SinkExt, StreamExt};
 use log::*;
 use tungstenite::Result;
 
 async fn accept_connection(peer: SocketAddr, stream: TcpStream) {
-    if let Err(err) = handle_connection(peer, stream).await {
-        error!("Error processing connection: {}", err);
+    if let Err(e) = handle_connection(peer, stream).await {
+        match e {
+            Error::ConnectionClosed | Error::Protocol(_) | Error::Utf8 => (),
+            err => error!("Error processing connection: {}", err),
+        }
     }
 }
 
