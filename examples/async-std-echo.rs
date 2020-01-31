@@ -5,9 +5,9 @@ use async_std::task;
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(any(feature = "async-tls", feature = "async-native-tls"))]
-    let url = url::Url::parse("wss://echo.websocket.org").unwrap();
+    let url = "wss://echo.websocket.org";
     #[cfg(not(any(feature = "async-tls", feature = "async-native-tls")))]
-    let url = url::Url::parse("ws://echo.websocket.org").unwrap();
+    let url = "ws://echo.websocket.org";
 
     let (mut ws_stream, _) = connect_async(url).await?;
 
