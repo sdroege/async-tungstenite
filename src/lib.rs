@@ -376,5 +376,5 @@ pub(crate) fn port(
             Some("ws") => Some(80),
             _ => None,
         })
-        .ok_or(tungstenite::Error::Url("Url scheme not supported".into()))
+        .ok_or_else(|| tungstenite::Error::Url("Url scheme not supported".into()))
 }
