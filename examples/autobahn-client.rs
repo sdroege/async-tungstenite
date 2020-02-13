@@ -1,5 +1,5 @@
 use async_tungstenite::{async_std::connect_async, tungstenite::Error, tungstenite::Result};
-use futures::{SinkExt, StreamExt};
+use futures::prelude::*;
 use log::*;
 
 const AGENT: &str = "Tungstenite";

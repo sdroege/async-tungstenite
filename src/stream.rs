@@ -6,7 +6,7 @@
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-use futures::io::{AsyncRead, AsyncWrite};
+use futures_io::{AsyncRead, AsyncWrite};
 
 /// Stream, either plain TCP or TLS.
 pub enum Stream<S, T> {

@@ -9,7 +9,7 @@ use async_std::net::TcpStream;
 use super::{domain, port, WebSocketStream};
 
 #[cfg(feature = "async-native-tls")]
-use futures::io::{AsyncRead, AsyncWrite};
+use futures_io::{AsyncRead, AsyncWrite};
 
 #[cfg(feature = "async-native-tls")]
 pub(crate) mod async_native_tls {
@@ -22,7 +22,7 @@ pub(crate) mod async_native_tls {
     use tungstenite::stream::Mode;
     use tungstenite::Error;
 
-    use futures::io::{AsyncRead, AsyncWrite};
+    use futures_io::{AsyncRead, AsyncWrite};
 
     use crate::stream::Stream as StreamSwitcher;
     use crate::{
@@ -93,7 +93,7 @@ pub(crate) mod async_native_tls {
 
 #[cfg(not(any(feature = "async-tls", feature = "async-native-tls")))]
 pub(crate) mod dummy_tls {
-    use futures::io::{AsyncRead, AsyncWrite};
+    use futures_io::{AsyncRead, AsyncWrite};
 
     use tungstenite::client::{uri_mode, IntoClientRequest};
     use tungstenite::handshake::client::Request;

@@ -8,7 +8,7 @@ use tokio::net::TcpStream;
 
 use super::{domain, port, WebSocketStream};
 
-use futures::io::{AsyncRead, AsyncWrite};
+use futures_io::{AsyncRead, AsyncWrite};
 
 #[cfg(feature = "tokio-tls")]
 pub(crate) mod tokio_tls {
@@ -20,7 +20,7 @@ pub(crate) mod tokio_tls {
     use tungstenite::stream::Mode;
     use tungstenite::Error;
 
-    use futures::io::{AsyncRead, AsyncWrite};
+    use futures_io::{AsyncRead, AsyncWrite};
 
     use crate::stream::Stream as StreamSwitcher;
     use crate::{client_async_with_config, domain, Response, WebSocketConfig, WebSocketStream};
@@ -91,7 +91,7 @@ pub(crate) mod tokio_tls {
 
 #[cfg(not(any(feature = "async-tls", feature = "tokio-tls")))]
 pub(crate) mod dummy_tls {
-    use futures::io::{AsyncRead, AsyncWrite};
+    use futures_io::{AsyncRead, AsyncWrite};
 
     use tungstenite::client::{uri_mode, IntoClientRequest};
     use tungstenite::handshake::client::Request;

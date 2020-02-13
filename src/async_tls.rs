@@ -4,7 +4,7 @@ use tungstenite::handshake::client::{Request, Response};
 use tungstenite::protocol::WebSocketConfig;
 use tungstenite::Error;
 
-use futures::io::{AsyncRead, AsyncWrite};
+use futures_io::{AsyncRead, AsyncWrite};
 
 use super::{client_async_with_config, WebSocketStream};
 

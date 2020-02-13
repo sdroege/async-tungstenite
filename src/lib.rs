@@ -31,7 +31,6 @@
     unused_imports,
     unused_import_braces
 )]
-
 #![forbid(unsafe_code)]
 
 pub use tungstenite;
@@ -49,8 +48,11 @@ pub mod stream;
 use std::io::{Read, Write};
 
 use compat::{cvt, AllowStd, ContextWaker};
-use futures::io::{AsyncRead, AsyncWrite};
-use futures::{Sink, SinkExt, Stream};
+use futures_io::{AsyncRead, AsyncWrite};
+use futures_util::{
+    sink::{Sink, SinkExt},
+    stream::Stream,
+};
 use log::*;
 use std::pin::Pin;
 use std::task::{Context, Poll};
@@ -283,7 +285,7 @@ where
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         trace!("{}:{} Stream.poll_next", file!(), line!());
-        match futures::ready!(self.with_context(Some((ContextWaker::Read, cx)), |s| {
+        match futures_util::ready!(self.with_context(Some((ContextWaker::Read, cx)), |s| {
             trace!(
                 "{}:{} Stream.with_context poll_next -> read_message()",
                 file!(),
