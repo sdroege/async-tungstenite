@@ -5,7 +5,7 @@ use std::io;
 
 use gio::prelude::*;
 
-use futures::io::{AsyncRead, AsyncWrite};
+use futures_io::{AsyncRead, AsyncWrite};
 
 use tungstenite::client::{uri_mode, IntoClientRequest};
 use tungstenite::handshake::client::Request;

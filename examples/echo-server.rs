@@ -12,7 +12,7 @@ use std::{env, io::Error};
 
 use async_std::net::{TcpListener, TcpStream};
 use async_std::task;
-use futures::StreamExt;
+use futures::prelude::*;
 use log::info;
 
 async fn run() -> Result<(), Error> {

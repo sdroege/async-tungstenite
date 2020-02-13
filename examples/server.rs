@@ -25,11 +25,10 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+use futures::prelude::*;
 use futures::{
     channel::mpsc::{unbounded, UnboundedSender},
     future, pin_mut,
-    stream::TryStreamExt,
-    StreamExt,
 };
 
 use async_std::net::{TcpListener, TcpStream};

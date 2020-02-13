@@ -1,6 +1,6 @@
 use async_std::net::{SocketAddr, TcpListener, TcpStream};
 use async_tungstenite::{accept_async, tungstenite::Error};
-use futures::{SinkExt, StreamExt};
+use futures::prelude::*;
 use log::*;
 use tungstenite::Result;
 

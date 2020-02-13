@@ -1,6 +1,6 @@
 use crate::compat::{AllowStd, SetWaker};
 use crate::WebSocketStream;
-use futures::io::{AsyncRead, AsyncWrite};
+use futures_io::{AsyncRead, AsyncWrite};
 use log::*;
 use std::future::Future;
 use std::io::{Read, Write};
@@ -148,7 +148,11 @@ where
     type Output = Result<Role::FinalResult, Error<Role>>;
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-        let mut s = self.as_mut().0.take().expect("future polled after completion");
+        let mut s = self
+            .as_mut()
+            .0
+            .take()
+            .expect("future polled after completion");
 
         let machine = s.get_mut();
         trace!("Setting context in handshake");
