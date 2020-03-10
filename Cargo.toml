@@ -80,6 +80,10 @@ name = "autobahn-client"
 required-features = ["async-std-runtime"]
 
 [[example]]
+name = "async-std-echo"
+required-features = ["async-std-runtime"]
+
+[[example]]
 name = "client"
 required-features = ["async-std-runtime"]
 
