@@ -53,7 +53,7 @@ where
     let socket = client
         .connect_async_future(&connectable)
         .await
-        .map_err(|err| to_std_io_error(err))?;
+        .map_err(to_std_io_error)?;
     let socket = IOStreamAsyncReadWrite::new(socket)
         .map_err(|_| io::Error::new(io::ErrorKind::Other, "Unsupported gio::IOStream"))?;
 
