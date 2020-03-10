@@ -73,7 +73,6 @@ pub mod gio;
 #[cfg(feature = "tokio-runtime")]
 pub mod tokio;
 
-use std::error::Error;
 use tungstenite::protocol::CloseFrame;
 
 /// Creates a WebSocket handshake from a request and a stream.
@@ -118,7 +117,7 @@ where
     f.await.map_err(|e| {
         WsError::Io(std::io::Error::new(
             std::io::ErrorKind::Other,
-            e.description(),
+            e.to_string(),
         ))
     })
 }
@@ -183,7 +182,7 @@ where
     f.await.map_err(|e| {
         WsError::Io(std::io::Error::new(
             std::io::ErrorKind::Other,
-            e.description(),
+            e.to_string(),
         ))
     })
 }
