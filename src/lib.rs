@@ -32,6 +32,8 @@
     unused_import_braces
 )]
 
+#![forbid(unsafe_code)]
+
 pub use tungstenite;
 
 mod compat;
