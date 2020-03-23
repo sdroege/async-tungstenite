@@ -1,7 +1,7 @@
 # async-tungstenite
 
 Asynchronous WebSockets for [async-std](https://async.rs),
-[tokio](https://tokio.rs), [gio](https://www.gtk-rs.org) and any `std`
+[tokio](https://tokio.rs), [gio](https://gtk-rs.org) and any `std`
 `Future`s runtime.
 
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
