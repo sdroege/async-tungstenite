@@ -44,7 +44,7 @@ integration with various other crates can be enabled via feature flags
  * `tokio-tls`: Enables the additional functions in the `tokio` module to
    implement TLS via [tokio-tls](https://crates.io/crates/tokio-tls).
  * `gio-runtime`: Enables the `gio` module, which provides integration with
-   the [gio](https://www.gtk-rs.org) runtime.
+   the [gio](https://gtk-rs.org) runtime.
 
 ## tokio-tungstenite
 
