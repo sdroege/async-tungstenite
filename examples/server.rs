@@ -6,11 +6,11 @@
 //!
 //! You can test this out by running:
 //!
-//!     cargo run --example server 127.0.0.1:12345
+//!     cargo run --features="async-std-runtime" --example server 127.0.0.1:12345
 //!
 //! And then in another window run:
 //!
-//!     cargo run --example client ws://127.0.0.1:12345/
+//!     cargo run --features="async-std-runtime" --example client ws://127.0.0.1:12345/
 //!
 //! You can run the second command in multiple windows and then chat between the
 //! two, seeing the messages from the other client as they're received. For all
