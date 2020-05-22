@@ -1,12 +1,14 @@
 use async_std::net::{TcpListener, TcpStream};
 use async_std::task;
-use async_tungstenite::{accept_async, tungstenite::Error};
+use async_tungstenite::{
+    accept_async,
+    tungstenite::{Error, Message, Result},
+};
 use futures::future::{select, Either};
 use futures::prelude::*;
 use log::*;
 use std::net::SocketAddr;
 use std::time::Duration;
-use tungstenite::{Message, Result};
 
 async fn accept_connection(peer: SocketAddr, stream: TcpStream) {
     if let Err(e) = handle_connection(peer, stream).await {

@@ -13,12 +13,12 @@
 use std::env;
 
 use futures::{future, pin_mut, StreamExt};
-use tungstenite::protocol::Message;
 
 use async_std::io;
 use async_std::prelude::*;
 use async_std::task;
 use async_tungstenite::async_std::connect_async;
+use async_tungstenite::tungstenite::protocol::Message;
 
 async fn run() {
     let connect_addr = env::args()
