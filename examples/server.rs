@@ -33,7 +33,7 @@ use futures::{
 
 use async_std::net::{TcpListener, TcpStream};
 use async_std::task;
-use tungstenite::protocol::Message;
+use async_tungstenite::tungstenite::protocol::Message;
 
 type Tx = UnboundedSender<Message>;
 type PeerMap = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
