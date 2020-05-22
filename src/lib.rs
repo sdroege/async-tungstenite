@@ -63,6 +63,7 @@ use tungstenite::{
     handshake::{
         client::{ClientHandshake, Response},
         server::{Callback, NoCallback},
+        HandshakeError,
     },
     protocol::{Message, Role, WebSocket, WebSocketConfig},
     server,
@@ -118,11 +119,12 @@ where
         let cli_handshake = ClientHandshake::start(allow_std, request, config)?;
         cli_handshake.handshake()
     });
-    f.await.map_err(|e| {
-        WsError::Io(std::io::Error::new(
+    f.await.map_err(|e| match e {
+        HandshakeError::Failure(e) => e,
+        e => WsError::Io(std::io::Error::new(
             std::io::ErrorKind::Other,
             e.to_string(),
-        ))
+        )),
     })
 }
 
@@ -183,11 +185,12 @@ where
     let f = handshake::server_handshake(stream, move |allow_std| {
         server::accept_hdr_with_config(allow_std, callback, config)
     });
-    f.await.map_err(|e| {
-        WsError::Io(std::io::Error::new(
+    f.await.map_err(|e| match e {
+        HandshakeError::Failure(e) => e,
+        e => WsError::Io(std::io::Error::new(
             std::io::ErrorKind::Other,
             e.to_string(),
-        ))
+        )),
     })
 }
 
