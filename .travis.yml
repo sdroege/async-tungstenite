@@ -19,11 +19,11 @@ script:
   - cargo check --features async-std-runtime,async-native-tls
   - cargo check --features async-std-runtime,async-tls,async-native-tls
   - cargo check --features tokio-runtime,async-tls
-  - cargo check --features tokio-runtime,tokio-tls
-  - cargo check --features tokio-runtime,async-tls,tokio-tls
+  - cargo check --features tokio-runtime,tokio-native-tls
+  - cargo check --features tokio-runtime,async-tls,tokio-native-tls
   - cargo check --features gio-runtime
   - cargo check --features gio-runtime,async-tls
-  - cargo check --features async-std-runtime,async-tls,async-native-tls,tokio-runtime,tokio-tls,gio-runtime
+  - cargo check --features async-std-runtime,async-tls,async-native-tls,tokio-runtime,tokio-native-tls,gio-runtime
   - cargo test --features async-std-runtime
   - sudo apt-get install python-unittest2
   - sudo pip install ghp-import urllib3[secure] autobahntestsuite
