@@ -16,8 +16,8 @@
 //!    [async-native-tls](https://crates.io/crates/async-native-tls).
 //!  * `tokio-runtime`: Enables the `tokio` module, which provides integration
 //!    with the [tokio](https://tokio.rs) runtime.
-//!  * `tokio-tls`: Enables the additional functions in the `tokio` module to
-//!    implement TLS via [tokio-tls](https://crates.io/crates/tokio-tls).
+//!  * `tokio-native-tls`: Enables the additional functions in the `tokio` module to
+//!    implement TLS via [tokio-native-tls](https://crates.io/crates/tokio-native-tls).
 //!  * `gio-runtime`: Enables the `gio` module, which provides integration with
 //!    the [gio](https://www.gtk-rs.org) runtime.
 //!
@@ -41,7 +41,7 @@ mod handshake;
 #[cfg(any(
     feature = "async-tls",
     feature = "async-native-tls",
-    feature = "tokio-tls",
+    feature = "tokio-native-tls",
 ))]
 pub mod stream;
 

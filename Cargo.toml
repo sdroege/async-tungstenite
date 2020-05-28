@@ -19,10 +19,10 @@ tokio-runtime = ["tokio"]
 gio-runtime = ["gio", "glib"]
 async-tls = ["real-async-tls"]
 async-native-tls = ["async-std-runtime", "real-async-native-tls"]
-tokio-tls = ["tokio-runtime", "real-tokio-tls", "real-native-tls", "tungstenite/tls"]
+tokio-native-tls = ["tokio-runtime", "real-tokio-native-tls", "real-native-tls", "tungstenite/tls"]
 
 [package.metadata.docs.rs]
-features = ["async-std-runtime", "tokio-runtime", "gio-runtime", "async-tls", "async-native-tls", "tokio-tls"]
+features = ["async-std-runtime", "tokio-runtime", "gio-runtime", "async-tls", "async-native-tls", "tokio-native-tls"]
 
 [dependencies]
 log = "0.4"
@@ -58,10 +58,10 @@ optional = true
 version = "0.2"
 features = ["tcp", "dns"]
 
-[dependencies.real-tokio-tls]
+[dependencies.real-tokio-native-tls]
 optional = true
-version = "0.3"
-package = "tokio-tls"
+version = "0.1"
+package = "tokio-native-tls"
 
 [dependencies.gio]
 optional = true

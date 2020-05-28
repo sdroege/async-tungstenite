@@ -10,10 +10,10 @@ use super::{domain, port, WebSocketStream};
 
 use futures_io::{AsyncRead, AsyncWrite};
 
-#[cfg(feature = "tokio-tls")]
+#[cfg(feature = "tokio-native-tls")]
 pub(crate) mod tokio_tls {
-    use real_tokio_tls::TlsConnector as AsyncTlsConnector;
-    use real_tokio_tls::TlsStream;
+    use real_tokio_native_tls::TlsConnector as AsyncTlsConnector;
+    use real_tokio_native_tls::TlsStream;
 
     use tungstenite::client::{uri_mode, IntoClientRequest};
     use tungstenite::handshake::client::Request;
@@ -89,7 +89,7 @@ pub(crate) mod tokio_tls {
     }
 }
 
-#[cfg(not(any(feature = "async-tls", feature = "tokio-tls")))]
+#[cfg(not(any(feature = "async-tls", feature = "tokio-native-tls")))]
 pub(crate) mod dummy_tls {
     use futures_io::{AsyncRead, AsyncWrite};
 
@@ -141,18 +141,18 @@ pub(crate) mod dummy_tls {
     }
 }
 
-#[cfg(not(any(feature = "async-tls", feature = "tokio-tls")))]
+#[cfg(not(any(feature = "async-tls", feature = "tokio-native-tls")))]
 use self::dummy_tls::{client_async_tls_with_connector_and_config, AutoStream};
 
-#[cfg(all(feature = "async-tls", not(feature = "tokio-tls")))]
+#[cfg(all(feature = "async-tls", not(feature = "tokio-native-tls")))]
 use crate::async_tls::{client_async_tls_with_connector_and_config, AutoStream};
-#[cfg(all(feature = "async-tls", not(feature = "tokio-tls")))]
+#[cfg(all(feature = "async-tls", not(feature = "tokio-native-tls")))]
 type Connector = real_async_tls::TlsConnector;
 
-#[cfg(feature = "tokio-tls")]
+#[cfg(feature = "tokio-native-tls")]
 use self::tokio_tls::{client_async_tls_with_connector_and_config, AutoStream, Connector};
 
-#[cfg(feature = "tokio-tls")]
+#[cfg(feature = "tokio-native-tls")]
 /// Creates a WebSocket handshake from a request and a stream,
 /// upgrading the stream to TLS if required.
 pub async fn client_async_tls<R, S>(
@@ -167,7 +167,7 @@ where
     client_async_tls_with_connector_and_config(request, stream, None, None).await
 }
 
-#[cfg(feature = "tokio-tls")]
+#[cfg(feature = "tokio-native-tls")]
 /// Creates a WebSocket handshake from a request and a stream,
 /// upgrading the stream to TLS if required and using the given
 /// WebSocket configuration.
@@ -184,7 +184,7 @@ where
     client_async_tls_with_connector_and_config(request, stream, None, config).await
 }
 
-#[cfg(feature = "tokio-tls")]
+#[cfg(feature = "tokio-native-tls")]
 /// Creates a WebSocket handshake from a request and a stream,
 /// upgrading the stream to TLS if required and using the given
 /// connector.
@@ -241,7 +241,7 @@ where
     client_async_tls_with_connector_and_config(request, TokioAdapter(socket), None, config).await
 }
 
-#[cfg(any(feature = "async-tls", feature = "tokio-tls"))]
+#[cfg(any(feature = "async-tls", feature = "tokio-native-tls"))]
 /// Connect to a given URL using the provided TLS connector.
 pub async fn connect_async_with_tls_connector<R>(
     request: R,
@@ -259,7 +259,7 @@ where
     connect_async_with_tls_connector_and_config(request, connector, None).await
 }
 
-#[cfg(any(feature = "async-tls", feature = "tokio-tls"))]
+#[cfg(any(feature = "async-tls", feature = "tokio-native-tls"))]
 /// Connect to a given URL using the provided TLS connector.
 pub async fn connect_async_with_tls_connector_and_config<R>(
     request: R,
