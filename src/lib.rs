@@ -371,7 +371,6 @@ pub(crate) fn domain(
 }
 
 #[cfg(any(
-    feature = "async-tls",
     feature = "async-std-runtime",
     feature = "tokio-runtime",
     feature = "gio-runtime"
