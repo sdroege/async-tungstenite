@@ -68,6 +68,8 @@ pub struct IOStreamAsyncReadWrite<T: IsA<gio::IOStream>> {
     write: gio::OutputStreamAsyncWrite<gio::PollableOutputStream>,
 }
 
+unsafe impl<T: IsA<gio::IOStream>> Send for IOStreamAsyncReadWrite<T> {}
+
 impl<T: IsA<gio::IOStream>> IOStreamAsyncReadWrite<T> {
     /// Create a new `gio::IOStream` adapter
     pub fn new(stream: T) -> Result<IOStreamAsyncReadWrite<T>, T> {

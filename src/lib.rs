@@ -31,7 +31,6 @@
     unused_imports,
     unused_import_braces
 )]
-#![forbid(unsafe_code)]
 
 pub use tungstenite;
 
@@ -272,8 +271,7 @@ impl<S> WebSocketStream<S> {
     }
 
     /// Returns a reference to the configuration of the tungstenite stream.
-    pub fn get_config(&self) -> &WebSocketConfig
-    {
+    pub fn get_config(&self) -> &WebSocketConfig {
         self.inner.get_config()
     }
 
