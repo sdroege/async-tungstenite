@@ -72,7 +72,7 @@ unsafe impl<T: IsA<gio::IOStream>> Send for IOStreamAsyncReadWrite<T> {}
 
 impl<T: IsA<gio::IOStream>> IOStreamAsyncReadWrite<T> {
     /// Create a new `gio::IOStream` adapter
-    pub fn new(stream: T) -> Result<IOStreamAsyncReadWrite<T>, T> {
+    fn new(stream: T) -> Result<IOStreamAsyncReadWrite<T>, T> {
         let write = stream
             .get_output_stream()
             .and_then(|s| s.dynamic_cast::<gio::PollableOutputStream>().ok())
