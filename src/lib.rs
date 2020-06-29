@@ -31,7 +31,7 @@
     unused_imports,
     unused_import_braces
 )]
-#![forbid(unsafe_code)]
+#![cfg_attr(not(feature = "gio-runtime"), forbid(unsafe_code))]
 
 pub use tungstenite;
 
