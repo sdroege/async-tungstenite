@@ -42,12 +42,15 @@ where
     }
 }
 
+/// Type alias for the stream type of the `client_async()` functions.
+pub type ClientStream<S> = AutoStream<S>;
+
 /// Creates a WebSocket handshake from a request and a stream,
 /// upgrading the stream to TLS if required.
 pub async fn client_async_tls<R, S>(
     request: R,
     stream: S,
-) -> Result<(WebSocketStream<AutoStream<S>>, Response), Error>
+) -> Result<(WebSocketStream<ClientStream<S>>, Response), Error>
 where
     R: IntoClientRequest + Unpin,
     S: 'static + AsyncRead + AsyncWrite + Unpin,
@@ -63,7 +66,7 @@ pub async fn client_async_tls_with_config<R, S>(
     request: R,
     stream: S,
     config: Option<WebSocketConfig>,
-) -> Result<(WebSocketStream<AutoStream<S>>, Response), Error>
+) -> Result<(WebSocketStream<ClientStream<S>>, Response), Error>
 where
     R: IntoClientRequest + Unpin,
     S: 'static + AsyncRead + AsyncWrite + Unpin,
@@ -79,7 +82,7 @@ pub async fn client_async_tls_with_connector<R, S>(
     request: R,
     stream: S,
     connector: Option<AsyncTlsConnector>,
-) -> Result<(WebSocketStream<AutoStream<S>>, Response), Error>
+) -> Result<(WebSocketStream<ClientStream<S>>, Response), Error>
 where
     R: IntoClientRequest + Unpin,
     S: 'static + AsyncRead + AsyncWrite + Unpin,
@@ -96,7 +99,7 @@ pub async fn client_async_tls_with_connector_and_config<R, S>(
     stream: S,
     connector: Option<AsyncTlsConnector>,
     config: Option<WebSocketConfig>,
-) -> Result<(WebSocketStream<AutoStream<S>>, Response), Error>
+) -> Result<(WebSocketStream<ClientStream<S>>, Response), Error>
 where
     R: IntoClientRequest + Unpin,
     S: 'static + AsyncRead + AsyncWrite + Unpin,

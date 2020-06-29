@@ -152,13 +152,16 @@ type Connector = real_async_tls::TlsConnector;
 #[cfg(feature = "tokio-native-tls")]
 use self::tokio_tls::{client_async_tls_with_connector_and_config, AutoStream, Connector};
 
+/// Type alias for the stream type of the `client_async()` functions.
+pub type ClientStream<S> = AutoStream<S>;
+
 #[cfg(feature = "tokio-native-tls")]
 /// Creates a WebSocket handshake from a request and a stream,
 /// upgrading the stream to TLS if required.
 pub async fn client_async_tls<R, S>(
     request: R,
     stream: S,
-) -> Result<(WebSocketStream<AutoStream<S>>, Response), Error>
+) -> Result<(WebSocketStream<ClientStream<S>>, Response), Error>
 where
     R: IntoClientRequest + Unpin,
     S: 'static + AsyncRead + AsyncWrite + Unpin,
@@ -175,7 +178,7 @@ pub async fn client_async_tls_with_config<R, S>(
     request: R,
     stream: S,
     config: Option<WebSocketConfig>,
-) -> Result<(WebSocketStream<AutoStream<S>>, Response), Error>
+) -> Result<(WebSocketStream<ClientStream<S>>, Response), Error>
 where
     R: IntoClientRequest + Unpin,
     S: 'static + AsyncRead + AsyncWrite + Unpin,
@@ -192,7 +195,7 @@ pub async fn client_async_tls_with_connector<R, S>(
     request: R,
     stream: S,
     connector: Option<Connector>,
-) -> Result<(WebSocketStream<AutoStream<S>>, Response), Error>
+) -> Result<(WebSocketStream<ClientStream<S>>, Response), Error>
 where
     R: IntoClientRequest + Unpin,
     S: 'static + AsyncRead + AsyncWrite + Unpin,
@@ -201,16 +204,13 @@ where
     client_async_tls_with_connector_and_config(request, stream, connector, None).await
 }
 
+/// Type alias for the stream type of the `connect_async()` functions.
+pub type ConnectStream = ClientStream<TokioAdapter<TcpStream>>;
+
 /// Connect to a given URL.
 pub async fn connect_async<R>(
     request: R,
-) -> Result<
-    (
-        WebSocketStream<AutoStream<TokioAdapter<TcpStream>>>,
-        Response,
-    ),
-    Error,
->
+) -> Result<(WebSocketStream<ConnectStream>, Response), Error>
 where
     R: IntoClientRequest + Unpin,
 {
@@ -221,13 +221,7 @@ where
 pub async fn connect_async_with_config<R>(
     request: R,
     config: Option<WebSocketConfig>,
-) -> Result<
-    (
-        WebSocketStream<AutoStream<TokioAdapter<TcpStream>>>,
-        Response,
-    ),
-    Error,
->
+) -> Result<(WebSocketStream<ConnectStream>, Response), Error>
 where
     R: IntoClientRequest + Unpin,
 {
@@ -246,13 +240,7 @@ where
 pub async fn connect_async_with_tls_connector<R>(
     request: R,
     connector: Option<Connector>,
-) -> Result<
-    (
-        WebSocketStream<AutoStream<TokioAdapter<TcpStream>>>,
-        Response,
-    ),
-    Error,
->
+) -> Result<(WebSocketStream<ConnectStream>, Response), Error>
 where
     R: IntoClientRequest + Unpin,
 {
@@ -265,13 +253,7 @@ pub async fn connect_async_with_tls_connector_and_config<R>(
     request: R,
     connector: Option<Connector>,
     config: Option<WebSocketConfig>,
-) -> Result<
-    (
-        WebSocketStream<AutoStream<TokioAdapter<TcpStream>>>,
-        Response,
-    ),
-    Error,
->
+) -> Result<(WebSocketStream<ConnectStream>, Response), Error>
 where
     R: IntoClientRequest + Unpin,
 {
