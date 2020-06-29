@@ -13,12 +13,13 @@ use tungstenite::stream::Mode;
 
 use crate::{client_async_with_config, domain, port, Response, WebSocketConfig, WebSocketStream};
 
-type MaybeTlsStream = IOStreamAsyncReadWrite<gio::SocketConnection>;
+/// Type alias for the stream type of the `connect_async()` functions.
+pub type ConnectStream = IOStreamAsyncReadWrite<gio::SocketConnection>;
 
 /// Connect to a given URL.
 pub async fn connect_async<R>(
     request: R,
-) -> Result<(WebSocketStream<MaybeTlsStream>, Response), Error>
+) -> Result<(WebSocketStream<ConnectStream>, Response), Error>
 where
     R: IntoClientRequest + Unpin,
 {
@@ -29,7 +30,7 @@ where
 pub async fn connect_async_with_config<R>(
     request: R,
     config: Option<WebSocketConfig>,
-) -> Result<(WebSocketStream<MaybeTlsStream>, Response), Error>
+) -> Result<(WebSocketStream<ConnectStream>, Response), Error>
 where
     R: IntoClientRequest + Unpin,
 {
