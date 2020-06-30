@@ -20,6 +20,7 @@ script:
   - cargo check --features async-std-runtime,async-tls,async-native-tls
   - cargo check --features tokio-runtime,async-tls
   - cargo check --features tokio-runtime,tokio-native-tls
+  - cargo check --features tokio-runtime,tokio-openssl
   - cargo check --features tokio-runtime,async-tls,tokio-native-tls
   - cargo check --features gio-runtime
   - cargo check --features gio-runtime,async-tls

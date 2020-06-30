@@ -2,9 +2,17 @@ use async_tungstenite::{tokio::connect_async, tungstenite::Message};
 use futures::prelude::*;
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
-    #[cfg(any(feature = "async-tls", feature = "tokio-native-tls"))]
+    #[cfg(any(
+        feature = "async-tls",
+        feature = "tokio-native-tls",
+        feature = "tokio-openssl"
+    ))]
     let url = "wss://echo.websocket.org";
-    #[cfg(not(any(feature = "async-tls", feature = "tokio-native-tls")))]
+    #[cfg(not(any(
+        feature = "async-tls",
+        feature = "tokio-native-tls",
+        feature = "tokio-openssl"
+    )))]
     let url = "ws://echo.websocket.org";
 
     let (mut ws_stream, _) = connect_async(url).await?;

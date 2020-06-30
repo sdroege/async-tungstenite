@@ -20,6 +20,7 @@ gio-runtime = ["gio", "glib"]
 async-tls = ["real-async-tls"]
 async-native-tls = ["async-std-runtime", "real-async-native-tls"]
 tokio-native-tls = ["tokio-runtime", "real-tokio-native-tls", "real-native-tls", "tungstenite/tls"]
+tokio-openssl = ["tokio-runtime", "real-tokio-openssl", "openssl"]
 
 [package.metadata.docs.rs]
 features = ["async-std-runtime", "tokio-runtime", "gio-runtime", "async-tls", "async-native-tls", "tokio-native-tls"]
@@ -37,6 +38,15 @@ default-features = false
 [dependencies.async-std]
 optional = true
 version = "1.0"
+
+[dependencies.real-tokio-openssl]
+optional = true
+version = "0.4"
+package = "tokio-openssl"
+
+[dependencies.openssl]
+optional = true
+version = "0.10"
 
 [dependencies.real-async-tls]
 optional = true

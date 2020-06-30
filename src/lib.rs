@@ -18,6 +18,8 @@
 //!    with the [tokio](https://tokio.rs) runtime.
 //!  * `tokio-native-tls`: Enables the additional functions in the `tokio` module to
 //!    implement TLS via [tokio-native-tls](https://crates.io/crates/tokio-native-tls).
+//!  * `tokio-openssl`: Enables the additional functions in the `tokio` module to
+//!    implement TLS via [tokio-openssl](https://crates.io/crates/tokio-openssl).
 //!  * `gio-runtime`: Enables the `gio` module, which provides integration with
 //!    the [gio](https://www.gtk-rs.org) runtime.
 //!
@@ -41,6 +43,7 @@ mod handshake;
     feature = "async-tls",
     feature = "async-native-tls",
     feature = "tokio-native-tls",
+    feature = "tokio-openssl",
 ))]
 pub mod stream;
 
