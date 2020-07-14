@@ -75,11 +75,11 @@ package = "tokio-native-tls"
 
 [dependencies.gio]
 optional = true
-version = "0.8"
+version = "0.9"
 
 [dependencies.glib]
 optional = true
-version = "0.9"
+version = "0.10"
 
 [dev-dependencies]
 futures = "0.3"
