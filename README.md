@@ -43,6 +43,8 @@ integration with various other crates can be enabled via feature flags
    with the [tokio](https://tokio.rs) runtime.
  * `tokio-native-tls`: Enables the additional functions in the `tokio` module to
    implement TLS via [tokio-native-tls](https://crates.io/crates/tokio-native-tls).
+ * `tokio-rustls`: Enables the additional functions in the `tokio` module to
+   implement TLS via [tokio-rustls](https://crates.io/crates/tokio-rustls).
  * `gio-runtime`: Enables the `gio` module, which provides integration with
    the [gio](https://gtk-rs.org) runtime.
 

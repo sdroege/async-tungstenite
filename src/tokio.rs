@@ -11,6 +11,85 @@ use super::{domain, port, WebSocketStream};
 
 use futures_io::{AsyncRead, AsyncWrite};
 
+#[cfg(feature = "tokio-rustls")]
+pub(crate) mod tokio_tls {
+    use real_tokio_rustls::{client::TlsStream, TlsConnector as AsyncTlsConnector};
+    use real_tokio_rustls::rustls::ClientConfig;
+    use real_tokio_rustls::webpki::DNSNameRef;
+
+    use tungstenite::client::{uri_mode, IntoClientRequest};
+    use tungstenite::handshake::client::Request;
+    use tungstenite::stream::Mode;
+    use tungstenite::Error;
+
+    use crate::stream::Stream as StreamSwitcher;
+    use crate::{client_async_with_config, domain, Response, WebSocketConfig, WebSocketStream};
+
+    use super::TokioAdapter;
+
+    /// A stream that might be protected with TLS.
+    pub type MaybeTlsStream<S> = StreamSwitcher<TokioAdapter<S>, TokioAdapter<TlsStream<S>>>;
+
+    pub type AutoStream<S> = MaybeTlsStream<S>;
+
+    pub type Connector = AsyncTlsConnector;
+
+    async fn wrap_stream<S>(
+        socket: S,
+        domain: String,
+        connector: Option<Connector>,
+        mode: Mode,
+    ) -> Result<AutoStream<S>, Error>
+    where
+        S: 'static + tokio::io::AsyncRead + tokio::io::AsyncWrite + Unpin,
+    {
+        match mode {
+            Mode::Plain => Ok(StreamSwitcher::Plain(TokioAdapter(socket))),
+            Mode::Tls => {
+                let stream = {
+                    let connector = if let Some(connector) = connector {
+                        connector
+                    } else {
+                        let config = ClientConfig::new();
+                        AsyncTlsConnector::from(std::sync::Arc::new(config))
+                    };
+                    let domain = DNSNameRef::try_from_ascii_str(&domain).map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+                    connector
+                        .connect(domain, socket)
+                        .await
+                        .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?
+                };
+                Ok(StreamSwitcher::Tls(TokioAdapter(stream)))
+            }
+        }
+    }
+
+    /// Creates a WebSocket handshake from a request and a stream,
+    /// upgrading the stream to TLS if required and using the given
+    /// connector and WebSocket configuration.
+    pub async fn client_async_tls_with_connector_and_config<R, S>(
+        request: R,
+        stream: S,
+        connector: Option<AsyncTlsConnector>,
+        config: Option<WebSocketConfig>,
+    ) -> Result<(WebSocketStream<AutoStream<S>>, Response), Error>
+    where
+        R: IntoClientRequest + Unpin,
+        S: 'static + tokio::io::AsyncRead + tokio::io::AsyncWrite + Unpin,
+        AutoStream<S>: Unpin,
+    {
+        let request: Request = request.into_client_request()?;
+
+        let domain = domain(&request)?;
+
+        // Make sure we check domain and mode first. URL must be valid.
+        let mode = uri_mode(request.uri())?;
+
+        let stream = wrap_stream(stream, domain, connector, mode).await?;
+        client_async_with_config(request, stream, config).await
+    }
+}
+
 #[cfg(feature = "tokio-native-tls")]
 pub(crate) mod tokio_tls {
     use real_tokio_native_tls::TlsConnector as AsyncTlsConnector;
@@ -183,6 +262,7 @@ pub(crate) mod tokio_tls {
 #[cfg(not(any(
     feature = "async-tls",
     feature = "tokio-native-tls",
+    feature = "tokio-rustls",
     feature = "tokio-openssl"
 )))]
 pub(crate) mod dummy_tls {
@@ -239,6 +319,7 @@ pub(crate) mod dummy_tls {
 #[cfg(not(any(
     feature = "async-tls",
     feature = "tokio-native-tls",
+    feature = "tokio-rustls",
     feature = "tokio-openssl"
 )))]
 use self::dummy_tls::{client_async_tls_with_connector_and_config, AutoStream};
@@ -287,6 +368,11 @@ use self::async_tls_adapter::{AutoStream, Connector};
 
 #[cfg(feature = "tokio-native-tls")]
 use self::tokio_tls::{client_async_tls_with_connector_and_config, AutoStream, Connector};
+
+#[cfg(feature = "tokio-rustls")]
+pub use self::tokio_tls::client_async_tls_with_connector_and_config;
+#[cfg(feature = "tokio-rustls")]
+use self::tokio_tls::{AutoStream, Connector};
 
 #[cfg(feature = "tokio-openssl")]
 pub use self::tokio_tls::client_async_tls_with_connector_and_config;
@@ -543,6 +629,7 @@ where
 #[cfg(any(
     feature = "async-tls",
     feature = "tokio-native-tls",
+    feature = "tokio-rustls",
     feature = "tokio-openssl"
 ))]
 /// Connect to a given URL using the provided TLS connector.
@@ -559,6 +646,7 @@ where
 #[cfg(any(
     feature = "async-tls",
     feature = "tokio-native-tls",
+    feature = "tokio-rustls",
     feature = "tokio-openssl"
 ))]
 /// Connect to a given URL using the provided TLS connector.
