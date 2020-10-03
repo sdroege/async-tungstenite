@@ -13,14 +13,14 @@ edition = "2018"
 readme = "README.md"
 
 [features]
-default = ["tokio-rustls"]
+default = []
 async-std-runtime = ["async-std"]
 tokio-runtime = ["tokio"]
 gio-runtime = ["gio", "glib"]
 async-tls = ["real-async-tls"]
 async-native-tls = ["async-std-runtime", "real-async-native-tls"]
 tokio-native-tls = ["tokio-runtime", "real-tokio-native-tls", "real-native-tls", "tungstenite/tls"]
-tokio-rustls = ["tokio-runtime", "real-tokio-rustls", "tungstenite/tls"]
+tokio-rustls = ["tokio-runtime", "real-tokio-rustls"]
 tokio-openssl = ["tokio-runtime", "real-tokio-openssl", "openssl"]
 
 [package.metadata.docs.rs]
