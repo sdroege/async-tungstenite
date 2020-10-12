@@ -30,23 +30,47 @@ jobs:
           sudo apt-get install libssl-dev python-unittest2
           sudo pip install urllib3[secure] autobahntestsuite
 
-      - run: cargo check
-      - run: cargo check --features async-tls
-      - run: cargo check --features async-std-runtime,async-tls
-      - run: cargo check --features async-std-runtime,async-native-tls
-      - run: cargo check --features async-std-runtime,async-tls,async-native-tls
+      - name: Check default-features
+        run: cargo check
 
-      - run: cargo check --features tokio-runtime,tokio-native-tls
-      - run: cargo check --features tokio-runtime,tokio-rustls
-      - run: cargo check --features tokio-runtime,tokio-openssl
-      - run: cargo check --features tokio-runtime,async-tls,tokio-native-tls
+      - name: Check async-tls
+        run: cargo check --features async-tls
 
-      - run: cargo check --features gio-runtime
-      - run: cargo check --features gio-runtime,async-tls
+      - name: Check async-std-runtime, async-tls
+        run: cargo check --features async-std-runtime,async-tls
 
-      - run: cargo check --features async-std-runtime,async-tls,async-native-tls,tokio-runtime,tokio-native-tls,gio-runtime
+      - name: Check async-std-runtime, async-native-tls
+        run: cargo check --features async-std-runtime,async-native-tls
 
-      - run: cargo test --features async-std-runtime
+      - name: Check async-std-runtime, async-tls, async-native-tls
+        run: cargo check --features async-std-runtime,async-tls,async-native-tls
 
-      - run: echo "Running Autobahn TestSuite for client" && ./scripts/autobahn-client.sh
-      - run: echo "Running Autobahn TestSuite for server" && ./scripts/autobahn-server.sh
+      - name: Check tokio-runtime, tokio-native-tls
+        run: cargo check --features tokio-runtime,tokio-native-tls
+
+      - name: Check tokio-runtime, tokio-rustls
+        run: cargo check --features tokio-runtime,tokio-rustls
+
+      - name: Check tokio-runtime, tokio-openssl
+        run: cargo check --features tokio-runtime,tokio-openssl
+
+      - name: Check tokio-runtime, async-tls, tokio-native-tls
+        run: cargo check --features tokio-runtime,async-tls,tokio-native-tls
+
+      - name: Check gio-runtime
+        run: cargo check --features gio-runtime
+
+      - name: Check gio-runtime, async-tls
+        run: cargo check --features gio-runtime,async-tls
+
+      - name: Check async-std-runtime, async-tls, async-native-tls, tokio-runtime, tokio-native-tls, gio-runtime
+        run: cargo check --features async-std-runtime,async-tls,async-native-tls,tokio-runtime,tokio-native-tls,gio-runtime
+
+      - name: Test async-std-runtime
+        run: cargo test --features async-std-runtime
+
+      - name: Running Autobahn TestSuite for client
+        run: ./scripts/autobahn-client.sh
+
+      - name: Running Autobahn TestSuite for server
+        run: ./scripts/autobahn-server.sh
