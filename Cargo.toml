@@ -28,7 +28,7 @@ features = ["async-std-runtime", "tokio-runtime", "gio-runtime", "async-tls", "a
 
 [dependencies]
 log = "0.4"
-futures-util = { version = "0.3", default-features = false, features = ["async-await", "sink", "std"] }
+futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
 futures-io = { version = "0.3", default-features = false, features = ["std"] }
 pin-project = "0.4"
 
