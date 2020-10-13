@@ -6,7 +6,7 @@ Asynchronous WebSockets for [async-std](https://async.rs),
 
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Crates.io](https://img.shields.io/crates/v/async-tungstenite.svg?maxAge=2592000)](https://crates.io/crates/async-tungstenite)
-[![Build Status](https://travis-ci.org/sdroege/async-tungstenite.svg?branch=master)](https://travis-ci.org/sdroege/async-tungstenite)
+[![Build Status](https://github.com/sdroege/async-tungstenite/workflows/CI/badge.svg)](https://github.com/sdroege/async-tungstenite/actions?query=workflow%3ACI)
 
 [Documentation](https://docs.rs/async-tungstenite)
 
