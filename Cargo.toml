@@ -24,7 +24,7 @@ tokio-rustls = ["tokio-runtime", "real-tokio-rustls"]
 tokio-openssl = ["tokio-runtime", "real-tokio-openssl", "openssl"]
 
 [package.metadata.docs.rs]
-features = ["async-std-runtime", "tokio-runtime", "gio-runtime", "async-tls", "async-native-tls", "tokio-native-tls", "tokio-rustls"]
+features = ["async-std-runtime", "tokio-runtime", "gio-runtime", "async-tls", "async-native-tls", "tokio-native-tls"]
 
 [dependencies]
 log = "0.4"
