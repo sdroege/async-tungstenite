@@ -504,7 +504,11 @@ where
 /// Type alias for the stream type of the `client_async()` functions.
 pub type ClientStream<S> = AutoStream<S>;
 
-#[cfg(feature = "tokio-native-tls")]
+#[cfg(any(
+    feature = "tokio-native-tls",
+    feature = "tokio-rustls",
+    all(feature = "async-tls", not(feature = "tokio-openssl"))
+))]
 /// Creates a WebSocket handshake from a request and a stream,
 /// upgrading the stream to TLS if required.
 pub async fn client_async_tls<R, S>(
@@ -519,7 +523,11 @@ where
     client_async_tls_with_connector_and_config(request, stream, None, None).await
 }
 
-#[cfg(feature = "tokio-native-tls")]
+#[cfg(any(
+    feature = "tokio-native-tls",
+    feature = "tokio-rustls",
+    all(feature = "async-tls", not(feature = "tokio-openssl"))
+))]
 /// Creates a WebSocket handshake from a request and a stream,
 /// upgrading the stream to TLS if required and using the given
 /// WebSocket configuration.
@@ -536,7 +544,11 @@ where
     client_async_tls_with_connector_and_config(request, stream, None, config).await
 }
 
-#[cfg(feature = "tokio-native-tls")]
+#[cfg(any(
+    feature = "tokio-native-tls",
+    feature = "tokio-rustls",
+    all(feature = "async-tls", not(feature = "tokio-openssl"))
+))]
 /// Creates a WebSocket handshake from a request and a stream,
 /// upgrading the stream to TLS if required and using the given
 /// connector.
@@ -553,7 +565,10 @@ where
     client_async_tls_with_connector_and_config(request, stream, connector, None).await
 }
 
-#[cfg(all(feature = "tokio-openssl", not(feature = "tokio-native-tls")))]
+#[cfg(all(
+    feature = "tokio-openssl",
+    not(any(feature = "tokio-native-tls", feature = "tokio-rustls"))
+))]
 /// Creates a WebSocket handshake from a request and a stream,
 /// upgrading the stream to TLS if required.
 pub async fn client_async_tls<R, S>(
@@ -574,7 +589,10 @@ where
     client_async_tls_with_connector_and_config(request, stream, None, None).await
 }
 
-#[cfg(all(feature = "tokio-openssl", not(feature = "tokio-native-tls")))]
+#[cfg(all(
+    feature = "tokio-openssl",
+    not(any(feature = "tokio-native-tls", feature = "tokio-rustls"))
+))]
 /// Creates a WebSocket handshake from a request and a stream,
 /// upgrading the stream to TLS if required and using the given
 /// WebSocket configuration.
@@ -597,7 +615,10 @@ where
     client_async_tls_with_connector_and_config(request, stream, None, config).await
 }
 
-#[cfg(all(feature = "tokio-openssl", not(feature = "tokio-native-tls")))]
+#[cfg(all(
+    feature = "tokio-openssl",
+    not(any(feature = "tokio-native-tls", feature = "tokio-rustls"))
+))]
 /// Creates a WebSocket handshake from a request and a stream,
 /// upgrading the stream to TLS if required and using the given
 /// connector.
