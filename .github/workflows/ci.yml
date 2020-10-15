@@ -62,8 +62,8 @@ jobs:
       - name: Check gio-runtime, async-tls
         run: cargo check --features gio-runtime,async-tls
 
-      - name: Check async-std-runtime, async-tls, async-native-tls, tokio-runtime, tokio-native-tls, gio-runtime
-        run: cargo check --features async-std-runtime,async-tls,async-native-tls,tokio-runtime,tokio-native-tls,gio-runtime
+      - name: Check all features
+        run: cargo check --all-features
 
       - name: Test async-std-runtime
         run: cargo test --features async-std-runtime
