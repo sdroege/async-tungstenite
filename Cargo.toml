@@ -42,7 +42,7 @@ version = "1.0"
 
 [dependencies.real-tokio-openssl]
 optional = true
-version = "0.4"
+version = "0.5"
 package = "tokio-openssl"
 
 [dependencies.openssl]
@@ -66,17 +66,17 @@ package = "native-tls"
 
 [dependencies.tokio]
 optional = true
-version = "0.2"
-features = ["tcp", "dns"]
+version = "0.3"
+features = ["net"]
 
 [dependencies.real-tokio-native-tls]
 optional = true
-version = "0.1"
+version = "0.2"
 package = "tokio-native-tls"
 
 [dependencies.real-tokio-rustls]
 optional = true
-version = "^0.14"
+version = "^0.20"
 package = "tokio-rustls"
 
 [dependencies.webpki-roots]
