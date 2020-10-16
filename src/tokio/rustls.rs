@@ -1,6 +1,6 @@
 use real_tokio_rustls::rustls::ClientConfig;
 use real_tokio_rustls::webpki::DNSNameRef;
-use real_tokio_rustls::{client::TlsStream, TlsConnector as AsyncTlsConnector};
+use real_tokio_rustls::{client::TlsStream, TlsConnector};
 
 use tungstenite::client::{uri_mode, IntoClientRequest};
 use tungstenite::handshake::client::Request;
@@ -17,7 +17,7 @@ pub type MaybeTlsStream<S> = StreamSwitcher<TokioAdapter<S>, TokioAdapter<TlsStr
 
 pub type AutoStream<S> = MaybeTlsStream<S>;
 
-pub type Connector = AsyncTlsConnector;
+pub type Connector = TlsConnector;
 
 async fn wrap_stream<S>(
     socket: S,
@@ -39,7 +39,7 @@ where
                     config
                         .root_store
                         .add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
-                    AsyncTlsConnector::from(std::sync::Arc::new(config))
+                    TlsConnector::from(std::sync::Arc::new(config))
                 };
                 let domain = DNSNameRef::try_from_ascii_str(&domain)
                     .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
@@ -59,7 +59,7 @@ where
 pub async fn client_async_tls_with_connector_and_config<R, S>(
     request: R,
     stream: S,
-    connector: Option<AsyncTlsConnector>,
+    connector: Option<Connector>,
     config: Option<WebSocketConfig>,
 ) -> Result<(WebSocketStream<AutoStream<S>>, Response), Error>
 where

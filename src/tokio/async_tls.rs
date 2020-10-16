@@ -1,6 +1,19 @@
-use super::{Error, IntoClientRequest, Response, TokioAdapter, WebSocketConfig, WebSocketStream};
+use real_async_tls::client::TlsStream;
+use real_async_tls::TlsConnector;
+
+use tungstenite::client::IntoClientRequest;
+use tungstenite::Error;
+
 use crate::stream::Stream as StreamSwitcher;
-use std::marker::Unpin;
+use crate::{Response, WebSocketConfig, WebSocketStream};
+
+use super::TokioAdapter;
+
+pub type MaybeTlsStream<S> = StreamSwitcher<S, TlsStream<S>>;
+
+pub type AutoStream<S> = MaybeTlsStream<TokioAdapter<S>>;
+
+pub type Connector = TlsConnector;
 
 /// Creates a WebSocket handshake from a request and a stream,
 /// upgrading the stream to TLS if required and using the given
@@ -24,9 +37,3 @@ where
     )
     .await
 }
-
-pub type Connector = real_async_tls::TlsConnector;
-
-pub type MaybeTlsStream<S> = StreamSwitcher<S, real_async_tls::client::TlsStream<S>>;
-
-pub type AutoStream<S> = MaybeTlsStream<TokioAdapter<S>>;
