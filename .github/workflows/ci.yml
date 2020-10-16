@@ -3,6 +3,24 @@ name: CI
 on: [push, pull_request]
 
 jobs:
+  style:
+    name: Check style
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt
+          profile: minimal
+          override: true
+
+      - run: cargo fmt -- --check
+
   test:
     name: Test
     runs-on: ubuntu-latest

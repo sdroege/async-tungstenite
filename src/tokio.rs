@@ -13,9 +13,9 @@ use futures_io::{AsyncRead, AsyncWrite};
 
 #[cfg(all(feature = "tokio-rustls", not(feature = "tokio-native-tls")))]
 pub(crate) mod tokio_tls {
-    use real_tokio_rustls::{client::TlsStream, TlsConnector as AsyncTlsConnector};
     use real_tokio_rustls::rustls::ClientConfig;
     use real_tokio_rustls::webpki::DNSNameRef;
+    use real_tokio_rustls::{client::TlsStream, TlsConnector as AsyncTlsConnector};
 
     use tungstenite::client::{uri_mode, IntoClientRequest};
     use tungstenite::handshake::client::Request;
@@ -53,7 +53,8 @@ pub(crate) mod tokio_tls {
                         let config = ClientConfig::new();
                         AsyncTlsConnector::from(std::sync::Arc::new(config))
                     };
-                    let domain = DNSNameRef::try_from_ascii_str(&domain).map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+                    let domain = DNSNameRef::try_from_ascii_str(&domain)
+                        .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
                     connector
                         .connect(domain, socket)
                         .await
