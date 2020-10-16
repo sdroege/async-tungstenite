@@ -395,7 +395,11 @@ impl<T: tokio::io::AsyncRead> AsyncRead for TokioAdapter<T> {
         cx: &mut Context<'_>,
         buf: &mut [u8],
     ) -> Poll<std::io::Result<usize>> {
-        self.project().0.poll_read(cx, buf)
+        let mut buf = tokio::io::ReadBuf::new(buf);
+        match self.project().0.poll_read(cx, &mut buf)? {
+            Poll::Pending => Poll::Pending,
+            Poll::Ready(_) => Poll::Ready(Ok(buf.filled().len())),
+        }
     }
 }
 
@@ -421,9 +425,15 @@ impl<T: AsyncRead> tokio::io::AsyncRead for TokioAdapter<T> {
     fn poll_read(
         self: Pin<&mut Self>,
         cx: &mut Context<'_>,
-        buf: &mut [u8],
-    ) -> Poll<std::io::Result<usize>> {
-        self.project().0.poll_read(cx, buf)
+        buf: &mut tokio::io::ReadBuf<'_>,
+    ) -> Poll<std::io::Result<()>> {
+        let slice = buf.initialize_unfilled();
+        let n = match self.project().0.poll_read(cx, slice)? {
+            Poll::Pending => return Poll::Pending,
+            Poll::Ready(n) => n,
+        };
+        buf.advance(n);
+        Poll::Ready(Ok(()))
     }
 }
 
