@@ -50,7 +50,10 @@ pub(crate) mod tokio_tls {
                     let connector = if let Some(connector) = connector {
                         connector
                     } else {
-                        let config = ClientConfig::new();
+                        let mut config = ClientConfig::new();
+                        config
+                            .root_store
+                            .add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
                         AsyncTlsConnector::from(std::sync::Arc::new(config))
                     };
                     let domain = DNSNameRef::try_from_ascii_str(&domain)
