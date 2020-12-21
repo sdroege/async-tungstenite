@@ -51,7 +51,7 @@ version = "0.10"
 
 [dependencies.real-async-tls]
 optional = true
-version = "0.10"
+version = "0.11"
 package = "async-tls"
 
 [dependencies.real-async-native-tls]
