@@ -1,5 +1,4 @@
 use openssl::ssl::{ConnectConfiguration, SslConnector, SslMethod};
-use real_tokio_openssl::connect;
 use real_tokio_openssl::SslStream as TlsStream;
 
 use tungstenite::client::{uri_mode, IntoClientRequest};
@@ -47,8 +46,12 @@ where
                         .configure()
                         .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?
                 };
-                connect(connector, &domain, socket)
-                    .await
+
+                let ssl = connector
+                    .into_ssl(&domain)
+                    .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+
+                TlsStream::new(ssl, socket)
                     .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?
             };
             Ok(StreamSwitcher::Tls(TokioAdapter(stream)))

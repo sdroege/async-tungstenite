@@ -42,7 +42,7 @@ version = "1.0"
 
 [dependencies.real-tokio-openssl]
 optional = true
-version = "0.5"
+version = "0.6"
 package = "tokio-openssl"
 
 [dependencies.openssl]
@@ -66,17 +66,17 @@ package = "native-tls"
 
 [dependencies.tokio]
 optional = true
-version = "0.3"
+version = "1.0"
 features = ["net"]
 
 [dependencies.real-tokio-native-tls]
 optional = true
-version = "0.2"
+version = "0.3"
 package = "tokio-native-tls"
 
 [dependencies.real-tokio-rustls]
 optional = true
-version = "^0.20"
+version = "^0.22"
 package = "tokio-rustls"
 
 [dependencies.webpki-roots]
@@ -96,6 +96,7 @@ futures = "0.3"
 url = "2.0.0"
 env_logger = "0.8"
 async-std = { version = "1.0", features = ["attributes", "unstable"] }
+tokio = { version = "1.0", features = ["full"] }
 
 [[example]]
 name = "autobahn-client"
