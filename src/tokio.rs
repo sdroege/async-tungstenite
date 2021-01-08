@@ -103,7 +103,7 @@ where
     R: IntoClientRequest + Unpin,
     S: tokio::io::AsyncRead + tokio::io::AsyncWrite + Unpin,
 {
-    crate::client_async_with_config(request, TokioAdapter(stream), config).await
+    crate::client_async_with_config(request, TokioAdapter::new(stream), config).await
 }
 
 /// Accepts a new WebSocket connection with the provided stream.
@@ -163,7 +163,7 @@ where
     S: tokio::io::AsyncRead + tokio::io::AsyncWrite + Unpin,
     C: Callback + Unpin,
 {
-    crate::accept_hdr_async_with_config(TokioAdapter(stream), callback, config).await
+    crate::accept_hdr_async_with_config(TokioAdapter::new(stream), callback, config).await
 }
 
 /// Type alias for the stream type of the `client_async()` functions.
@@ -379,15 +379,30 @@ where
     client_async_tls_with_connector_and_config(request, socket, connector, config).await
 }
 
-use pin_project::pin_project;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-/// Adapter for `tokio::io::AsyncRead` and `tokio::io::AsyncWrite` to provide
-/// the variants from the `futures` crate and the other way around.
-#[pin_project]
-#[derive(Debug, Clone)]
-pub struct TokioAdapter<T>(#[pin] pub T);
+pin_project_lite::pin_project! {
+    /// Adapter for `tokio::io::AsyncRead` and `tokio::io::AsyncWrite` to provide
+    /// the variants from the `futures` crate and the other way around.
+    #[derive(Debug, Clone)]
+    pub struct TokioAdapter<T> {
+        #[pin]
+        inner: T,
+    }
+}
+
+impl<T> TokioAdapter<T> {
+    /// Creates a new `TokioAdapter` wrapping the provided value.
+    pub fn new(inner: T) -> Self {
+        Self { inner }
+    }
+
+    /// Consumes this `TokioAdapter`, returning the underlying value.
+    pub fn into_inner(self) -> T {
+        self.inner
+    }
+}
 
 impl<T: tokio::io::AsyncRead> AsyncRead for TokioAdapter<T> {
     fn poll_read(
@@ -396,7 +411,7 @@ impl<T: tokio::io::AsyncRead> AsyncRead for TokioAdapter<T> {
         buf: &mut [u8],
     ) -> Poll<std::io::Result<usize>> {
         let mut buf = tokio::io::ReadBuf::new(buf);
-        match self.project().0.poll_read(cx, &mut buf)? {
+        match self.project().inner.poll_read(cx, &mut buf)? {
             Poll::Pending => Poll::Pending,
             Poll::Ready(_) => Poll::Ready(Ok(buf.filled().len())),
         }
@@ -409,15 +424,15 @@ impl<T: tokio::io::AsyncWrite> AsyncWrite for TokioAdapter<T> {
         cx: &mut Context<'_>,
         buf: &[u8],
     ) -> Poll<Result<usize, std::io::Error>> {
-        self.project().0.poll_write(cx, buf)
+        self.project().inner.poll_write(cx, buf)
     }
 
     fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), std::io::Error>> {
-        self.project().0.poll_flush(cx)
+        self.project().inner.poll_flush(cx)
     }
 
     fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), std::io::Error>> {
-        self.project().0.poll_shutdown(cx)
+        self.project().inner.poll_shutdown(cx)
     }
 }
 
@@ -428,7 +443,7 @@ impl<T: AsyncRead> tokio::io::AsyncRead for TokioAdapter<T> {
         buf: &mut tokio::io::ReadBuf<'_>,
     ) -> Poll<std::io::Result<()>> {
         let slice = buf.initialize_unfilled();
-        let n = match self.project().0.poll_read(cx, slice)? {
+        let n = match self.project().inner.poll_read(cx, slice)? {
             Poll::Pending => return Poll::Pending,
             Poll::Ready(n) => n,
         };
@@ -443,17 +458,17 @@ impl<T: AsyncWrite> tokio::io::AsyncWrite for TokioAdapter<T> {
         cx: &mut Context<'_>,
         buf: &[u8],
     ) -> Poll<Result<usize, std::io::Error>> {
-        self.project().0.poll_write(cx, buf)
+        self.project().inner.poll_write(cx, buf)
     }
 
     fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), std::io::Error>> {
-        self.project().0.poll_flush(cx)
+        self.project().inner.poll_flush(cx)
     }
 
     fn poll_shutdown(
         self: Pin<&mut Self>,
         cx: &mut Context<'_>,
     ) -> Poll<Result<(), std::io::Error>> {
-        self.project().0.poll_close(cx)
+        self.project().inner.poll_close(cx)
     }
 }

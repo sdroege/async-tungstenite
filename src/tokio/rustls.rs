@@ -29,7 +29,7 @@ where
     S: 'static + tokio::io::AsyncRead + tokio::io::AsyncWrite + Unpin,
 {
     match mode {
-        Mode::Plain => Ok(StreamSwitcher::Plain(TokioAdapter(socket))),
+        Mode::Plain => Ok(StreamSwitcher::Plain(TokioAdapter::new(socket))),
         Mode::Tls => {
             let stream = {
                 let connector = if let Some(connector) = connector {
@@ -48,7 +48,7 @@ where
                     .await
                     .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?
             };
-            Ok(StreamSwitcher::Tls(TokioAdapter(stream)))
+            Ok(StreamSwitcher::Tls(TokioAdapter::new(stream)))
         }
     }
 }

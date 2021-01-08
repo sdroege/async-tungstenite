@@ -34,7 +34,7 @@ where
         + Sync,
 {
     match mode {
-        Mode::Plain => Ok(StreamSwitcher::Plain(TokioAdapter(socket))),
+        Mode::Plain => Ok(StreamSwitcher::Plain(TokioAdapter::new(socket))),
         Mode::Tls => {
             let stream = {
                 let connector = if let Some(connector) = connector {
@@ -54,7 +54,7 @@ where
                 TlsStream::new(ssl, socket)
                     .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?
             };
-            Ok(StreamSwitcher::Tls(TokioAdapter(stream)))
+            Ok(StreamSwitcher::Tls(TokioAdapter::new(stream)))
         }
     }
 }
