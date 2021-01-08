@@ -21,7 +21,7 @@ where
     S: 'static + tokio::io::AsyncRead + tokio::io::AsyncWrite + Unpin,
 {
     match mode {
-        Mode::Plain => Ok(TokioAdapter(socket)),
+        Mode::Plain => Ok(TokioAdapter::new(socket)),
         Mode::Tls => Err(Error::Url("TLS support not compiled in.".into())),
     }
 }
