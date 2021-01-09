@@ -81,7 +81,7 @@ package = "tokio-rustls"
 
 [dependencies.webpki-roots]
 optional = true
-version = "0.20"
+version = "0.21"
 
 [dependencies.gio]
 optional = true
