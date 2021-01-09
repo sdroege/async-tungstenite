@@ -4,7 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.11.0]
+## [0.12.0] - 2021-01-09
+### Changed
+- Updated tungstenite to version 0.12
+- Migrated from pin-project to pin-project-lite
+- `TokioAdapter` is now created via `TokioAdapter::new`
+
+## [0.11.0] - 2020-12-30
 ### Changed
 - Updated tokio to version 1.0
 - Updated async-tls to version 0.11
@@ -47,7 +53,8 @@ No changelog is available for older versions as of yet.
 -->
 
 
-[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.11.0...HEAD
+[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.12.0...HEAD
+[0.12.0]: https://github.com/sdroege/async-tungstenite/compare/0.12.0...0.11.0
 [0.11.0]: https://github.com/sdroege/async-tungstenite/compare/0.11.0...0.10.0
 [0.10.0]: https://github.com/sdroege/async-tungstenite/compare/0.10.0...0.9.3
 [0.9.3]: https://github.com/sdroege/async-tungstenite/compare/0.9.3...0.9.2
