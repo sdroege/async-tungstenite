@@ -8,7 +8,7 @@ license = "MIT"
 homepage = "https://github.com/sdroege/async-tungstenite"
 repository = "https://github.com/sdroege/async-tungstenite"
 documentation = "https://docs.rs/async-tungstenite"
-version = "0.12.0"
+version = "0.13.0"
 edition = "2018"
 readme = "README.md"
 
@@ -18,9 +18,9 @@ async-std-runtime = ["async-std"]
 tokio-runtime = ["tokio"]
 gio-runtime = ["gio", "glib"]
 async-tls = ["real-async-tls"]
-async-native-tls = ["async-std-runtime", "real-async-native-tls"]
-tokio-native-tls = ["tokio-runtime", "real-tokio-native-tls", "real-native-tls", "tungstenite/tls"]
-tokio-rustls = ["tokio-runtime", "real-tokio-rustls", "webpki-roots"]
+async-native-tls = ["async-std-runtime", "real-async-native-tls", "tungstenite/native-tls"]
+tokio-native-tls = ["tokio-runtime", "real-tokio-native-tls", "real-native-tls", "tungstenite/native-tls"]
+tokio-rustls = ["tokio-runtime", "real-tokio-rustls", "webpki-roots", "tungstenite/rustls-tls"]
 tokio-openssl = ["tokio-runtime", "real-tokio-openssl", "openssl"]
 
 [package.metadata.docs.rs]
@@ -33,7 +33,7 @@ futures-io = { version = "0.3", default-features = false, features = ["std"] }
 pin-project-lite = "0.2"
 
 [dependencies.tungstenite]
-version = "0.12.0"
+version = "0.13.0"
 default-features = false
 
 [dependencies.async-std]

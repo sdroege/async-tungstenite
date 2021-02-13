@@ -22,7 +22,9 @@ where
 {
     match mode {
         Mode::Plain => Ok(TokioAdapter::new(socket)),
-        Mode::Tls => Err(Error::Url("TLS support not compiled in.".into())),
+        Mode::Tls => Err(Error::Url(
+            tungstenite::error::UrlError::TlsFeatureNotEnabled,
+        )),
     }
 }
 

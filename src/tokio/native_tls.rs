@@ -34,13 +34,15 @@ where
                 let connector = if let Some(connector) = connector {
                     connector
                 } else {
-                    let connector = real_native_tls::TlsConnector::builder().build()?;
+                    let connector = real_native_tls::TlsConnector::builder()
+                        .build()
+                        .map_err(|err| Error::Tls(err.into()))?;
                     AsyncTlsConnector::from(connector)
                 };
                 connector
                     .connect(&domain, socket)
                     .await
-                    .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?
+                    .map_err(|err| Error::Tls(err.into()))?
             };
             Ok(StreamSwitcher::Tls(TokioAdapter::new(stream)))
         }

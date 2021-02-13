@@ -370,7 +370,9 @@ pub(crate) fn domain(
 ) -> Result<String, tungstenite::Error> {
     match request.uri().host() {
         Some(d) => Ok(d.to_string()),
-        None => Err(tungstenite::Error::Url("no host name in the url".into())),
+        None => Err(tungstenite::Error::Url(
+            tungstenite::error::UrlError::NoHostName,
+        )),
     }
 }
 
@@ -392,5 +394,5 @@ pub(crate) fn port(
             Some("ws") => Some(80),
             _ => None,
         })
-        .ok_or_else(|| tungstenite::Error::Url("Url scheme not supported".into()))
+        .ok_or_else(|| tungstenite::Error::Url(tungstenite::error::UrlError::UnsupportedUrlScheme))
 }
