@@ -42,11 +42,8 @@ where
                     TlsConnector::from(std::sync::Arc::new(config))
                 };
                 let domain = DNSNameRef::try_from_ascii_str(&domain)
-                    .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
-                connector
-                    .connect(domain, socket)
-                    .await
-                    .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?
+                    .map_err(|err| Error::Tls(err.into()))?;
+                connector.connect(domain, socket).await?
             };
             Ok(StreamSwitcher::Tls(TokioAdapter::new(stream)))
         }

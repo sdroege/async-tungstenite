@@ -58,7 +58,7 @@ pub(crate) mod async_native_tls {
                     connector
                         .connect(&domain, socket)
                         .await
-                        .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?
+                        .map_err(|err| Error::Tls(err.into()))?
                 };
                 Ok(StreamSwitcher::Tls(stream))
             }
@@ -116,7 +116,9 @@ pub(crate) mod dummy_tls {
     {
         match mode {
             Mode::Plain => Ok(socket),
-            Mode::Tls => Err(Error::Url("TLS support not compiled in.".into())),
+            Mode::Tls => Err(Error::Url(
+                tungstenite::error::UrlError::TlsFeatureNotEnabled,
+            )),
         }
     }
 
