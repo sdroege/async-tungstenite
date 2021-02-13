@@ -394,5 +394,7 @@ pub(crate) fn port(
             Some("ws") => Some(80),
             _ => None,
         })
-        .ok_or_else(|| tungstenite::Error::Url(tungstenite::error::UrlError::UnsupportedUrlScheme))
+        .ok_or(tungstenite::Error::Url(
+            tungstenite::error::UrlError::UnsupportedUrlScheme,
+        ))
 }

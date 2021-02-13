@@ -22,10 +22,7 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     println!("Sending: \"{}\"", text);
     ws_stream.send(Message::text(text)).await?;
 
-    let msg = ws_stream
-        .next()
-        .await
-        .ok_or_else(|| "didn't receive anything")??;
+    let msg = ws_stream.next().await.ok_or("didn't receive anything")??;
 
     println!("Received: {:?}", msg);
 
