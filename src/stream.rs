@@ -9,6 +9,7 @@ use std::task::{Context, Poll};
 use futures_io::{AsyncRead, AsyncWrite};
 
 /// Stream, either plain TCP or TLS.
+#[derive(Debug)]
 pub enum Stream<S, T> {
     /// Unencrypted socket stream.
     Plain(S),
