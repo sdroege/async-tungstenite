@@ -402,6 +402,16 @@ impl<T> TokioAdapter<T> {
     pub fn into_inner(self) -> T {
         self.inner
     }
+
+    /// Get a reference to the underlying value.
+    pub fn get_ref(&self) -> &T {
+        &self.inner
+    }
+
+    /// Get a mutable reference to the underlying value.
+    pub fn get_mut(&mut self) -> &mut T {
+        &mut self.inner
+    }
 }
 
 impl<T: tokio::io::AsyncRead> AsyncRead for TokioAdapter<T> {
