@@ -12,7 +12,8 @@ use crate::{client_async_with_config, domain, Response, WebSocketConfig, WebSock
 use super::TokioAdapter;
 
 /// A stream that might be protected with TLS.
-pub type MaybeTlsStream<S> = StreamSwitcher<TokioAdapter<S>, TokioAdapter<TlsStream<S>>>;
+pub type MaybeTlsStream<S> =
+    StreamSwitcher<TokioAdapter<S>, TokioAdapter<std::pin::Pin<Box<TlsStream<S>>>>>;
 
 pub type AutoStream<S> = MaybeTlsStream<S>;
 
@@ -40,7 +41,7 @@ where
                 let connector = if let Some(connector) = connector {
                     connector
                 } else {
-                    SslConnector::builder(SslMethod::tls_client())
+                    SslConnector::builder(SslMethod::tls())
                         .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?
                         .build()
                         .configure()
@@ -51,8 +52,18 @@ where
                     .into_ssl(&domain)
                     .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
 
-                TlsStream::new(ssl, socket)
-                    .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?
+                let mut stream = Box::pin(
+                    TlsStream::new(ssl, socket)
+                        .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?,
+                );
+
+                stream
+                    .as_mut()
+                    .connect()
+                    .await
+                    .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?;
+
+                stream
             };
             Ok(StreamSwitcher::Tls(TokioAdapter::new(stream)))
         }
