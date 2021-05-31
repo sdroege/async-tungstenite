@@ -15,13 +15,23 @@ use futures_io::{AsyncRead, AsyncWrite};
 #[path = "tokio/native_tls.rs"]
 mod tls;
 
-#[cfg(all(feature = "tokio-rustls", not(feature = "tokio-native-tls")))]
+#[cfg(all(
+    any(
+        feature = "tokio-rustls-native-certs",
+        feature = "tokio-rustls-webpki-roots"
+    ),
+    not(feature = "tokio-native-tls")
+))]
 #[path = "tokio/rustls.rs"]
 mod tls;
 
 #[cfg(all(
     feature = "tokio-openssl",
-    not(any(feature = "tokio-native-tls", feature = "tokio-rustls"))
+    not(any(
+        feature = "tokio-native-tls",
+        feature = "tokio-rustls-native-certs",
+        feature = "tokio-rustls-webpki-roots"
+    ))
 ))]
 #[path = "tokio/openssl.rs"]
 mod tls;
@@ -30,7 +40,8 @@ mod tls;
     feature = "async-tls",
     not(any(
         feature = "tokio-native-tls",
-        feature = "tokio-rustls",
+        feature = "tokio-rustls-native-certs",
+        feature = "tokio-rustls-webpki-roots",
         feature = "tokio-openssl"
     ))
 ))]
@@ -39,7 +50,8 @@ mod tls;
 
 #[cfg(not(any(
     feature = "tokio-native-tls",
-    feature = "tokio-rustls",
+    feature = "tokio-rustls-native-certs",
+    feature = "tokio-rustls-webpki-roots",
     feature = "tokio-openssl",
     feature = "async-tls"
 )))]
@@ -48,14 +60,16 @@ mod tls;
 
 #[cfg(any(
     feature = "tokio-native-tls",
-    feature = "tokio-rustls",
+    feature = "tokio-rustls-native-certs",
+    feature = "tokio-rustls-webpki-roots",
     feature = "tokio-openssl",
     feature = "async-tls",
 ))]
 pub use self::tls::client_async_tls_with_connector_and_config;
 #[cfg(any(
     feature = "tokio-native-tls",
-    feature = "tokio-rustls",
+    feature = "tokio-rustls-native-certs",
+    feature = "tokio-rustls-webpki-roots",
     feature = "tokio-openssl",
     feature = "async-tls"
 ))]
@@ -63,7 +77,8 @@ use self::tls::{AutoStream, Connector};
 
 #[cfg(not(any(
     feature = "tokio-native-tls",
-    feature = "tokio-rustls",
+    feature = "tokio-rustls-native-certs",
+    feature = "tokio-rustls-webpki-roots",
     feature = "tokio-openssl",
     feature = "async-tls"
 )))]
@@ -171,7 +186,8 @@ pub type ClientStream<S> = AutoStream<S>;
 
 #[cfg(any(
     feature = "tokio-native-tls",
-    feature = "tokio-rustls",
+    feature = "tokio-rustls-native-certs",
+    feature = "tokio-rustls-webpki-roots",
     all(feature = "async-tls", not(feature = "tokio-openssl"))
 ))]
 /// Creates a WebSocket handshake from a request and a stream,
@@ -190,7 +206,8 @@ where
 
 #[cfg(any(
     feature = "tokio-native-tls",
-    feature = "tokio-rustls",
+    feature = "tokio-rustls-native-certs",
+    feature = "tokio-rustls-webpki-roots",
     all(feature = "async-tls", not(feature = "tokio-openssl"))
 ))]
 /// Creates a WebSocket handshake from a request and a stream,
@@ -211,7 +228,8 @@ where
 
 #[cfg(any(
     feature = "tokio-native-tls",
-    feature = "tokio-rustls",
+    feature = "tokio-rustls-native-certs",
+    feature = "tokio-rustls-webpki-roots",
     all(feature = "async-tls", not(feature = "tokio-openssl"))
 ))]
 /// Creates a WebSocket handshake from a request and a stream,
@@ -232,7 +250,11 @@ where
 
 #[cfg(all(
     feature = "tokio-openssl",
-    not(any(feature = "tokio-native-tls", feature = "tokio-rustls"))
+    not(any(
+        feature = "tokio-native-tls",
+        feature = "tokio-rustls-native-certs",
+        feature = "tokio-rustls-webpki-roots"
+    ))
 ))]
 /// Creates a WebSocket handshake from a request and a stream,
 /// upgrading the stream to TLS if required.
@@ -256,7 +278,11 @@ where
 
 #[cfg(all(
     feature = "tokio-openssl",
-    not(any(feature = "tokio-native-tls", feature = "tokio-rustls"))
+    not(any(
+        feature = "tokio-native-tls",
+        feature = "tokio-rustls-native-certs",
+        feature = "tokio-rustls-webpki-roots"
+    ))
 ))]
 /// Creates a WebSocket handshake from a request and a stream,
 /// upgrading the stream to TLS if required and using the given
@@ -282,7 +308,11 @@ where
 
 #[cfg(all(
     feature = "tokio-openssl",
-    not(any(feature = "tokio-native-tls", feature = "tokio-rustls"))
+    not(any(
+        feature = "tokio-native-tls",
+        feature = "tokio-rustls-native-certs",
+        feature = "tokio-rustls-webpki-roots"
+    ))
 ))]
 /// Creates a WebSocket handshake from a request and a stream,
 /// upgrading the stream to TLS if required and using the given
@@ -340,7 +370,8 @@ where
 #[cfg(any(
     feature = "async-tls",
     feature = "tokio-native-tls",
-    feature = "tokio-rustls",
+    feature = "tokio-rustls-native-certs",
+    feature = "tokio-rustls-webpki-roots",
     feature = "tokio-openssl"
 ))]
 /// Connect to a given URL using the provided TLS connector.
@@ -357,7 +388,8 @@ where
 #[cfg(any(
     feature = "async-tls",
     feature = "tokio-native-tls",
-    feature = "tokio-rustls",
+    feature = "tokio-rustls-native-certs",
+    feature = "tokio-rustls-webpki-roots",
     feature = "tokio-openssl"
 ))]
 /// Connect to a given URL using the provided TLS connector.
