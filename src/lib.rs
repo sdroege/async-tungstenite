@@ -18,8 +18,14 @@
 //!    with the [tokio](https://tokio.rs) runtime.
 //!  * `tokio-native-tls`: Enables the additional functions in the `tokio` module to
 //!    implement TLS via [tokio-native-tls](https://crates.io/crates/tokio-native-tls).
-//!  * `tokio-rustls`: Enables the additional functions in the `tokio` module to
-//!    implement TLS via [tokio-rustls](https://crates.io/crates/tokio-rustls).
+//!  * `tokio-rustls-native-certs`: Enables the additional functions in the `tokio`
+//!    module to implement TLS via [tokio-rustls](https://crates.io/crates/tokio-rustls)
+//!    and uses native system certificates found with
+//!    [rustls-native-certs](https://github.com/rustls/rustls-native-certs).
+//!  * `tokio-rustls-webpki-roots`: Enables the additional functions in the `tokio`
+//!    module to implement TLS via [tokio-rustls](https://crates.io/crates/tokio-rustls)
+//!    and uses the certificates [webpki-roots](https://github.com/rustls/webpki-roots)
+//!    provides.
 //!  * `tokio-openssl`: Enables the additional functions in the `tokio` module to
 //!    implement TLS via [tokio-openssl](https://crates.io/crates/tokio-openssl).
 //!  * `gio-runtime`: Enables the `gio` module, which provides integration with
@@ -45,7 +51,8 @@ mod handshake;
     feature = "async-tls",
     feature = "async-native-tls",
     feature = "tokio-native-tls",
-    feature = "tokio-rustls",
+    feature = "tokio-rustls-native-certs",
+    feature = "tokio-rustls-webpki-roots",
     feature = "tokio-openssl",
 ))]
 pub mod stream;
