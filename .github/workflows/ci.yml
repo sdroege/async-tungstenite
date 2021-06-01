@@ -60,8 +60,11 @@ jobs:
       - name: Check tokio-runtime, tokio-native-tls
         run: cargo check --features tokio-runtime,tokio-native-tls
 
-      - name: Check tokio-runtime, tokio-rustls
-        run: cargo check --features tokio-runtime,tokio-rustls
+      - name: Check tokio-runtime, tokio-rustls-native-certs
+        run: cargo check --features tokio-runtime,tokio-rustls-native-certs
+
+      - name: Check tokio-runtime, tokio-rustls-webpki-roots
+        run: cargo check --features tokio-runtime,tokio-rustls-webpki-roots
 
       - name: Check tokio-runtime, tokio-openssl
         run: cargo check --features tokio-runtime,tokio-openssl
