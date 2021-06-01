@@ -41,7 +41,7 @@ where
                         config.root_store =
                             rustls_native_certs::load_native_certs().map_err(|(_, err)| err)?;
                     }
-                    #[cfg(all(feature = "tokio-rustls-webpki-roots", not(feature = "tokio-rustls-native-certs"))]
+                    #[cfg(all(feature = "tokio-rustls-webpki-roots", not(feature = "tokio-rustls-native-certs")))]
                     config
                         .root_store
                         .add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
