@@ -121,6 +121,7 @@ where
     where
         F: FnOnce(&mut Context<'_>, Pin<&mut S>) -> Poll<std::io::Result<R>>,
     {
+        #[cfg(not(feature = "no-verbose-logging"))]
         trace!("{}:{} AllowStd.with_context", file!(), line!());
         let waker = match kind {
             ContextWaker::Read => task::waker_ref(&self.read_waker_proxy),
@@ -144,8 +145,10 @@ where
     S: AsyncRead + Unpin,
 {
     fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+        #[cfg(not(feature = "no-verbose-logging"))]
         trace!("{}:{} Read.read", file!(), line!());
         match self.with_context(ContextWaker::Read, |ctx, stream| {
+            #[cfg(not(feature = "no-verbose-logging"))]
             trace!(
                 "{}:{} Read.with_context read -> poll_read",
                 file!(),
@@ -164,8 +167,10 @@ where
     S: AsyncWrite + Unpin,
 {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        #[cfg(not(feature = "no-verbose-logging"))]
         trace!("{}:{} Write.write", file!(), line!());
         match self.with_context(ContextWaker::Write, |ctx, stream| {
+            #[cfg(not(feature = "no-verbose-logging"))]
             trace!(
                 "{}:{} Write.with_context write -> poll_write",
                 file!(),
@@ -179,8 +184,10 @@ where
     }
 
     fn flush(&mut self) -> std::io::Result<()> {
+        #[cfg(not(feature = "no-verbose-logging"))]
         trace!("{}:{} Write.flush", file!(), line!());
         match self.with_context(ContextWaker::Write, |ctx, stream| {
+            #[cfg(not(feature = "no-verbose-logging"))]
             trace!(
                 "{}:{} Write.with_context flush -> poll_flush",
                 file!(),
@@ -198,6 +205,7 @@ pub(crate) fn cvt<T>(r: Result<T, WsError>) -> Poll<Result<T, WsError>> {
     match r {
         Ok(v) => Poll::Ready(Ok(v)),
         Err(WsError::Io(ref e)) if e.kind() == std::io::ErrorKind::WouldBlock => {
+            #[cfg(not(feature = "no-verbose-logging"))]
             trace!("WouldBlock");
             Poll::Pending
         }

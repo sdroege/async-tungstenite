@@ -23,6 +23,7 @@ tokio-native-tls = ["tokio-runtime", "real-tokio-native-tls", "real-native-tls",
 tokio-rustls-webpki-roots = ["tokio-runtime", "real-tokio-rustls", "webpki-roots", "tungstenite/rustls-tls"]
 tokio-rustls-native-certs = ["tokio-runtime", "real-tokio-rustls", "rustls-native-certs", "tungstenite/rustls-tls"]
 tokio-openssl = ["tokio-runtime", "real-tokio-openssl", "openssl"]
+no-verbose-logging = []
 
 [package.metadata.docs.rs]
 features = ["async-std-runtime", "tokio-runtime", "gio-runtime", "async-tls", "async-native-tls", "tokio-native-tls"]

@@ -260,6 +260,7 @@ impl<S> WebSocketStream<S> {
         F: FnOnce(&mut WebSocket<AllowStd<S>>) -> R,
         AllowStd<S>: Read + Write,
     {
+        #[cfg(not(feature = "no-verbose-logging"))]
         trace!("{}:{} WebSocketStream.with_context", file!(), line!());
         if let Some((kind, ctx)) = ctx {
             self.inner.get_mut().set_waker(kind, &ctx.waker());
@@ -305,8 +306,10 @@ where
     type Item = Result<Message, WsError>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        #[cfg(not(feature = "no-verbose-logging"))]
         trace!("{}:{} Stream.poll_next", file!(), line!());
         match futures_util::ready!(self.with_context(Some((ContextWaker::Read, cx)), |s| {
+            #[cfg(not(feature = "no-verbose-logging"))]
             trace!(
                 "{}:{} Stream.with_context poll_next -> read_message()",
                 file!(),
