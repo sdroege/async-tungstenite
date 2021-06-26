@@ -43,6 +43,7 @@ where
             .0
             .take()
             .expect("future polled after completion");
+        #[cfg(not(feature = "no-verbose-logging"))]
         trace!("Setting context when skipping handshake");
         let stream = AllowStd::new(inner.stream, ctx.waker());
 
@@ -129,6 +130,7 @@ where
 
     fn poll(mut self: Pin<&mut Self>, ctx: &mut Context<'_>) -> Poll<Self::Output> {
         let inner = self.0.take().expect("future polled after completion");
+        #[cfg(not(feature = "no-verbose-logging"))]
         trace!("Setting ctx when starting handshake");
         let stream = AllowStd::new(inner.stream, ctx.waker());
 
@@ -155,6 +157,7 @@ where
             .expect("future polled after completion");
 
         let machine = s.get_mut();
+        #[cfg(not(feature = "no-verbose-logging"))]
         trace!("Setting context in handshake");
         machine.get_mut().set_waker(cx.waker());
 
