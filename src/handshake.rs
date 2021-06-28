@@ -1,6 +1,7 @@
 use crate::compat::{AllowStd, SetWaker};
 use crate::WebSocketStream;
 use futures_io::{AsyncRead, AsyncWrite};
+#[allow(unused_imports)]
 use log::*;
 use std::future::Future;
 use std::io::{Read, Write};
@@ -43,6 +44,7 @@ where
             .0
             .take()
             .expect("future polled after completion");
+        #[cfg(feature = "verbose-logging")]
         trace!("Setting context when skipping handshake");
         let stream = AllowStd::new(inner.stream, ctx.waker());
 
@@ -129,6 +131,7 @@ where
 
     fn poll(mut self: Pin<&mut Self>, ctx: &mut Context<'_>) -> Poll<Self::Output> {
         let inner = self.0.take().expect("future polled after completion");
+        #[cfg(feature = "verbose-logging")]
         trace!("Setting ctx when starting handshake");
         let stream = AllowStd::new(inner.stream, ctx.waker());
 
@@ -155,6 +158,7 @@ where
             .expect("future polled after completion");
 
         let machine = s.get_mut();
+        #[cfg(feature = "verbose-logging")]
         trace!("Setting context in handshake");
         machine.get_mut().set_waker(cx.waker());
 
