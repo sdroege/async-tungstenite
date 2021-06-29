@@ -82,7 +82,15 @@ use self::tls::{AutoStream, Connector};
     feature = "tokio-openssl",
     feature = "async-tls"
 )))]
-use self::tls::{client_async_tls_with_connector_and_config, AutoStream};
+pub use self::tls::client_async_tls_with_connector_and_config;
+#[cfg(not(any(
+    feature = "tokio-native-tls",
+    feature = "tokio-rustls-native-certs",
+    feature = "tokio-rustls-webpki-roots",
+    feature = "tokio-openssl",
+    feature = "async-tls"
+)))]
+use self::tls::AutoStream;
 
 /// Creates a WebSocket handshake from a request and a stream.
 /// For convenience, the user may call this with a url string, a URL,
