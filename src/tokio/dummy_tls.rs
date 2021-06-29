@@ -28,7 +28,10 @@ where
     }
 }
 
-pub(crate) async fn client_async_tls_with_connector_and_config<R, S>(
+/// Creates a WebSocket handshake from a request and a stream,
+/// upgrading the stream to TLS if required and using the given
+/// connector and WebSocket configuration.
+pub async fn client_async_tls_with_connector_and_config<R, S>(
     request: R,
     stream: S,
     connector: Option<Connector>,

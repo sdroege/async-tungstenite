@@ -122,7 +122,10 @@ pub(crate) mod dummy_tls {
         }
     }
 
-    pub(crate) async fn client_async_tls_with_connector_and_config<R, S>(
+    /// Creates a WebSocket handshake from a request and a stream,
+    /// upgrading the stream to TLS if required and using the given
+    /// connector and WebSocket configuration.
+    pub async fn client_async_tls_with_connector_and_config<R, S>(
         request: R,
         stream: S,
         connector: Option<Connector>,
@@ -146,15 +149,21 @@ pub(crate) mod dummy_tls {
 }
 
 #[cfg(not(any(feature = "async-tls", feature = "async-native-tls")))]
-use self::dummy_tls::{client_async_tls_with_connector_and_config, AutoStream};
+pub use self::dummy_tls::client_async_tls_with_connector_and_config;
+#[cfg(not(any(feature = "async-tls", feature = "async-native-tls")))]
+use self::dummy_tls::AutoStream;
 
 #[cfg(all(feature = "async-tls", not(feature = "async-native-tls")))]
-use crate::async_tls::{client_async_tls_with_connector_and_config, AutoStream};
+pub use crate::async_tls::client_async_tls_with_connector_and_config;
+#[cfg(all(feature = "async-tls", not(feature = "async-native-tls")))]
+use crate::async_tls::AutoStream;
 #[cfg(all(feature = "async-tls", not(feature = "async-native-tls")))]
 type Connector = real_async_tls::TlsConnector;
 
 #[cfg(feature = "async-native-tls")]
-use self::async_native_tls::{client_async_tls_with_connector_and_config, AutoStream, Connector};
+pub use self::async_native_tls::client_async_tls_with_connector_and_config;
+#[cfg(feature = "async-native-tls")]
+use self::async_native_tls::{AutoStream, Connector};
 
 /// Type alias for the stream type of the `client_async()` functions.
 pub type ClientStream<S> = AutoStream<S>;
