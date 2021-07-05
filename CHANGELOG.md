@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0] - 2021-07-05
+### Changed
+- Remove `tokio-rustls` feature and replace with `tokio-rustls-webpki-roots`
+  and `tokio-rustls-native-certs` features that allow selecting the
+  certificate checking backend.
+- Add `verbose-logging` feature that enables more verbose logging via the
+  `log` crate, which was enabled by default before.
+
+### Added
+- Make `client_async_tls_with_connector_and_config()` a public function to
+  allow creating a WebSocket connection from a `Stream`.
+
 ## [0.13.1] - 2021-03-23
 ### Fixed
 - The connect API using the `tokio-openssl` TLS implementation was broken in
@@ -66,7 +78,10 @@ No changelog is available for older versions as of yet.
 -->
 
 
-[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.12.0...HEAD
+[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.14.0...HEAD
+[0.14.0]: https://github.com/sdroege/async-tungstenite/compare/0.14.0...0.13.1
+[0.13.1]: https://github.com/sdroege/async-tungstenite/compare/0.13.1...0.13.0
+[0.13.0]: https://github.com/sdroege/async-tungstenite/compare/0.13.0...0.12.0
 [0.12.0]: https://github.com/sdroege/async-tungstenite/compare/0.12.0...0.11.0
 [0.11.0]: https://github.com/sdroege/async-tungstenite/compare/0.11.0...0.10.0
 [0.10.0]: https://github.com/sdroege/async-tungstenite/compare/0.10.0...0.9.3
