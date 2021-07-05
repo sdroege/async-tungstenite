@@ -76,12 +76,14 @@ impl<T: IsA<gio::IOStream>> IOStreamAsyncReadWrite<T> {
     fn new(stream: T) -> Result<IOStreamAsyncReadWrite<T>, T> {
         let write = stream
             .output_stream()
-            .dynamic_cast::<gio::PollableOutputStream>().ok()
+            .dynamic_cast::<gio::PollableOutputStream>()
+            .ok()
             .and_then(|s| s.into_async_write().ok());
 
         let read = stream
             .input_stream()
-            .dynamic_cast::<gio::PollableInputStream>().ok()
+            .dynamic_cast::<gio::PollableInputStream>()
+            .ok()
             .and_then(|s| s.into_async_read().ok());
 
         let (read, write) = match (read, write) {
