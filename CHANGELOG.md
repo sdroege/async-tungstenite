@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   certificate checking backend.
 - Add `verbose-logging` feature that enables more verbose logging via the
   `log` crate, which was enabled by default before.
+- Update `gio-runtime` feature to glib/gio 0.14.
 
 ### Added
 - Make `client_async_tls_with_connector_and_config()` a public function to
