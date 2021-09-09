@@ -21,8 +21,8 @@ gio-runtime = ["gio", "glib"]
 async-tls = ["real-async-tls"]
 async-native-tls = ["async-std-runtime", "real-async-native-tls", "tungstenite/native-tls"]
 tokio-native-tls = ["tokio-runtime", "real-tokio-native-tls", "real-native-tls", "tungstenite/native-tls"]
-tokio-rustls-webpki-roots = ["tokio-runtime", "real-tokio-rustls", "webpki-roots", "tungstenite/rustls-tls"]
-tokio-rustls-native-certs = ["tokio-runtime", "real-tokio-rustls", "rustls-native-certs", "tungstenite/rustls-tls"]
+tokio-rustls-webpki-roots = ["tokio-runtime", "real-tokio-rustls", "webpki-roots", "tungstenite/__rustls-tls"]
+tokio-rustls-native-certs = ["tokio-runtime", "real-tokio-rustls", "rustls-native-certs", "tungstenite/__rustls-tls"]
 tokio-openssl = ["tokio-runtime", "real-tokio-openssl", "openssl"]
 verbose-logging = []
 
@@ -36,7 +36,7 @@ futures-io = { version = "0.3", default-features = false, features = ["std"] }
 pin-project-lite = "0.2"
 
 [dependencies.tungstenite]
-version = "0.14.0"
+version = "0.15.0"
 default-features = false
 
 [dependencies.async-std]

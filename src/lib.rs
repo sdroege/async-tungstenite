@@ -78,7 +78,6 @@ use tungstenite::{
         HandshakeError,
     },
     protocol::{Message, Role, WebSocket, WebSocketConfig},
-    server,
 };
 
 #[cfg(feature = "async-std-runtime")]
@@ -195,7 +194,7 @@ where
     C: Callback + Unpin,
 {
     let f = handshake::server_handshake(stream, move |allow_std| {
-        server::accept_hdr_with_config(allow_std, callback, config)
+        tungstenite::accept_hdr_with_config(allow_std, callback, config)
     });
     f.await.map_err(|e| match e {
         HandshakeError::Failure(e) => e,
