@@ -8,7 +8,7 @@ license = "MIT"
 homepage = "https://github.com/sdroege/async-tungstenite"
 repository = "https://github.com/sdroege/async-tungstenite"
 documentation = "https://docs.rs/async-tungstenite"
-version = "0.15.0"
+version = "0.16.0"
 edition = "2018"
 readme = "README.md"
 include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
@@ -36,7 +36,7 @@ futures-io = { version = "0.3", default-features = false, features = ["std"] }
 pin-project-lite = "0.2"
 
 [dependencies.tungstenite]
-version = "0.15.0"
+version = "0.16.0"
 default-features = false
 
 [dependencies.async-std]
@@ -79,16 +79,16 @@ package = "tokio-native-tls"
 
 [dependencies.real-tokio-rustls]
 optional = true
-version = "^0.22"
+version = "0.23"
 package = "tokio-rustls"
 
 [dependencies.rustls-native-certs]
 optional = true
-version = "0.5"
+version = "0.6"
 
 [dependencies.webpki-roots]
 optional = true
-version = "0.21"
+version = "0.22"
 
 [dependencies.gio]
 optional = true

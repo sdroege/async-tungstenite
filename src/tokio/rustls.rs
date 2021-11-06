@@ -1,11 +1,13 @@
-use real_tokio_rustls::rustls::ClientConfig;
-use real_tokio_rustls::webpki::DNSNameRef;
+use real_tokio_rustls::rustls::{ClientConfig, RootCertStore, ServerName};
 use real_tokio_rustls::{client::TlsStream, TlsConnector};
 
 use tungstenite::client::{uri_mode, IntoClientRequest};
+use tungstenite::error::TlsError;
 use tungstenite::handshake::client::Request;
 use tungstenite::stream::Mode;
 use tungstenite::Error;
+
+use std::convert::TryFrom;
 
 use crate::stream::Stream as StreamSwitcher;
 use crate::{client_async_with_config, domain, Response, WebSocketConfig, WebSocketStream};
@@ -35,23 +37,43 @@ where
                 let connector = if let Some(connector) = connector {
                     connector
                 } else {
-                    let mut config = ClientConfig::new();
+                    let mut root_store = RootCertStore::empty();
                     #[cfg(feature = "tokio-rustls-native-certs")]
                     {
-                        config.root_store =
-                            rustls_native_certs::load_native_certs().map_err(|(_, err)| err)?;
+                        use real_tokio_rustls::rustls::Certificate;
+
+                        for cert in rustls_native_certs::load_native_certs()? {
+                            root_store
+                                .add(&Certificate(cert.0))
+                                .map_err(TlsError::Webpki)?;
+                        }
                     }
                     #[cfg(all(
                         feature = "tokio-rustls-webpki-roots",
                         not(feature = "tokio-rustls-native-certs")
                     ))]
-                    config
-                        .root_store
-                        .add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
-                    TlsConnector::from(std::sync::Arc::new(config))
+                    {
+                        use real_tokio_rustls::rustls::OwnedTrustAnchor;
+
+                        root_store.add_server_trust_anchors(
+                            webpki_roots::TLS_SERVER_ROOTS.0.iter().map(|ta| {
+                                OwnedTrustAnchor::from_subject_spki_name_constraints(
+                                    ta.subject,
+                                    ta.spki,
+                                    ta.name_constraints,
+                                )
+                            }),
+                        );
+                    }
+                    TlsConnector::from(std::sync::Arc::new(
+                        ClientConfig::builder()
+                            .with_safe_defaults()
+                            .with_root_certificates(root_store)
+                            .with_no_client_auth(),
+                    ))
                 };
-                let domain = DNSNameRef::try_from_ascii_str(&domain)
-                    .map_err(|err| Error::Tls(err.into()))?;
+                let domain = ServerName::try_from(domain.as_str())
+                    .map_err(|_| Error::Tls(TlsError::InvalidDnsName))?;
                 connector.connect(domain, socket).await?
             };
             Ok(StreamSwitcher::Tls(TokioAdapter::new(stream)))
