@@ -8,7 +8,7 @@ license = "MIT"
 homepage = "https://github.com/sdroege/async-tungstenite"
 repository = "https://github.com/sdroege/async-tungstenite"
 documentation = "https://docs.rs/async-tungstenite"
-version = "0.16.1"
+version = "0.17.0"
 edition = "2018"
 readme = "README.md"
 include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
@@ -36,7 +36,7 @@ futures-io = { version = "0.3", default-features = false, features = ["std"] }
 pin-project-lite = "0.2"
 
 [dependencies.tungstenite]
-version = "0.16.0"
+version = "0.17.0"
 default-features = false
 
 [dependencies.async-std]
@@ -59,7 +59,7 @@ package = "async-tls"
 
 [dependencies.real-async-native-tls]
 optional = true
-version = "0.3.0"
+version = "0.4.0"
 package = "async-native-tls"
 
 [dependencies.real-native-tls]
@@ -92,11 +92,11 @@ version = "0.22"
 
 [dependencies.gio]
 optional = true
-version = "0.14"
+version = "0.15"
 
 [dependencies.glib]
 optional = true
-version = "0.14"
+version = "0.15"
 
 [dev-dependencies]
 futures = "0.3"
