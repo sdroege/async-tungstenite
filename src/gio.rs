@@ -52,7 +52,7 @@ where
     let connectable = gio::NetworkAddress::new(domain.as_str(), port);
 
     let socket = client
-        .connect_async_future(&connectable)
+        .connect_future(&connectable)
         .await
         .map_err(to_std_io_error)?;
     let socket = IOStreamAsyncReadWrite::new(socket)
@@ -64,6 +64,7 @@ where
 /// Adapter for `gio::IOStream` to provide `AsyncRead` and `AsyncWrite`.
 #[derive(Debug)]
 pub struct IOStreamAsyncReadWrite<T: IsA<gio::IOStream>> {
+    #[allow(dead_code)]
     io_stream: T,
     read: gio::InputStreamAsyncRead<gio::PollableInputStream>,
     write: gio::OutputStreamAsyncWrite<gio::PollableOutputStream>,
