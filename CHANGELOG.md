@@ -4,7 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.17.0] - 2022-17-07
+## [0.17.1] - 2022-03-01
+### Fixed
+- Fix `poll_close` returning WouldBlock error kind.
+- Fix a couple of minor clippy warnings.
+
+## [0.17.0] - 2022-02-17
 ### Changed
 - Update to tungstenite 0.17.
 - Update to gio/glib 0.15.
@@ -101,7 +106,10 @@ No changelog is available for older versions as of yet.
 -->
 
 
-[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.16.0...HEAD
+[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.17.1...HEAD
+[0.17.1]: https://github.com/sdroege/async-tungstenite/compare/0.17.1...0.17.0
+[0.17.0]: https://github.com/sdroege/async-tungstenite/compare/0.17.0...0.16.1
+[0.16.1]: https://github.com/sdroege/async-tungstenite/compare/0.16.1...0.16.0
 [0.16.0]: https://github.com/sdroege/async-tungstenite/compare/0.16.0...0.15.0
 [0.15.0]: https://github.com/sdroege/async-tungstenite/compare/0.15.0...0.14.0
 [0.14.0]: https://github.com/sdroege/async-tungstenite/compare/0.14.0...0.13.1
