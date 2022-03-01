@@ -266,7 +266,7 @@ impl<S> WebSocketStream<S> {
         #[cfg(feature = "verbose-logging")]
         trace!("{}:{} WebSocketStream.with_context", file!(), line!());
         if let Some((kind, ctx)) = ctx {
-            self.inner.get_mut().set_waker(kind, &ctx.waker());
+            self.inner.get_mut().set_waker(kind, ctx.waker());
         }
         f(&mut self.inner)
     }
@@ -276,7 +276,7 @@ impl<S> WebSocketStream<S> {
     where
         S: AsyncRead + AsyncWrite + Unpin,
     {
-        &self.inner.get_ref().get_ref()
+        self.inner.get_ref().get_ref()
     }
 
     /// Returns a mutable reference to the inner stream.
@@ -418,7 +418,9 @@ pub(crate) fn domain(
 
             host.to_owned()
         })
-        .ok_or_else(|| tungstenite::Error::Url(tungstenite::error::UrlError::NoHostName))
+        .ok_or(tungstenite::Error::Url(
+            tungstenite::error::UrlError::NoHostName,
+        ))
 }
 
 #[cfg(any(
