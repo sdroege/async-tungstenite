@@ -104,6 +104,8 @@ url = "2.0.0"
 env_logger = "0.9"
 async-std = { version = "1.0", features = ["attributes", "unstable"] }
 tokio = { version = "1.0", features = ["full"] }
+futures-channel = "0.3"
+hyper = { version = "0.14", default-features = false, features = ["http1", "server", "tcp"] }
 
 [[example]]
 name = "autobahn-client"
@@ -139,4 +141,8 @@ required-features = ["gio-runtime"]
 
 [[example]]
 name = "tokio-echo"
+required-features = ["tokio-runtime"]
+
+[[example]]
+name = "server-custom-accept"
 required-features = ["tokio-runtime"]
