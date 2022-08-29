@@ -1,4 +1,6 @@
-use crate::compat::{AllowStd, SetWaker};
+use crate::compat::AllowStd;
+#[cfg(feature = "handshake")]
+use crate::compat::SetWaker;
 use crate::WebSocketStream;
 use futures_io::{AsyncRead, AsyncWrite};
 #[allow(unused_imports)]
@@ -7,10 +9,15 @@ use std::future::Future;
 use std::io::{Read, Write};
 use std::pin::Pin;
 use std::task::{Context, Poll};
-use tungstenite::handshake::client::Response;
-use tungstenite::handshake::server::Callback;
-use tungstenite::handshake::{HandshakeError as Error, HandshakeRole, MidHandshake as WsHandshake};
-use tungstenite::{ClientHandshake, ServerHandshake, WebSocket};
+use tungstenite::WebSocket;
+#[cfg(feature = "handshake")]
+use tungstenite::{
+    handshake::{
+        client::Response, server::Callback, HandshakeError as Error, HandshakeRole,
+        MidHandshake as WsHandshake,
+    },
+    ClientHandshake, ServerHandshake,
+};
 
 pub(crate) async fn without_handshake<F, S>(stream: S, f: F) -> WebSocketStream<S>
 where
@@ -52,19 +59,24 @@ where
     }
 }
 
+#[cfg(feature = "handshake")]
 struct MidHandshake<Role: HandshakeRole>(Option<WsHandshake<Role>>);
 
+#[cfg(feature = "handshake")]
 enum StartedHandshake<Role: HandshakeRole> {
     Done(Role::FinalResult),
     Mid(WsHandshake<Role>),
 }
 
+#[cfg(feature = "handshake")]
 struct StartedHandshakeFuture<F, S>(Option<StartedHandshakeFutureInner<F, S>>);
+#[cfg(feature = "handshake")]
 struct StartedHandshakeFutureInner<F, S> {
     f: F,
     stream: S,
 }
 
+#[cfg(feature = "handshake")]
 async fn handshake<Role, F, S>(stream: S, f: F) -> Result<Role::FinalResult, Error<Role>>
 where
     Role: HandshakeRole + Unpin,
@@ -83,6 +95,7 @@ where
     }
 }
 
+#[cfg(feature = "handshake")]
 pub(crate) async fn client_handshake<F, S>(
     stream: S,
     f: F,
@@ -101,6 +114,7 @@ where
     Ok((WebSocketStream::new(s), r))
 }
 
+#[cfg(feature = "handshake")]
 pub(crate) async fn server_handshake<C, F, S>(
     stream: S,
     f: F,
@@ -119,6 +133,7 @@ where
     Ok(WebSocketStream::new(s))
 }
 
+#[cfg(feature = "handshake")]
 impl<Role, F, S> Future for StartedHandshakeFuture<F, S>
 where
     Role: HandshakeRole,
@@ -143,6 +158,7 @@ where
     }
 }
 
+#[cfg(feature = "handshake")]
 impl<Role> Future for MidHandshake<Role>
 where
     Role: HandshakeRole + Unpin,

@@ -14,11 +14,12 @@ readme = "README.md"
 include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
 
 [features]
-default = []
-async-std-runtime = ["async-std"]
-tokio-runtime = ["tokio"]
-gio-runtime = ["gio", "glib"]
-async-tls = ["real-async-tls"]
+default = ["handshake"]
+handshake = ["tungstenite/handshake"]
+async-std-runtime = ["async-std", "handshake"]
+tokio-runtime = ["tokio", "handshake"]
+gio-runtime = ["gio", "glib", "handshake"]
+async-tls = ["real-async-tls", "handshake"]
 async-native-tls = ["async-std-runtime", "real-async-native-tls", "tungstenite/native-tls"]
 tokio-native-tls = ["tokio-runtime", "real-tokio-native-tls", "real-native-tls", "tungstenite/native-tls"]
 tokio-rustls-webpki-roots = ["tokio-runtime", "real-tokio-rustls", "webpki-roots", "tungstenite/__rustls-tls"]
@@ -36,7 +37,7 @@ futures-io = { version = "0.3", default-features = false, features = ["std"] }
 pin-project-lite = "0.2"
 
 [dependencies.tungstenite]
-version = "0.17.0"
+version = "0.18"
 default-features = false
 
 [dependencies.async-std]
