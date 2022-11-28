@@ -1,3 +1,5 @@
+#![cfg(feature = "handshake")]
+
 use async_std::net::{TcpListener, TcpStream};
 use async_std::task;
 use async_tungstenite::{accept_async, client_async, WebSocketStream};
