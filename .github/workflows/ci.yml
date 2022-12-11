@@ -45,6 +45,9 @@ jobs:
       - name: Check default-features
         run: cargo check
 
+      - name: Check no default-features
+        run: cargo check --no-default-features
+
       - name: Check async-tls
         run: cargo check --features async-tls
 
