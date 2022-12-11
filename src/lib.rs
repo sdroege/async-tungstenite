@@ -486,6 +486,7 @@ mod tests {
         assert_eq!(crate::domain(&request).unwrap(), "::1");
     }
 
+    #[cfg(feature = "handshake")]
     #[test]
     fn requests_cannot_contain_invalid_uris() {
         use tungstenite::client::IntoClientRequest;
