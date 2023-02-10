@@ -55,7 +55,7 @@ version = "0.10"
 
 [dependencies.real-async-tls]
 optional = true
-version = "0.11"
+version = "0.12"
 package = "async-tls"
 
 [dependencies.real-async-native-tls]
@@ -93,16 +93,16 @@ version = "0.22"
 
 [dependencies.gio]
 optional = true
-version = "0.16"
+version = "0.17"
 
 [dependencies.glib]
 optional = true
-version = "0.16"
+version = "0.17"
 
 [dev-dependencies]
 futures = "0.3"
 url = "2.0.0"
-env_logger = "0.9"
+env_logger = "0.10"
 async-std = { version = "1.0", features = ["attributes", "unstable"] }
 tokio = { version = "1.0", features = ["full"] }
 futures-channel = "0.3"
