@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.20.0] - 2023-02-10
+### Changed
+- Update to gio/glib 0.17.
+- Update to async-tls 0.12 and env-logger 0.10.
+
 ## [0.19.0] - 2022-12-11
 ### Changed
 - Update to tungstenite 0.18 and make the "handshake" feature optional but
