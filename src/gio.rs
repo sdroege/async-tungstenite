@@ -9,6 +9,7 @@ use futures_io::{AsyncRead, AsyncWrite};
 
 use tungstenite::client::{uri_mode, IntoClientRequest};
 use tungstenite::handshake::client::Request;
+use tungstenite::handshake::server::{Callback, NoCallback};
 use tungstenite::stream::Mode;
 
 use crate::{client_async_with_config, domain, port, Response, WebSocketConfig, WebSocketStream};
@@ -59,6 +60,69 @@ where
         .map_err(|_| io::Error::new(io::ErrorKind::Other, "Unsupported gio::IOStream"))?;
 
     client_async_with_config(request, socket, config).await
+}
+
+/// Accepts a new WebSocket connection with the provided stream.
+///
+/// This function will internally call `server::accept` to create a
+/// handshake representation and returns a future representing the
+/// resolution of the WebSocket handshake. The returned future will resolve
+/// to either `WebSocketStream<S>` or `Error` depending if it's successful
+/// or not.
+///
+/// This is typically used after a socket has been accepted from a
+/// `TcpListener`. That socket is then passed to this function to perform
+/// the server half of the accepting a client's websocket connection.
+pub async fn accept_async<S>(stream: S) -> Result<WebSocketStream<IOStreamAsyncReadWrite<S>>, Error>
+where
+    S: IsA<gio::IOStream> + Unpin,
+{
+    accept_hdr_async(stream, NoCallback).await
+}
+
+/// The same as `accept_async()` but the one can specify a websocket configuration.
+/// Please refer to `accept_async()` for more details.
+pub async fn accept_async_with_config<S>(
+    stream: S,
+    config: Option<WebSocketConfig>,
+) -> Result<WebSocketStream<IOStreamAsyncReadWrite<S>>, Error>
+where
+    S: IsA<gio::IOStream> + Unpin,
+{
+    accept_hdr_async_with_config(stream, NoCallback, config).await
+}
+
+/// Accepts a new WebSocket connection with the provided stream.
+///
+/// This function does the same as `accept_async()` but accepts an extra callback
+/// for header processing. The callback receives headers of the incoming
+/// requests and is able to add extra headers to the reply.
+pub async fn accept_hdr_async<S, C>(
+    stream: S,
+    callback: C,
+) -> Result<WebSocketStream<IOStreamAsyncReadWrite<S>>, Error>
+where
+    S: IsA<gio::IOStream> + Unpin,
+    C: Callback + Unpin,
+{
+    accept_hdr_async_with_config(stream, callback, None).await
+}
+
+/// The same as `accept_hdr_async()` but the one can specify a websocket configuration.
+/// Please refer to `accept_hdr_async()` for more details.
+pub async fn accept_hdr_async_with_config<S, C>(
+    stream: S,
+    callback: C,
+    config: Option<WebSocketConfig>,
+) -> Result<WebSocketStream<IOStreamAsyncReadWrite<S>>, Error>
+where
+    S: IsA<gio::IOStream> + Unpin,
+    C: Callback + Unpin,
+{
+    let stream = IOStreamAsyncReadWrite::new(stream)
+        .map_err(|_| io::Error::new(io::ErrorKind::Other, "Unsupported gio::IOStream"))?;
+
+    crate::accept_hdr_async_with_config(stream, callback, config).await
 }
 
 /// Adapter for `gio::IOStream` to provide `AsyncRead` and `AsyncWrite`.
