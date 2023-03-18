@@ -137,6 +137,10 @@ name = "echo-server"
 required-features = ["async-std-runtime"]
 
 [[example]]
+name = "server-headers"
+required-features = ["async-std-runtime", "handshake"]
+
+[[example]]
 name = "interval-server"
 required-features = ["async-std-runtime"]
 
