@@ -5,4 +5,5 @@ Examples
 * [client.rs](https://github.com/sdroege/async-tungstenite/blob/master/examples/client.rs)
 * [echo-server.rs](https://github.com/sdroege/async-tungstenite/blob/master/examples/echo-server.rs)
 * [server.rs](https://github.com/sdroege/async-tungstenite/blob/master/examples/server.rs)
+* [server-headers.rs](https://github.com/sdroege/async-tungstenite/blob/master/examples/server-headers.rs)
 * [interval-server.rs](https://github.com/sdroege/async-tungstenite/blob/master/examples/interval-server.rs)
