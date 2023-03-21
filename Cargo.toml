@@ -141,6 +141,10 @@ name = "gio-echo"
 required-features = ["gio-runtime"]
 
 [[example]]
+name = "gio-echo-server"
+required-features = ["gio-runtime"]
+
+[[example]]
 name = "tokio-echo"
 required-features = ["tokio-runtime"]
 
