@@ -15,6 +15,8 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Received: {:?}", msg);
 
+    ws_stream.close(None).await.expect("error sending close");
+
     Ok(())
 }
 
