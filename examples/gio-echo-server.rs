@@ -1,14 +1,10 @@
 use std::{env, net::SocketAddr};
 
-use async_tungstenite::{
-    gio::accept_async,
-    tungstenite::{Error, Result},
-};
+use async_tungstenite::{gio::accept_async, tungstenite::Result};
 use futures::prelude::*;
 use gio::{
     prelude::*, InetSocketAddress, SocketConnection, SocketProtocol, SocketService, SocketType,
 };
-use log::info;
 
 async fn accept_connection(stream: SocketConnection) -> Result<()> {
     let addr = stream
@@ -52,7 +48,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     service.connect_incoming(|_service, connection, _| {
         let stream = connection.clone();
         glib::MainContext::default().spawn_local(async move {
-            accept_connection(stream).await;
+            accept_connection(stream).await.unwrap();
         });
         false
     });
