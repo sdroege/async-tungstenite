@@ -80,7 +80,7 @@ package = "tokio-native-tls"
 
 [dependencies.real-tokio-rustls]
 optional = true
-version = "0.23"
+version = "0.24"
 package = "tokio-rustls"
 
 [dependencies.rustls-native-certs]
