@@ -45,7 +45,7 @@ where
                         for cert in rustls_native_certs::load_native_certs()? {
                             root_store
                                 .add(&Certificate(cert.0))
-                                .map_err(TlsError::Webpki)?;
+                                .map_err(TlsError::Rustls)?;
                         }
                     }
                     #[cfg(all(
