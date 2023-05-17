@@ -51,6 +51,7 @@ mod handshake;
     feature = "async-tls",
     feature = "async-native-tls",
     feature = "tokio-native-tls",
+    feature = "tokio-rustls-manual-roots",
     feature = "tokio-rustls-native-certs",
     feature = "tokio-rustls-webpki-roots",
     feature = "tokio-openssl",
