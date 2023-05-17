@@ -70,6 +70,9 @@ jobs:
       - name: Check tokio-runtime, tokio-rustls-webpki-roots
         run: cargo check --features tokio-runtime,tokio-rustls-webpki-roots
 
+      - name: Check tokio-runtime, tokio-rustls-manual-roots
+        run: cargo check --features tokio-runtime,tokio-rustls-manual-roots
+
       - name: Check tokio-runtime, tokio-openssl
         run: cargo check --features tokio-runtime,tokio-openssl
 

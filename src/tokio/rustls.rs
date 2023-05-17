@@ -37,7 +37,14 @@ where
                 let connector = if let Some(connector) = connector {
                     connector
                 } else {
+                    #[cfg(feature = "tokio-rustls-manual-roots")]
+                    log::error!("tokio-rustls-manual-roots was selected, but no connector was provided! No certificates can be verified in this state.");
+
+                    #[cfg(feature = "tokio-rustls-manual-roots")]
+                    let root_store = RootCertStore::empty();
+                    #[cfg(not(feature = "tokio-rustls-manual-roots"))]
                     let mut root_store = RootCertStore::empty();
+
                     #[cfg(feature = "tokio-rustls-native-certs")]
                     {
                         use real_tokio_rustls::rustls::Certificate;
@@ -50,7 +57,8 @@ where
                     }
                     #[cfg(all(
                         feature = "tokio-rustls-webpki-roots",
-                        not(feature = "tokio-rustls-native-certs")
+                        not(feature = "tokio-rustls-native-certs"),
+                        not(feature = "tokio-rustls-manual-roots")
                     ))]
                     {
                         use real_tokio_rustls::rustls::OwnedTrustAnchor;
