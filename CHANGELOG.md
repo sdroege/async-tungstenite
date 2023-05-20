@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.22.2] - 2023-05-20
+### Added
+- New `tokio-rustls-manual-roots` feature for dropping the dependency on
+  webpki-roots.
+
 ## [0.22.1] - 2023-05-08
 ### Fixed
 - Fix `poll_flush` on a closed connection.
@@ -148,7 +153,8 @@ No changelog is available for older versions as of yet.
 -->
 
 
-[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.22.1...HEAD
+[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.22.2...HEAD
+[0.22.2]: https://github.com/sdroege/async-tungstenite/compare/0.22.2...0.22.1
 [0.22.1]: https://github.com/sdroege/async-tungstenite/compare/0.22.1...0.22.0
 [0.22.0]: https://github.com/sdroege/async-tungstenite/compare/0.22.0...0.21.0
 [0.21.0]: https://github.com/sdroege/async-tungstenite/compare/0.21.0...0.20.0
