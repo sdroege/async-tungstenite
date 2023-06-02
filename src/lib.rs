@@ -388,13 +388,15 @@ where
     }
 
     fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        (*self).with_context(Some((ContextWaker::Write, cx)), |s| cvt(s.flush())).map(|r| {
-            // WebSocket connection has just been closed. Flushing completed, not an error.
-            match r {
-                Err(WsError::ConnectionClosed) => Ok(()),
-                other => other,
-            }
-        })
+        (*self)
+            .with_context(Some((ContextWaker::Write, cx)), |s| cvt(s.flush()))
+            .map(|r| {
+                // WebSocket connection has just been closed. Flushing completed, not an error.
+                match r {
+                    Err(WsError::ConnectionClosed) => Ok(()),
+                    other => other,
+                }
+            })
     }
 
     fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
