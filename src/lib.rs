@@ -229,6 +229,11 @@ pub struct WebSocketStream<S> {
     inner: WebSocket<AllowStd<S>>,
     closing: bool,
     ended: bool,
+    /// Tungstenite is probably ready to receive more data.
+    ///
+    /// `false` once start_send hits `WouldBlock` errors.
+    /// `true` initially and after `flush`ing.
+    ready: bool,
 }
 
 impl<S> WebSocketStream<S> {
@@ -262,10 +267,11 @@ impl<S> WebSocketStream<S> {
     }
 
     pub(crate) fn new(ws: WebSocket<AllowStd<S>>) -> Self {
-        WebSocketStream {
+        Self {
             inner: ws,
             closing: false,
             ended: false,
+            ready: true,
         }
     }
 
@@ -369,18 +375,27 @@ where
     type Error = WsError;
 
     fn poll_ready(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        Poll::Ready(Ok(()))
+        if self.ready {
+            Poll::Ready(Ok(()))
+        } else {
+            Poll::Pending
+        }
     }
 
     fn start_send(mut self: Pin<&mut Self>, item: Message) -> Result<(), Self::Error> {
         match (*self).with_context(None, |s| s.write(item)) {
-            Ok(()) => Ok(()),
+            Ok(()) => {
+                self.ready = true;
+                Ok(())
+            }
             Err(WsError::Io(err)) if err.kind() == std::io::ErrorKind::WouldBlock => {
-                // the message was accepted and queued
-                // isn't an error.
+                // the message was accepted and queued so not an error
+                // but `poll_ready` will start returning pending now.
+                self.ready = false;
                 Ok(())
             }
             Err(e) => {
+                self.ready = true;
                 debug!("websocket start_send error: {}", e);
                 Err(e)
             }
@@ -388,6 +403,7 @@ where
     }
 
     fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        self.ready = true;
         (*self)
             .with_context(Some((ContextWaker::Write, cx)), |s| cvt(s.flush()))
             .map(|r| {
@@ -400,6 +416,7 @@ where
     }
 
     fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        self.ready = true;
         let res = if self.closing {
             // After queueing it, we call `flush` to drive the close handshake to completion.
             (*self).with_context(Some((ContextWaker::Write, cx)), |s| s.flush())
