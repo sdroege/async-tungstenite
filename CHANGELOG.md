@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.23.0] - 2023-08-08
+### Changed
+- Update to tungstenite 0.20.
+- Update to webpki-roots 0.25.
+- Update to glib/gio 0.18.
+- Update MSRV to 1.70.
+
+### Fixed
+- Gracefully handle invalid native root certificates
+- Do not flush on every `poll_ready()` call.
+
 ## [0.22.2] - 2023-05-20
 ### Added
 - New `tokio-rustls-manual-roots` feature for dropping the dependency on
@@ -153,7 +164,8 @@ No changelog is available for older versions as of yet.
 -->
 
 
-[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.22.2...HEAD
+[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.23.0...HEAD
+[0.23.0]: https://github.com/sdroege/async-tungstenite/compare/0.23.0...0.22.2
 [0.22.2]: https://github.com/sdroege/async-tungstenite/compare/0.22.2...0.22.1
 [0.22.1]: https://github.com/sdroege/async-tungstenite/compare/0.22.1...0.22.0
 [0.22.0]: https://github.com/sdroege/async-tungstenite/compare/0.22.0...0.21.0
