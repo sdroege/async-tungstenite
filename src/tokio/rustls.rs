@@ -47,8 +47,6 @@ where
 
                     #[cfg(feature = "tokio-rustls-native-certs")]
                     {
-                        use real_tokio_rustls::rustls::Certificate;
-
                         let native_certs = rustls_native_certs::load_native_certs()?;
                         let der_certs: Vec<Vec<u8>> =
                             native_certs.into_iter().map(|cert| cert.0).collect();
