@@ -9,8 +9,11 @@
 //! ```sh
 //! cmd /c "set RUST_LOG=debug && cargo run --example server-headers"
 //! ```
-use tokio::net::{TcpListener, TcpStream};
-use tokio_tungstenite::{
+use async_std::{
+    net::{TcpListener, TcpStream},
+    task,
+};
+use async_tungstenite::{
     accept_hdr_async,
     tungstenite::{
         connect,
@@ -23,11 +26,11 @@ use url::Url;
 extern crate log;
 use futures_util::{SinkExt, StreamExt};
 
-#[tokio::main]
+#[async_std::main]
 async fn main() {
     env_logger::builder().format_timestamp(None).init();
 
-    tokio::spawn(async move {
+    task::spawn(async move {
         server().await;
     });
     client();
@@ -37,7 +40,7 @@ async fn server() {
     let server = TcpListener::bind("127.0.0.1:8080").await.unwrap();
 
     while let Ok((stream, _)) = server.accept().await {
-        tokio::spawn(accept_connection(stream));
+        task::spawn(accept_connection(stream));
     }
 }
 
@@ -78,7 +81,9 @@ fn client() {
         debug!("* {}: {:?}", header, _value);
     }
 
-    socket.send(Message::Text("Hello WebSocket".into())).unwrap();
+    socket
+        .send(Message::Text("Hello WebSocket".into()))
+        .unwrap();
     loop {
         let msg = socket.read().expect("Error reading message");
         debug!("Received: {}", msg);
