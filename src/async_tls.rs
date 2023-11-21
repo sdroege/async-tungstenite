@@ -17,7 +17,7 @@ use tungstenite::stream::Mode;
 use crate::domain;
 use crate::stream::Stream as StreamSwitcher;
 
-type MaybeTlsStream<S> = StreamSwitcher<S, TlsStream<S>>;
+pub type MaybeTlsStream<S> = StreamSwitcher<S, TlsStream<S>>;
 
 pub(crate) type AutoStream<S> = MaybeTlsStream<S>;
 
