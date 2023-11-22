@@ -19,7 +19,7 @@ use crate::stream::Stream as StreamSwitcher;
 
 pub type MaybeTlsStream<S> = StreamSwitcher<S, TlsStream<S>>;
 
-pub(crate) type AutoStream<S> = MaybeTlsStream<S>;
+pub type AutoStream<S> = MaybeTlsStream<S>;
 
 async fn wrap_stream<S>(
     socket: S,
