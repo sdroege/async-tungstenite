@@ -12,7 +12,7 @@ use super::{domain, port, WebSocketStream};
 use futures_io::{AsyncRead, AsyncWrite};
 
 #[cfg(feature = "async-native-tls")]
-pub(crate) mod async_native_tls {
+pub mod async_native_tls {
     use async_native_tls::TlsConnector as AsyncTlsConnector;
     use async_native_tls::TlsStream;
     use real_async_native_tls as async_native_tls;
