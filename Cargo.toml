@@ -29,7 +29,7 @@ tokio-rustls-native-certs = ["__rustls-tls", "rustls-native-certs"]
 tokio-openssl = ["tokio-runtime", "real-tokio-openssl", "openssl"]
 verbose-logging = []
 
-__rustls-tls = ["tokio-runtime", "real-tokio-rustls", "tungstenite/__rustls-tls"]
+__rustls-tls = ["tokio-runtime", "real-tokio-rustls", "rustls-pki-types", "tungstenite/__rustls-tls"]
 
 [package.metadata.docs.rs]
 features = ["async-std-runtime", "tokio-runtime", "gio-runtime", "async-tls", "async-native-tls", "tokio-native-tls"]
@@ -84,12 +84,16 @@ package = "tokio-native-tls"
 
 [dependencies.real-tokio-rustls]
 optional = true
-version = "0.24"
+version = "0.25"
 package = "tokio-rustls"
+
+[dependencies.rustls-pki-types]
+optional = true
+version = "1.0.1"
 
 [dependencies.rustls-native-certs]
 optional = true
-version = "0.6"
+version = "0.7"
 
 [dependencies.webpki-roots]
 optional = true
