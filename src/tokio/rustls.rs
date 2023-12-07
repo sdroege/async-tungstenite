@@ -1,5 +1,6 @@
-use real_tokio_rustls::rustls::{ClientConfig, RootCertStore, ServerName};
+use real_tokio_rustls::rustls::{ClientConfig, RootCertStore};
 use real_tokio_rustls::{client::TlsStream, TlsConnector};
+use rustls_pki_types::ServerName;
 
 use tungstenite::client::{uri_mode, IntoClientRequest};
 use tungstenite::error::TlsError;
@@ -48,11 +49,9 @@ where
                     #[cfg(feature = "tokio-rustls-native-certs")]
                     {
                         let native_certs = rustls_native_certs::load_native_certs()?;
-                        let der_certs: Vec<Vec<u8>> =
-                            native_certs.into_iter().map(|cert| cert.0).collect();
-                        let total_number = der_certs.len();
+                        let total_number = native_certs.len();
                         let (number_added, number_ignored) =
-                            root_store.add_parsable_certificates(&der_certs);
+                            root_store.add_parsable_certificates(native_certs);
                         log::debug!("Added {number_added}/{total_number} native root certificates (ignored {number_ignored})");
                     }
                     #[cfg(all(
@@ -61,26 +60,15 @@ where
                         not(feature = "tokio-rustls-manual-roots")
                     ))]
                     {
-                        use real_tokio_rustls::rustls::OwnedTrustAnchor;
-
-                        root_store.add_trust_anchors(webpki_roots::TLS_SERVER_ROOTS.iter().map(
-                            |ta| {
-                                OwnedTrustAnchor::from_subject_spki_name_constraints(
-                                    ta.subject.as_ref(),
-                                    ta.subject_public_key_info.as_ref(),
-                                    ta.name_constraints.as_deref(),
-                                )
-                            },
-                        ));
+                        root_store.extend(webpki_roots::TLS_SERVER_ROOTS.iter().cloned());
                     }
                     TlsConnector::from(std::sync::Arc::new(
                         ClientConfig::builder()
-                            .with_safe_defaults()
                             .with_root_certificates(root_store)
                             .with_no_client_auth(),
                     ))
                 };
-                let domain = ServerName::try_from(domain.as_str())
+                let domain = ServerName::try_from(domain)
                     .map_err(|_| Error::Tls(TlsError::InvalidDnsName))?;
                 connector.connect(domain, socket).await?
             };
