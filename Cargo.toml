@@ -41,7 +41,7 @@ futures-io = { version = "0.3", default-features = false, features = ["std"] }
 pin-project-lite = "0.2"
 
 [dependencies.tungstenite]
-version = "0.20"
+version = "0.21"
 default-features = false
 
 [dependencies.async-std]
