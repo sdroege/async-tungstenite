@@ -25,7 +25,6 @@ jobs:
     strategy:
       matrix:
         rust:
-          - 1.70.0
           - stable
           - beta
           - nightly
@@ -90,6 +89,31 @@ jobs:
 
       - name: Test async-std-runtime
         run: cargo test --features async-std-runtime
+
+  test-msrv:
+    name: Test MSRV
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        rust:
+          - 1.61.0
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install toolchain
+        uses: hecrj/setup-rust-action@v1
+        with:
+          rust-version: ${{ matrix.rust }}
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get install libssl-dev
+
+      - name: Check
+        run: cargo check
 
   autobahn:
     name: Autobahn tests
