@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.24.0] - 2023-12-08
+### Changed
+- Update MSRV from 1.70 to 1.61.
+- Update to tungstenite 0.21.
+- Update to webpki-roots 0.26.
+- Update tokio-rustls to 0.25 and rustls-native-certs to 0.7.
+- Update example to hyper 1.0.
+
 ## [0.23.0] - 2023-08-08
 ### Changed
 - Update to tungstenite 0.20.
