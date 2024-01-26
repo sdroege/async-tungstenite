@@ -31,7 +31,7 @@ where
 {
     crate::async_tls::client_async_tls_with_connector_and_config(
         request,
-        TokioAdapter(stream),
+        TokioAdapter::new(stream),
         connector,
         config,
     )
