@@ -8,7 +8,7 @@ license = "MIT"
 homepage = "https://github.com/sdroege/async-tungstenite"
 repository = "https://github.com/sdroege/async-tungstenite"
 documentation = "https://docs.rs/async-tungstenite"
-version = "0.24.0"
+version = "0.25.0"
 edition = "2018"
 readme = "README.md"
 include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
@@ -59,7 +59,7 @@ version = "0.10"
 
 [dependencies.real-async-tls]
 optional = true
-version = "0.12"
+version = "0.13"
 package = "async-tls"
 
 [dependencies.real-async-native-tls]
@@ -101,11 +101,11 @@ version = "0.26"
 
 [dependencies.gio]
 optional = true
-version = "0.18"
+version = "0.19"
 
 [dependencies.glib]
 optional = true
-version = "0.18"
+version = "0.19"
 
 [dev-dependencies]
 futures = "0.3"
