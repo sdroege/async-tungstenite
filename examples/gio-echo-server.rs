@@ -12,7 +12,7 @@ async fn accept_connection(stream: SocketConnection) -> Result<()> {
         .remote_address()
         .expect("SocketConnection should have a remote address");
 
-    println!("Peer address: {}", addr);
+    println!("Peer address: {}", addr.to_string());
     let mut ws_stream = accept_async(stream)
         .await
         .expect("Error during the websocket handshake occurred");
@@ -43,7 +43,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         SocketProtocol::Tcp,
         glib::Object::NONE,
     )?;
-    println!("Listening on: {}", inetaddr);
+    println!("Listening on: {}", inetaddr.to_string());
 
     service.connect_incoming(|_service, connection, _| {
         let stream = connection.clone();

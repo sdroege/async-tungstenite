@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.25.0] - 2024-02-09
+### Changed
+- Update to glib/gio 0.19.
+- Update to async-tls 0.13.
+
 ## [0.24.0] - 2023-12-08
 ### Changed
 - Update MSRV from 1.70 to 1.61.
