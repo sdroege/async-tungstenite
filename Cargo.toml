@@ -84,7 +84,7 @@ package = "tokio-native-tls"
 
 [dependencies.real-tokio-rustls]
 optional = true
-version = "0.25"
+version = "0.26"
 package = "tokio-rustls"
 
 [dependencies.rustls-pki-types]
