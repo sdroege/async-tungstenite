@@ -41,7 +41,7 @@ futures-io = { version = "0.3", default-features = false, features = ["std"] }
 pin-project-lite = "0.2"
 
 [dependencies.tungstenite]
-version = "0.21"
+version = "0.23"
 default-features = false
 
 [dependencies.async-std]
@@ -61,6 +61,8 @@ version = "0.10"
 optional = true
 version = "0.13"
 package = "async-tls"
+default-features = false
+features = ["client"]
 
 [dependencies.real-async-native-tls]
 optional = true
@@ -76,6 +78,7 @@ package = "native-tls"
 optional = true
 version = "1.0"
 features = ["net"]
+default-features = false
 
 [dependencies.real-tokio-native-tls]
 optional = true
@@ -86,6 +89,7 @@ package = "tokio-native-tls"
 optional = true
 version = "0.26"
 package = "tokio-rustls"
+default-features = false
 
 [dependencies.rustls-pki-types]
 optional = true
@@ -117,6 +121,10 @@ futures-channel = "0.3"
 hyper = { version = "1.0", default-features = false, features = ["http1", "server"] }
 hyper-util = { version = "0.1", features = ["tokio"] }
 http-body-util = "0.1"
+
+[dev-dependencies.tungstenite]
+version = "0.23"
+features = ["url"]
 
 [[example]]
 name = "autobahn-client"
