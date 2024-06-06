@@ -8,7 +8,7 @@ license = "MIT"
 homepage = "https://github.com/sdroege/async-tungstenite"
 repository = "https://github.com/sdroege/async-tungstenite"
 documentation = "https://docs.rs/async-tungstenite"
-version = "0.26.0"
+version = "0.26.1"
 edition = "2018"
 readme = "README.md"
 include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
@@ -28,6 +28,7 @@ tokio-rustls-webpki-roots = ["__rustls-tls", "webpki-roots"]
 tokio-rustls-native-certs = ["__rustls-tls", "rustls-native-certs"]
 tokio-openssl = ["tokio-runtime", "real-tokio-openssl", "openssl"]
 verbose-logging = []
+url = ["tungstenite/url"]
 
 __rustls-tls = ["tokio-runtime", "real-tokio-rustls", "rustls-pki-types", "tungstenite/__rustls-tls"]
 
