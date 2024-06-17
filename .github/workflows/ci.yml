@@ -112,6 +112,9 @@ jobs:
         run: |
           sudo apt-get install libssl-dev
 
+      - name: Use MSRV Cargo.lock
+        run: cp Cargo.lock.msrv Cargo.lock
+
       - name: Check
         run: cargo check
 
