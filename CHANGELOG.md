@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.2] - 2024-06-17
+### Fixed
+- Work around bug related to `futures_task::ArcWake`, which causes
+  busy looping because of spurious waker "changes" caused by creating the same
+  waker with different vtables.
+
 ## [0.26.1] - 2024-06-06
 ### Added
 - New `url` feature that maps to the corresponding feature from `tungstenite`
@@ -191,7 +197,8 @@ No changelog is available for older versions as of yet.
 -->
 
 
-[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.26.1...HEAD
+[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.26.2...HEAD
+[0.26.2]: https://github.com/sdroege/async-tungstenite/compare/0.26.2...0.26.1
 [0.26.1]: https://github.com/sdroege/async-tungstenite/compare/0.26.1...0.26.0
 [0.26.0]: https://github.com/sdroege/async-tungstenite/compare/0.26.0...0.25.1
 [0.25.1]: https://github.com/sdroege/async-tungstenite/compare/0.25.1...0.25.0
