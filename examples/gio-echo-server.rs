@@ -3,7 +3,7 @@ use std::{env, net::SocketAddr};
 use async_tungstenite::{gio::accept_async, tungstenite::Result};
 use futures::prelude::*;
 use gio::{
-    prelude::*, InetSocketAddress, SocketConnection, SocketProtocol, SocketService, SocketType,
+    prelude::*, InetSocketAddress, SocketConnection, SocketListener, SocketProtocol, SocketType,
 };
 
 async fn accept_connection(stream: SocketConnection) -> Result<()> {
@@ -36,8 +36,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let sockaddr: SocketAddr = addr.parse()?;
     let inetaddr: InetSocketAddress = sockaddr.into();
 
-    let service = SocketService::new();
-    service.add_address(
+    let listener = SocketListener::new();
+    listener.add_address(
         &inetaddr,
         SocketType::Stream,
         SocketProtocol::Tcp,
@@ -45,16 +45,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     )?;
     println!("Listening on: {}", inetaddr.to_string());
 
-    service.connect_incoming(|_service, connection, _| {
-        let stream = connection.clone();
-        glib::MainContext::default().spawn_local(async move {
-            accept_connection(stream).await.unwrap();
-        });
-        false
-    });
-
     let main_loop = glib::MainLoop::new(None, false);
-    main_loop.run();
+    main_loop.context().block_on(async move {
+        while let Ok((stream, _)) = listener.accept_future().await {
+            glib::MainContext::default().spawn_local(async move {
+                accept_connection(stream).await.unwrap();
+            });
+        }
+    });
 
     Ok(())
 }
