@@ -8,7 +8,7 @@ license = "MIT"
 homepage = "https://github.com/sdroege/async-tungstenite"
 repository = "https://github.com/sdroege/async-tungstenite"
 documentation = "https://docs.rs/async-tungstenite"
-version = "0.26.2"
+version = "0.27.0"
 edition = "2018"
 readme = "README.md"
 include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
@@ -106,11 +106,11 @@ version = "0.26"
 
 [dependencies.gio]
 optional = true
-version = "0.19"
+version = "0.20"
 
 [dependencies.glib]
 optional = true
-version = "0.19"
+version = "0.20"
 
 [dev-dependencies]
 futures = "0.3"
