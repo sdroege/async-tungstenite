@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.27.0] - 2024-07-17
+### Changed
+- Update glib / gio dependencies to 0.20.
+
 ## [0.26.2] - 2024-06-17
 ### Fixed
 - Work around bug related to `futures_task::ArcWake`, which causes
@@ -197,7 +201,8 @@ No changelog is available for older versions as of yet.
 -->
 
 
-[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.26.2...HEAD
+[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.27.0...HEAD
+[0.27.9]: https://github.com/sdroege/async-tungstenite/compare/0.27.0...0.26.2
 [0.26.2]: https://github.com/sdroege/async-tungstenite/compare/0.26.2...0.26.1
 [0.26.1]: https://github.com/sdroege/async-tungstenite/compare/0.26.1...0.26.0
 [0.26.0]: https://github.com/sdroege/async-tungstenite/compare/0.26.0...0.25.1
