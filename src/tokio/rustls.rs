@@ -48,7 +48,11 @@ where
 
                     #[cfg(feature = "tokio-rustls-native-certs")]
                     {
-                        let native_certs = rustls_native_certs::load_native_certs()?;
+                        let mut native_certs = rustls_native_certs::load_native_certs();
+                        if let Some(err) = native_certs.errors.drain(..).next() {
+                            return Err(std::io::Error::new(std::io::ErrorKind::Other, err).into());
+                        }
+                        let native_certs = native_certs.certs;
                         let total_number = native_certs.len();
                         let (number_added, number_ignored) =
                             root_store.add_parsable_certificates(native_certs);
