@@ -15,7 +15,8 @@ include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
 rust-version = "1.63"
 
 [features]
-default = ["handshake"]
+default = ["handshake", "sink"]
+sink = ["futures-util"]
 handshake = ["tungstenite/handshake"]
 async-std-runtime = ["async-std", "handshake"]
 tokio-runtime = ["tokio", "handshake"]
@@ -37,9 +38,17 @@ features = ["async-std-runtime", "tokio-runtime", "gio-runtime", "async-tls", "a
 
 [dependencies]
 log = "0.4"
-futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
+futures-core = { version = "0.3", default-features = false }
+# TODO use this or `futures_core::task::__internal::AtomicWaker`?
+atomic-waker = { version = "1.1", default-features = false }
 futures-io = { version = "0.3", default-features = false, features = ["std"] }
 pin-project-lite = "0.2"
+
+[dependencies.futures-util]
+optional = true
+version = "0.3"
+default-features = false
+features = ["sink"]
 
 [dependencies.tungstenite]
 version = "0.24"

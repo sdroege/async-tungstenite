@@ -62,13 +62,10 @@ use std::io::{Read, Write};
 
 use compat::{cvt, AllowStd, ContextWaker};
 use futures_io::{AsyncRead, AsyncWrite};
-use futures_util::{
-    sink::{Sink, SinkExt},
-    stream::{FusedStream, Stream},
-};
+use futures_core::stream::{FusedStream, Stream};
 use log::*;
 use std::pin::Pin;
-use std::task::{Context, Poll};
+use std::task::{ready, Context, Poll};
 
 #[cfg(feature = "handshake")]
 use tungstenite::{
@@ -337,7 +334,7 @@ where
             return Poll::Ready(None);
         }
 
-        match futures_util::ready!(self.with_context(Some((ContextWaker::Read, cx)), |s| {
+        match ready!(self.with_context(Some((ContextWaker::Read, cx)), |s| {
             #[cfg(feature = "verbose-logging")]
             trace!(
                 "{}:{} Stream.with_context poll_next -> read()",
@@ -368,7 +365,19 @@ where
     }
 }
 
-impl<T> Sink<Message> for WebSocketStream<T>
+impl<S> WebSocketStream<S> {
+    /// Simple send method to replace `futures_sink::Sink` (till v0.3).
+    pub async fn send(&mut self, msg: Message) -> Result<(), WsError>
+    where
+        S: AsyncRead + AsyncWrite + Unpin,
+    {
+        let _ = msg;
+        todo!()
+    }
+}
+
+#[cfg(feature = "sink")]
+impl<T> futures_util::Sink<Message> for WebSocketStream<T>
 where
     T: AsyncRead + AsyncWrite + Unpin,
 {
