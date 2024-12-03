@@ -2,10 +2,10 @@
 use log::*;
 use std::io::{Read, Write};
 use std::pin::Pin;
-use std::task::{Context, Poll};
+use std::task::{Context, Poll, Wake, Waker};
 
+use atomic_waker::AtomicWaker;
 use futures_io::{AsyncRead, AsyncWrite};
-use futures_util::task;
 use std::sync::Arc;
 use tungstenite::Error as WsError;
 
@@ -49,18 +49,20 @@ pub(crate) struct AllowStd<S> {
 // read waker slot for this, but any would do.
 //
 // Don't ever use this from multiple tasks at the same time!
+#[cfg(feature = "handshake")]
 pub(crate) trait SetWaker {
-    fn set_waker(&self, waker: &task::Waker);
+    fn set_waker(&self, waker: &Waker);
 }
 
+#[cfg(feature = "handshake")]
 impl<S> SetWaker for AllowStd<S> {
-    fn set_waker(&self, waker: &task::Waker) {
+    fn set_waker(&self, waker: &Waker) {
         self.set_waker(ContextWaker::Read, waker);
     }
 }
 
 impl<S> AllowStd<S> {
-    pub(crate) fn new(inner: S, waker: &task::Waker) -> Self {
+    pub(crate) fn new(inner: S, waker: &Waker) -> Self {
         let res = Self {
             inner,
             write_waker_proxy: Default::default(),
@@ -83,7 +85,7 @@ impl<S> AllowStd<S> {
     //
     // Write: this is only supposde to be called by write operations, i.e. the Sink impl on the
     // WebSocketStream.
-    pub(crate) fn set_waker(&self, kind: ContextWaker, waker: &task::Waker) {
+    pub(crate) fn set_waker(&self, kind: ContextWaker, waker: &Waker) {
         match kind {
             ContextWaker::Read => {
                 self.write_waker_proxy.read_waker.register(waker);
@@ -103,11 +105,11 @@ impl<S> AllowStd<S> {
 // reads and writes, and the same for writes.
 #[derive(Debug, Default)]
 struct WakerProxy {
-    read_waker: task::AtomicWaker,
-    write_waker: task::AtomicWaker,
+    read_waker: AtomicWaker,
+    write_waker: AtomicWaker,
 }
 
-impl std::task::Wake for WakerProxy {
+impl Wake for WakerProxy {
     fn wake(self: Arc<Self>) {
         self.wake_by_ref()
     }
@@ -129,10 +131,10 @@ where
         #[cfg(feature = "verbose-logging")]
         trace!("{}:{} AllowStd.with_context", file!(), line!());
         let waker = match kind {
-            ContextWaker::Read => task::Waker::from(self.read_waker_proxy.clone()),
-            ContextWaker::Write => task::Waker::from(self.write_waker_proxy.clone()),
+            ContextWaker::Read => Waker::from(self.read_waker_proxy.clone()),
+            ContextWaker::Write => Waker::from(self.write_waker_proxy.clone()),
         };
-        let mut context = task::Context::from_waker(&waker);
+        let mut context = Context::from_waker(&waker);
         f(&mut context, Pin::new(&mut self.inner))
     }
 
