@@ -12,10 +12,11 @@ version = "0.28.0"
 edition = "2018"
 readme = "README.md"
 include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
-rust-version = "1.63"
+rust-version = "1.64"
 
 [features]
-default = ["handshake"]
+default = ["handshake", "futures-03-sink"]
+futures-03-sink = ["futures-util"]
 handshake = ["tungstenite/handshake"]
 async-std-runtime = ["async-std", "handshake"]
 tokio-runtime = ["tokio", "handshake"]
@@ -37,9 +38,16 @@ features = ["async-std-runtime", "tokio-runtime", "gio-runtime", "async-tls", "a
 
 [dependencies]
 log = "0.4"
-futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
+futures-core = { version = "0.3", default-features = false }
+atomic-waker = { version = "1.1", default-features = false }
 futures-io = { version = "0.3", default-features = false, features = ["std"] }
 pin-project-lite = "0.2"
+
+[dependencies.futures-util]
+optional = true
+version = "0.3"
+default-features = false
+features = ["sink"]
 
 [dependencies.tungstenite]
 version = "0.24"
@@ -141,7 +149,7 @@ required-features = ["async-std-runtime"]
 
 [[example]]
 name = "autobahn-server"
-required-features = ["async-std-runtime"]
+required-features = ["async-std-runtime", "futures-03-sink"]
 
 [[example]]
 name = "server"
@@ -153,7 +161,7 @@ required-features = ["async-std-runtime"]
 
 [[example]]
 name = "server-headers"
-required-features = ["async-std-runtime", "handshake"]
+required-features = ["async-std-runtime", "handshake", "futures-util"]
 
 [[example]]
 name = "interval-server"
@@ -173,4 +181,4 @@ required-features = ["tokio-runtime"]
 
 [[example]]
 name = "server-custom-accept"
-required-features = ["tokio-runtime"]
+required-features = ["tokio-runtime", "futures-util"]

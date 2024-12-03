@@ -97,7 +97,7 @@ jobs:
     strategy:
       matrix:
         rust:
-          - 1.63.0
+          - 1.64.0
 
     steps:
       - name: Checkout sources
