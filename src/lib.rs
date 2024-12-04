@@ -67,8 +67,6 @@ use std::{
 use compat::{cvt, AllowStd, ContextWaker};
 use futures_core::stream::{FusedStream, Stream};
 use futures_io::{AsyncRead, AsyncWrite};
-#[cfg(feature = "sink")]
-use futures_util::SinkExt;
 use log::*;
 
 #[cfg(feature = "handshake")]
@@ -448,7 +446,6 @@ where
     }
 }
 
-#[cfg(not(feature = "sink"))]
 impl<S> WebSocketStream<S> {
     /// Simple send method to replace `futures_sink::Sink` (till v0.3).
     pub async fn send(&mut self, msg: Message) -> Result<(), WsError>
@@ -459,13 +456,11 @@ impl<S> WebSocketStream<S> {
     }
 }
 
-#[cfg(not(feature = "sink"))]
 struct Send<'a, S> {
     ws: &'a mut WebSocketStream<S>,
     msg: Option<Message>,
 }
 
-#[cfg(not(feature = "sink"))]
 impl<'a, S> Send<'a, S>
 where
     S: AsyncRead + AsyncWrite + Unpin,
@@ -475,7 +470,6 @@ where
     }
 }
 
-#[cfg(not(feature = "sink"))]
 impl<S> std::future::Future for Send<'_, S>
 where
     S: AsyncRead + AsyncWrite + Unpin,
