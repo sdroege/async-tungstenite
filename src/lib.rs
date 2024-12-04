@@ -502,7 +502,7 @@ where
                 Err(WsError::Io(err)) if err.kind() == std::io::ErrorKind::WouldBlock => {
                     // the message was accepted and queued so not an error
                     //
-                    // set to false here for cancel safe of *this* Future
+                    // set to false here for cancellation safety of *this* Future
                     self.ws.ready = false;
                     Ok(())
                 }
