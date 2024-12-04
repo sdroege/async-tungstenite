@@ -4,8 +4,8 @@ use std::io::{Read, Write};
 use std::pin::Pin;
 use std::task::{Context, Poll, Wake, Waker};
 
-use futures_io::{AsyncRead, AsyncWrite};
 use atomic_waker::AtomicWaker;
+use futures_io::{AsyncRead, AsyncWrite};
 use std::sync::Arc;
 use tungstenite::Error as WsError;
 
