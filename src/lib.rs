@@ -61,15 +61,14 @@ pub mod stream;
 use std::{
     future::Future,
     io::{Read, Write},
-    task::ready,
+    pin::Pin,
+    task::{ready, Context, Poll},
 };
 
 use compat::{cvt, AllowStd, ContextWaker};
-use futures_io::{AsyncRead, AsyncWrite};
 use futures_core::stream::{FusedStream, Stream};
+use futures_io::{AsyncRead, AsyncWrite};
 use log::*;
-use std::pin::Pin;
-use std::task::{ready, Context, Poll};
 
 #[cfg(feature = "handshake")]
 use tungstenite::{
