@@ -24,7 +24,7 @@ use async_tungstenite::{
 use url::Url;
 #[macro_use]
 extern crate log;
-use futures_util::{SinkExt, StreamExt};
+use futures_util::StreamExt;
 
 #[async_std::main]
 async fn main() {
