@@ -226,7 +226,7 @@ where
 #[derive(Debug)]
 pub struct WebSocketStream<S> {
     inner: WebSocket<AllowStd<S>>,
-    #[cfg(feature = "sink")]
+    #[cfg(feature = "futures-03-sink")]
     closing: bool,
     ended: bool,
     /// Tungstenite is probably ready to receive more data.
@@ -269,7 +269,7 @@ impl<S> WebSocketStream<S> {
     pub(crate) fn new(ws: WebSocket<AllowStd<S>>) -> Self {
         Self {
             inner: ws,
-            #[cfg(feature = "sink")]
+            #[cfg(feature = "futures-03-sink")]
             closing: false,
             ended: false,
             ready: true,
@@ -369,7 +369,7 @@ where
     }
 }
 
-#[cfg(feature = "sink")]
+#[cfg(feature = "futures-03-sink")]
 impl<T> futures_util::Sink<Message> for WebSocketStream<T>
 where
     T: AsyncRead + AsyncWrite + Unpin,

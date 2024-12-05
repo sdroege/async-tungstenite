@@ -15,8 +15,8 @@ include = ["examples/**/*", "src/**/*", "LICENSE", "README.md", "CHANGELOG.md"]
 rust-version = "1.64"
 
 [features]
-default = ["handshake", "sink"]
-sink = ["futures-util"]
+default = ["handshake", "futures-03-sink"]
+futures-03-sink = ["futures-util"]
 handshake = ["tungstenite/handshake"]
 async-std-runtime = ["async-std", "handshake"]
 tokio-runtime = ["tokio", "handshake"]
