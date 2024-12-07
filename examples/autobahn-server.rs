@@ -23,7 +23,9 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream) -> Result<()> {
     while let Some(msg) = ws_stream.next().await {
         let msg = msg?;
         if msg.is_text() || msg.is_binary() {
-            ws_stream.send(msg).await?;
+            // here we explicitly using futures 0.3's Sink implementation for send message
+            // for WebSocketStream::send, see autobahn-client example
+            futures::SinkExt::send(&mut ws_stream, msg).await?;
         }
     }
 

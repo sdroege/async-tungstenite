@@ -32,6 +32,7 @@ async fn run_test(case: u32) -> Result<()> {
     while let Some(msg) = ws_stream.next().await {
         let msg = msg?;
         if msg.is_text() || msg.is_binary() {
+            // for Sink of futures 0.3, see autobahn-server example
             ws_stream.send(msg).await?;
         }
     }
