@@ -2,10 +2,11 @@
 use log::*;
 use std::io::{Read, Write};
 use std::pin::Pin;
-use std::task::{Context, Poll, Wake, Waker};
+use std::task::{Context, Poll, Waker};
 
 use atomic_waker::AtomicWaker;
 use futures_io::{AsyncRead, AsyncWrite};
+use futures_task::{waker_ref, ArcWake};
 use std::sync::Arc;
 use tungstenite::Error as WsError;
 
@@ -109,14 +110,10 @@ struct WakerProxy {
     write_waker: AtomicWaker,
 }
 
-impl Wake for WakerProxy {
-    fn wake(self: Arc<Self>) {
-        self.wake_by_ref()
-    }
-
-    fn wake_by_ref(self: &Arc<Self>) {
-        self.read_waker.wake();
-        self.write_waker.wake();
+impl ArcWake for WakerProxy {
+    fn wake_by_ref(arc_self: &Arc<Self>) {
+        arc_self.read_waker.wake();
+        arc_self.write_waker.wake();
     }
 }
 
@@ -131,8 +128,8 @@ where
         #[cfg(feature = "verbose-logging")]
         trace!("{}:{} AllowStd.with_context", file!(), line!());
         let waker = match kind {
-            ContextWaker::Read => Waker::from(self.read_waker_proxy.clone()),
-            ContextWaker::Write => Waker::from(self.write_waker_proxy.clone()),
+            ContextWaker::Read => waker_ref(&self.read_waker_proxy),
+            ContextWaker::Write => waker_ref(&self.write_waker_proxy),
         };
         let mut context = Context::from_waker(&waker);
         f(&mut context, Pin::new(&mut self.inner))
