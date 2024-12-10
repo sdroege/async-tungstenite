@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.28.1] - 2024-12-10
+### Added
+- Added `WebSocketStream::send()` and make the `Sink` impl and `futures_util`
+  dependency optional.
+
+### Changed
+- Update MSRV to 1.64
+- Revert workaround from 0.26.2 for `futures_task::ArcWake`, which is fixed in 0.3.31.
+
 ## [0.28.0] - 2024-09-04
 ### Changed
 - Update to tungstenite 0.24.
@@ -207,8 +216,10 @@ No changelog is available for older versions as of yet.
 -->
 
 
-[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.27.0...HEAD
-[0.27.9]: https://github.com/sdroege/async-tungstenite/compare/0.27.0...0.26.2
+[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.27.1...HEAD
+[0.28.1]: https://github.com/sdroege/async-tungstenite/compare/0.28.1...0.28.0
+[0.28.0]: https://github.com/sdroege/async-tungstenite/compare/0.28.0...0.27.0
+[0.27.0]: https://github.com/sdroege/async-tungstenite/compare/0.27.0...0.26.2
 [0.26.2]: https://github.com/sdroege/async-tungstenite/compare/0.26.2...0.26.1
 [0.26.1]: https://github.com/sdroege/async-tungstenite/compare/0.26.1...0.26.0
 [0.26.0]: https://github.com/sdroege/async-tungstenite/compare/0.26.0...0.25.1
