@@ -39,7 +39,7 @@ features = ["async-std-runtime", "tokio-runtime", "gio-runtime", "async-tls", "a
 [dependencies]
 log = "0.4"
 futures-core = { version = "0.3", default-features = false }
-futures-task = { version = "0.3.31", default-features = false }
+futures-task = { version = "0.3.31", default-features = false, features = ["alloc"] }
 atomic-waker = { version = "1.1", default-features = false }
 futures-io = { version = "0.3", default-features = false, features = ["std"] }
 pin-project-lite = "0.2"
