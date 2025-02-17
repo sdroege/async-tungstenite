@@ -92,6 +92,11 @@ pub mod gio;
 #[cfg(feature = "tokio-runtime")]
 pub mod tokio;
 
+#[cfg(feature = "futures-03-sink")]
+pub mod bytes;
+#[cfg(feature = "futures-03-sink")]
+pub use bytes::ByteWriter;
+
 use tungstenite::protocol::CloseFrame;
 
 /// Creates a WebSocket handshake from a request and a stream.

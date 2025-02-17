@@ -149,6 +149,10 @@ name = "client"
 required-features = ["async-std-runtime"]
 
 [[example]]
+name = "client-bytes"
+required-features = ["async-std-runtime"]
+
+[[example]]
 name = "autobahn-server"
 required-features = ["async-std-runtime", "futures-03-sink"]
 
