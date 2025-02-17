@@ -58,7 +58,7 @@ async fn communication() {
     for i in 1..10 {
         info!("Sending message");
         stream
-            .send(Message::Text(format!("{}", i)))
+            .send(Message::text(format!("{}", i)))
             .await
             .expect("Failed to send message");
     }
@@ -104,7 +104,7 @@ async fn split_communication() {
 
     for i in 1..10 {
         info!("Sending message");
-        tx.send(Message::Text(format!("{}", i)))
+        tx.send(Message::text(format!("{}", i)))
             .await
             .expect("Failed to send message");
     }
