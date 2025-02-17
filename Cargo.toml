@@ -51,7 +51,7 @@ default-features = false
 features = ["sink"]
 
 [dependencies.tungstenite]
-version = "0.24"
+version = "0.26"
 default-features = false
 
 [dependencies.async-std]
@@ -133,7 +133,7 @@ hyper-util = { version = "0.1", features = ["tokio"] }
 http-body-util = "0.1"
 
 [dev-dependencies.tungstenite]
-version = "0.24"
+version = "0.26"
 features = ["url"]
 
 [[example]]

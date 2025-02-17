@@ -9,7 +9,7 @@ async fn get_case_count() -> Result<u32> {
     let msg = socket.next().await.expect("Can't fetch case count")?;
     socket.close(None).await?;
     Ok(msg
-        .into_text()?
+        .to_text()?
         .parse::<u32>()
         .expect("Can't parse case count"))
 }

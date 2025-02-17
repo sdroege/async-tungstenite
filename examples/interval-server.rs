@@ -47,7 +47,7 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream) -> Result<()> {
                 };
             }
             Either::Right((_, msg_fut_continue)) => {
-                ws_sender.send(Message::Text("tick".to_owned())).await?;
+                ws_sender.send(Message::text("tick")).await?;
                 msg_fut = msg_fut_continue; // Continue receiving the WebSocket message.
                 tick_fut = interval.next(); // Wait for next tick.
             }
