@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.29.1] - 2025-02-18
+### Added
+- Added wrappers that allow treating a WebSocket as a byte stream. `ByteWriter`
+  allows using any `Sink<Stream>` as an `AsyncWrite`. `ByteReader` allows using
+  any `Stream<Item = tungstenite::Result<Message>>` as an `AsyncRead`.
+
+  Note that `ByteReader` will treat all bytes received as uniform, including
+  for instance the contents of Close or Ping/Pong messages; if you need to
+  handle the contents of a `Close`, don't use this.
+
+  You may want to wrap these in a `BufWriter` or `BufReader` for efficiency.
+
 ## [0.29.0] - 2025-02-17
 ### Changed
 - Update to tungstenite 0.26.
@@ -224,7 +236,8 @@ No changelog is available for older versions as of yet.
 -->
 
 
-[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.29.0...HEAD
+[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.29.1...HEAD
+[0.29.1]: https://github.com/sdroege/async-tungstenite/compare/0.29.1...0.29.0
 [0.29.0]: https://github.com/sdroege/async-tungstenite/compare/0.29.0...0.28.2
 [0.28.2]: https://github.com/sdroege/async-tungstenite/compare/0.28.2...0.28.1
 [0.28.1]: https://github.com/sdroege/async-tungstenite/compare/0.28.1...0.28.0
