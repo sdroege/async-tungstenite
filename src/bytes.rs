@@ -125,39 +125,70 @@ impl<S> ByteReader<S> {
     }
 }
 
+fn poll_read_helper<S>(
+    mut s: Pin<&mut ByteReader<S>>,
+    cx: &mut Context<'_>,
+    buf_len: usize,
+) -> Poll<io::Result<Option<Bytes>>>
+where
+    S: Stream<Item = Result<Message, WsError>> + Unpin,
+{
+    Poll::Ready(Ok(Some(match s.bytes {
+        None => match Pin::new(&mut s.stream).poll_next(cx) {
+            Poll::Pending => return Poll::Pending,
+            Poll::Ready(None) => return Poll::Ready(Ok(None)),
+            Poll::Ready(Some(Err(e))) => return Poll::Ready(Err(convert_err(e))),
+            Poll::Ready(Some(Ok(msg))) => {
+                let bytes = msg.into_data();
+                if bytes.len() > buf_len {
+                    s.bytes.insert(bytes).split_to(buf_len)
+                } else {
+                    bytes
+                }
+            }
+        },
+        Some(ref mut bytes) if bytes.len() > buf_len => bytes.split_to(buf_len),
+        Some(ref mut bytes) => {
+            let bytes = bytes.clone();
+            s.bytes = None;
+            bytes
+        }
+    })))
+}
+
 impl<S> futures_io::AsyncRead for ByteReader<S>
 where
     S: Stream<Item = Result<Message, WsError>> + Unpin,
 {
     fn poll_read(
-        mut self: Pin<&mut Self>,
+        self: Pin<&mut Self>,
         cx: &mut Context<'_>,
         buf: &mut [u8],
     ) -> Poll<io::Result<usize>> {
-        let buf_len = buf.len();
-        let bytes_to_read = match self.bytes {
-            None => match Pin::new(&mut self.stream).poll_next(cx) {
-                Poll::Pending => return Poll::Pending,
-                Poll::Ready(None) => return Poll::Ready(Ok(0)),
-                Poll::Ready(Some(Err(e))) => return Poll::Ready(Err(convert_err(e))),
-                Poll::Ready(Some(Ok(msg))) => {
-                    let bytes = msg.into_data();
-                    if bytes.len() > buf_len {
-                        self.bytes.insert(bytes).split_to(buf_len)
-                    } else {
-                        bytes
-                    }
-                }
-            },
-            Some(ref mut bytes) if bytes.len() > buf_len => bytes.split_to(buf_len),
-            Some(ref mut bytes) => {
-                let bytes = bytes.clone();
-                self.bytes = None;
-                bytes
+        poll_read_helper(self, cx, buf.len()).map_ok(|bytes| {
+            bytes.map_or(0, |bytes| {
+                buf[..bytes.len()].copy_from_slice(&bytes);
+                bytes.len()
+            })
+        })
+    }
+}
+
+#[cfg(feature = "tokio-runtime")]
+impl<S> tokio::io::AsyncRead for ByteReader<S>
+where
+    S: Stream<Item = Result<Message, WsError>> + Unpin,
+{
+    fn poll_read(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buf: &mut tokio::io::ReadBuf,
+    ) -> Poll<io::Result<()>> {
+        poll_read_helper(self, cx, buf.remaining()).map_ok(|bytes| {
+            if let Some(ref bytes) = bytes {
+                buf.put_slice(bytes);
             }
-        };
-        buf.copy_from_slice(&bytes_to_read);
-        Poll::Ready(Ok(bytes_to_read.len()))
+        })
     }
 }
 
