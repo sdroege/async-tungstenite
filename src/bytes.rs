@@ -31,28 +31,39 @@ impl<S> ByteWriter<S> {
     }
 }
 
+fn poll_write_helper<S>(
+    mut s: Pin<&mut ByteWriter<S>>,
+    cx: &mut Context<'_>,
+    buf: &[u8],
+) -> Poll<io::Result<usize>>
+where
+    S: Sink<Message, Error = WsError> + Unpin,
+{
+    match Pin::new(&mut s.0).poll_ready(cx).map_err(convert_err) {
+        Poll::Ready(Ok(())) => {}
+        Poll::Ready(Err(e)) => return Poll::Ready(Err(e)),
+        Poll::Pending => return Poll::Pending,
+    }
+    let len = buf.len();
+    let msg = Message::binary(buf.to_owned());
+    Poll::Ready(
+        Pin::new(&mut s.0)
+            .start_send(msg)
+            .map_err(convert_err)
+            .map(|()| len),
+    )
+}
+
 impl<S> futures_io::AsyncWrite for ByteWriter<S>
 where
     S: Sink<Message, Error = WsError> + Unpin,
 {
     fn poll_write(
-        mut self: Pin<&mut Self>,
+        self: Pin<&mut Self>,
         cx: &mut Context<'_>,
         buf: &[u8],
     ) -> Poll<io::Result<usize>> {
-        match Pin::new(&mut self.0).poll_ready(cx).map_err(convert_err) {
-            Poll::Ready(Ok(())) => {}
-            Poll::Ready(Err(e)) => return Poll::Ready(Err(e)),
-            Poll::Pending => return Poll::Pending,
-        }
-        let len = buf.len();
-        let msg = Message::binary(buf.to_owned());
-        Poll::Ready(
-            Pin::new(&mut self.0)
-                .start_send(msg)
-                .map_err(convert_err)
-                .map(|()| len),
-        )
+        poll_write_helper(self, cx, buf)
     }
 
     fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
@@ -60,6 +71,28 @@ where
     }
 
     fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
+        Pin::new(&mut self.0).poll_close(cx).map_err(convert_err)
+    }
+}
+
+#[cfg(feature = "tokio-runtime")]
+impl<S> tokio::io::AsyncWrite for ByteWriter<S>
+where
+    S: Sink<Message, Error = WsError> + Unpin,
+{
+    fn poll_write(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buf: &[u8],
+    ) -> Poll<io::Result<usize>> {
+        poll_write_helper(self, cx, buf)
+    }
+
+    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
+        Pin::new(&mut self.0).poll_flush(cx).map_err(convert_err)
+    }
+
+    fn poll_shutdown(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
         Pin::new(&mut self.0).poll_close(cx).map_err(convert_err)
     }
 }
