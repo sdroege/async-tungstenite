@@ -56,14 +56,14 @@ integration with various other crates can be enabled via feature flags
 
 ## Messages vs Streaming
 
-WebSocket provides a message-oriented protocol, and this crate supports sending
-and receiving data in messages; protocols built on WebSocket are allowed to
-make message boundaries semantically significant. However, some users of
-WebSocket may want to treat the socket as a continuous stream of bytes. If you
-know the sending end does not place significance on message boundaries, and you
-want to process a stream of bytes without regard to those boundaries, try
-[`ws_stream_tungstenite`](https://crates.io/crates/ws_stream_tungstenite),
-which builds upon this crate.
+WebSocket provides a message-oriented protocol, and this crate primarily
+supports sending and receiving data in messages; protocols built on WebSocket
+are allowed to make message boundaries semantically significant. However, some
+users of WebSocket may want to treat the socket as a continuous stream of
+bytes. If you know the other end does not place significance on message
+boundaries, and you want to process a stream of bytes without regard to those
+boundaries, you can use the `ByteReader` and `ByteWriter` types provided by
+this crate.
 
 ## Is it performant?
 
