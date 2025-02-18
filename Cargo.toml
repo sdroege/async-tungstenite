@@ -181,6 +181,10 @@ name = "gio-echo-server"
 required-features = ["gio-runtime"]
 
 [[example]]
+name = "tokio-client-bytes"
+required-features = ["tokio-runtime"]
+
+[[example]]
 name = "tokio-echo"
 required-features = ["tokio-runtime"]
 
