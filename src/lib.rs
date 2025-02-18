@@ -92,8 +92,8 @@ pub mod gio;
 #[cfg(feature = "tokio-runtime")]
 pub mod tokio;
 
-#[cfg(feature = "futures-03-sink")]
 pub mod bytes;
+pub use bytes::ByteReader;
 #[cfg(feature = "futures-03-sink")]
 pub use bytes::ByteWriter;
 

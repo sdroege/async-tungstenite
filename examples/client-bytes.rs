@@ -15,10 +15,9 @@ use std::env;
 use futures::StreamExt;
 
 use async_std::io;
-use async_std::prelude::*;
 use async_std::task;
 use async_tungstenite::async_std::connect_async;
-use async_tungstenite::ByteWriter;
+use async_tungstenite::{ByteReader, ByteWriter};
 
 async fn run() {
     let connect_addr = env::args()
@@ -32,15 +31,11 @@ async fn run() {
 
     let (write, read) = ws_stream.split();
     let byte_writer = ByteWriter::new(write);
-    let stdin_to_ws = task::spawn(async {
-        io::copy(io::stdin(), byte_writer).await.unwrap();
-    });
-    let ws_to_stdout = task::spawn(read.for_each(|message| async {
-        let data = message.unwrap().into_data();
-        async_std::io::stdout().write_all(&data).await.unwrap();
-    }));
-    stdin_to_ws.await;
-    ws_to_stdout.await;
+    let byte_reader = ByteReader::new(read);
+    let stdin_to_ws = task::spawn(io::copy(io::stdin(), byte_writer));
+    let ws_to_stdout = task::spawn(io::copy(byte_reader, io::stdout()));
+    stdin_to_ws.await.unwrap();
+    ws_to_stdout.await.unwrap();
 }
 
 fn main() {
