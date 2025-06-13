@@ -283,7 +283,6 @@ impl<S> WebSocketStream<S> {
 
     fn with_context<F, R>(&mut self, ctx: Option<(ContextWaker, &mut Context<'_>)>, f: F) -> R
     where
-        S: Unpin,
         F: FnOnce(&mut WebSocket<AllowStd<S>>) -> R,
         AllowStd<S>: Read + Write,
     {
@@ -373,29 +372,25 @@ where
     }
 }
 
-#[cfg(feature = "futures-03-sink")]
-impl<T> futures_util::Sink<Message> for WebSocketStream<T>
+impl<T> WebSocketStream<T>
 where
     T: AsyncRead + AsyncWrite + Unpin,
 {
-    type Error = WsError;
-
-    fn poll_ready(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+    fn poll_ready(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), WsError>> {
         if self.ready {
-            Poll::Ready(Ok(()))
-        } else {
-            // Currently blocked so try to flush the blockage away
-            (*self)
-                .with_context(Some((ContextWaker::Write, cx)), |s| cvt(s.flush()))
-                .map(|r| {
-                    self.ready = true;
-                    r
-                })
+            return Poll::Ready(Ok(()));
         }
+
+        // Currently blocked so try to flush the blockage away
+        self.with_context(Some((ContextWaker::Write, cx)), |s| cvt(s.flush()))
+            .map(|r| {
+                self.ready = true;
+                r
+            })
     }
 
-    fn start_send(mut self: Pin<&mut Self>, item: Message) -> Result<(), Self::Error> {
-        match (*self).with_context(None, |s| s.write(item)) {
+    fn start_send(mut self: Pin<&mut Self>, item: Message) -> Result<(), WsError> {
+        match self.with_context(None, |s| s.write(item)) {
             Ok(()) => {
                 self.ready = true;
                 Ok(())
@@ -414,9 +409,8 @@ where
         }
     }
 
-    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        (*self)
-            .with_context(Some((ContextWaker::Write, cx)), |s| cvt(s.flush()))
+    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), WsError>> {
+        self.with_context(Some((ContextWaker::Write, cx)), |s| cvt(s.flush()))
             .map(|r| {
                 self.ready = true;
                 match r {
@@ -426,14 +420,34 @@ where
                 }
             })
     }
+}
+
+#[cfg(feature = "futures-03-sink")]
+impl<T> futures_util::Sink<Message> for WebSocketStream<T>
+where
+    T: AsyncRead + AsyncWrite + Unpin,
+{
+    type Error = WsError;
+
+    fn poll_ready(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        self.poll_ready(cx)
+    }
+
+    fn start_send(self: Pin<&mut Self>, item: Message) -> Result<(), Self::Error> {
+        self.start_send(item)
+    }
+
+    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        self.poll_flush(cx)
+    }
 
     fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
         self.ready = true;
         let res = if self.closing {
             // After queueing it, we call `flush` to drive the close handshake to completion.
-            (*self).with_context(Some((ContextWaker::Write, cx)), |s| s.flush())
+            self.with_context(Some((ContextWaker::Write, cx)), |s| s.flush())
         } else {
-            (*self).with_context(Some((ContextWaker::Write, cx)), |s| s.close(None))
+            self.with_context(Some((ContextWaker::Write, cx)), |s| s.close(None))
         };
 
         match res {
@@ -484,49 +498,12 @@ where
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         if self.msg.is_some() {
-            if !self.ws.ready {
-                // Currently blocked so try to flush the blockage away
-                let polled = self
-                    .ws
-                    .with_context(Some((ContextWaker::Write, cx)), |s| cvt(s.flush()))
-                    .map(|r| {
-                        self.ws.ready = true;
-                        r
-                    });
-                ready!(polled)?
-            }
-
+            ready!(Pin::new(&mut *self.ws).poll_ready(cx))?;
             let msg = self.msg.take().expect("unreachable");
-            match self.ws.with_context(None, |s| s.write(msg)) {
-                Ok(_) => Ok(()),
-                Err(WsError::Io(err)) if err.kind() == std::io::ErrorKind::WouldBlock => {
-                    // the message was accepted and queued so not an error
-                    //
-                    // set to false here for cancellation safety of *this* Future
-                    self.ws.ready = false;
-                    Ok(())
-                }
-                Err(e) => {
-                    debug!("websocket start_send error: {}", e);
-                    Err(e)
-                }
-            }?;
+            Pin::new(&mut *self.ws).start_send(msg)?;
         }
 
-        let polled = self
-            .ws
-            .with_context(Some((ContextWaker::Write, cx)), |s| cvt(s.flush()))
-            .map(|r| {
-                self.ws.ready = true;
-                match r {
-                    // WebSocket connection has just been closed. Flushing completed, not an error.
-                    Err(WsError::ConnectionClosed) => Ok(()),
-                    other => other,
-                }
-            });
-        ready!(polled)?;
-
-        Poll::Ready(Ok(()))
+        Pin::new(&mut *self.ws).poll_flush(cx)
     }
 }
 
