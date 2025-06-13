@@ -101,7 +101,7 @@ async fn split_communication() {
         .await
         .expect("Client failed to connect");
 
-    let (mut tx, _rx) = futures::StreamExt::split(stream);
+    let (tx, _rx) = stream.split();
 
     for i in 1..10 {
         info!("Sending message");
@@ -110,7 +110,7 @@ async fn split_communication() {
             .expect("Failed to send message");
     }
 
-    tx.close().await.expect("Failed to close");
+    tx.close(None).await.expect("Failed to close");
 
     info!("Waiting for response messages");
     let messages = msg_rx.await.expect("Failed to receive messages");
