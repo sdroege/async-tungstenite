@@ -96,7 +96,7 @@ async fn split_communication() {
     let tcp = TcpStream::connect("127.0.0.1:12346")
         .await
         .expect("Failed to connect");
-    let url = url::Url::parse("ws://localhost:12345/").unwrap();
+    let url = url::Url::parse("ws://localhost:12346/").unwrap();
     let (stream, _) = client_async(url, tcp)
         .await
         .expect("Client failed to connect");
