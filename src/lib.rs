@@ -61,7 +61,7 @@ pub mod stream;
 use std::{
     io::{Read, Write},
     pin::Pin,
-    sync::{Arc, Mutex},
+    sync::{Arc, Mutex, MutexGuard},
     task::{ready, Context, Poll},
 };
 
@@ -327,10 +327,7 @@ impl<S> WebSocketStream<S> {
     /// Splits the websocket stream into separate
     /// [sender](WebSocketSender) and [receiver](WebSocketReceiver) parts.
     pub fn split(self) -> (WebSocketSender<S>, WebSocketReceiver<S>) {
-        let shared = Arc::new(Shared {
-            stream: Mutex::new(self),
-        });
-
+        let shared = Arc::new(Shared(Mutex::new(self)));
         let sender = WebSocketSender {
             shared: shared.clone(),
         };
@@ -340,29 +337,13 @@ impl<S> WebSocketStream<S> {
     }
 }
 
-/// The sender part of a [websocket](WebSocketStream) stream.
-pub struct WebSocketSender<S> {
-    shared: Arc<Shared<S>>,
-}
-
-/// The receiver part of a [websocket](WebSocketStream) stream.
-pub struct WebSocketReceiver<S> {
-    shared: Arc<Shared<S>>,
-}
-
-struct Shared<S> {
-    stream: Mutex<WebSocketStream<S>>,
-}
-
-impl<T> Stream for WebSocketStream<T>
+impl<T> WebSocketStream<T>
 where
     T: AsyncRead + AsyncWrite + Unpin,
 {
-    type Item = Result<Message, WsError>;
-
-    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+    fn poll_next(&mut self, cx: &mut Context<'_>) -> Poll<Option<Result<Message, WsError>>> {
         #[cfg(feature = "verbose-logging")]
-        trace!("{}:{} Stream.poll_next", file!(), line!());
+        trace!("{}:{} WebSocketStream.poll_next", file!(), line!());
 
         // The connection has been closed or a critical error has occurred.
         // We have already returned the error to the user, the `Stream` is unusable,
@@ -374,7 +355,7 @@ where
         match ready!(self.with_context(Some((ContextWaker::Read, cx)), |s| {
             #[cfg(feature = "verbose-logging")]
             trace!(
-                "{}:{} Stream.with_context poll_next -> read()",
+                "{}:{} WebSocketStream.with_context poll_next -> read()",
                 file!(),
                 line!()
             );
@@ -391,22 +372,8 @@ where
             }
         }
     }
-}
 
-impl<T> FusedStream for WebSocketStream<T>
-where
-    T: AsyncRead + AsyncWrite + Unpin,
-{
-    fn is_terminated(&self) -> bool {
-        self.ended
-    }
-}
-
-impl<T> WebSocketStream<T>
-where
-    T: AsyncRead + AsyncWrite + Unpin,
-{
-    fn poll_ready(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), WsError>> {
+    fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), WsError>> {
         if self.ready {
             return Poll::Ready(Ok(()));
         }
@@ -419,7 +386,7 @@ where
             })
     }
 
-    fn start_send(mut self: Pin<&mut Self>, item: Message) -> Result<(), WsError> {
+    fn start_send(&mut self, item: Message) -> Result<(), WsError> {
         match self.with_context(None, |s| s.write(item)) {
             Ok(()) => {
                 self.ready = true;
@@ -439,7 +406,7 @@ where
         }
     }
 
-    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), WsError>> {
+    fn poll_flush(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), WsError>> {
         self.with_context(Some((ContextWaker::Write, cx)), |s| cvt(s.flush()))
             .map(|r| {
                 self.ready = true;
@@ -452,6 +419,26 @@ where
     }
 }
 
+impl<T> Stream for WebSocketStream<T>
+where
+    T: AsyncRead + AsyncWrite + Unpin,
+{
+    type Item = Result<Message, WsError>;
+
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        self.get_mut().poll_next(cx)
+    }
+}
+
+impl<T> FusedStream for WebSocketStream<T>
+where
+    T: AsyncRead + AsyncWrite + Unpin,
+{
+    fn is_terminated(&self) -> bool {
+        self.ended
+    }
+}
+
 #[cfg(feature = "futures-03-sink")]
 impl<T> futures_util::Sink<Message> for WebSocketStream<T>
 where
@@ -460,15 +447,15 @@ where
     type Error = WsError;
 
     fn poll_ready(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        self.poll_ready(cx)
+        self.get_mut().poll_ready(cx)
     }
 
     fn start_send(self: Pin<&mut Self>, item: Message) -> Result<(), Self::Error> {
-        self.start_send(item)
+        self.get_mut().start_send(item)
     }
 
     fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        self.poll_flush(cx)
+        self.get_mut().poll_flush(cx)
     }
 
     fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
@@ -502,38 +489,119 @@ impl<S> WebSocketStream<S> {
     where
         S: AsyncRead + AsyncWrite + Unpin,
     {
-        Send::new(self, msg).await
+        Send {
+            ws: self,
+            msg: Some(msg),
+        }
+        .await
     }
 }
 
-struct Send<'a, S> {
-    ws: &'a mut WebSocketStream<S>,
+struct Send<W> {
+    ws: W,
     msg: Option<Message>,
 }
 
-impl<'a, S> Send<'a, S>
+/// Performs an asynchronous message send to the websocket.
+fn send<S>(
+    ws: &mut WebSocketStream<S>,
+    msg: &mut Option<Message>,
+    cx: &mut Context<'_>,
+) -> Poll<Result<(), WsError>>
 where
     S: AsyncRead + AsyncWrite + Unpin,
 {
-    fn new(ws: &'a mut WebSocketStream<S>, msg: Message) -> Self {
-        Self { ws, msg: Some(msg) }
+    if msg.is_some() {
+        ready!(ws.poll_ready(cx))?;
+        let msg = msg.take().expect("unreachable");
+        ws.start_send(msg)?;
     }
+
+    ws.poll_flush(cx)
 }
 
-impl<S> std::future::Future for Send<'_, S>
+impl<S> std::future::Future for Send<&mut WebSocketStream<S>>
 where
     S: AsyncRead + AsyncWrite + Unpin,
 {
     type Output = Result<(), WsError>;
 
-    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-        if self.msg.is_some() {
-            ready!(Pin::new(&mut *self.ws).poll_ready(cx))?;
-            let msg = self.msg.take().expect("unreachable");
-            Pin::new(&mut *self.ws).start_send(msg)?;
-        }
+    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        let me = self.get_mut();
+        send(me.ws, &mut me.msg, cx)
+    }
+}
 
-        Pin::new(&mut *self.ws).poll_flush(cx)
+impl<S> std::future::Future for Send<&Shared<S>>
+where
+    S: AsyncRead + AsyncWrite + Unpin,
+{
+    type Output = Result<(), WsError>;
+
+    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        let me = self.get_mut();
+        let mut ws = me.ws.lock();
+        send(&mut ws, &mut me.msg, cx)
+    }
+}
+
+/// The sender part of a [websocket](WebSocketStream) stream.
+pub struct WebSocketSender<S> {
+    shared: Arc<Shared<S>>,
+}
+
+impl<S> WebSocketSender<S> {
+    /// Send a message via [websocket](WebSocketStream).
+    pub async fn send(&self, msg: Message) -> Result<(), WsError>
+    where
+        S: AsyncRead + AsyncWrite + Unpin,
+    {
+        Send {
+            ws: &*self.shared,
+            msg: Some(msg),
+        }
+        .await
+    }
+
+    /// Close the underlying [websocket](WebSocketStream).
+    pub async fn close(&self, msg: Option<CloseFrame>) -> Result<(), WsError>
+    where
+        S: AsyncRead + AsyncWrite + Unpin,
+    {
+        self.send(Message::Close(msg)).await
+    }
+}
+
+/// The receiver part of a [websocket](WebSocketStream) stream.
+pub struct WebSocketReceiver<S> {
+    shared: Arc<Shared<S>>,
+}
+
+impl<S> Stream for WebSocketReceiver<S>
+where
+    S: AsyncRead + AsyncWrite + Unpin,
+{
+    type Item = Result<Message, WsError>;
+
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        self.shared.lock().poll_next(cx)
+    }
+}
+
+impl<S> FusedStream for WebSocketReceiver<S>
+where
+    S: AsyncRead + AsyncWrite + Unpin,
+{
+    fn is_terminated(&self) -> bool {
+        self.shared.lock().ended
+    }
+}
+
+struct Shared<S>(Mutex<WebSocketStream<S>>);
+
+impl<S> Shared<S> {
+    fn lock(&self) -> MutexGuard<'_, WebSocketStream<S>> {
+        self.0.lock().expect("lock shared stream")
     }
 }
 
