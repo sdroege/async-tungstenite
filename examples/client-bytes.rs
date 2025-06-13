@@ -12,8 +12,6 @@
 
 use std::env;
 
-use futures::StreamExt;
-
 use async_std::io;
 use async_std::task;
 use async_tungstenite::async_std::connect_async;

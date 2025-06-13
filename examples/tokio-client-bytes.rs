@@ -12,8 +12,6 @@
 
 use std::env;
 
-use futures::StreamExt;
-
 use async_tungstenite::tokio::connect_async;
 use async_tungstenite::{ByteReader, ByteWriter};
 use tokio::io;

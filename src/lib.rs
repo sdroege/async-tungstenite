@@ -507,7 +507,7 @@ struct Send<W> {
 }
 
 /// Performs an asynchronous message send to the websocket.
-fn send<S>(
+fn send_helper<S>(
     ws: &mut WebSocketStream<S>,
     msg: &mut Option<Message>,
     cx: &mut Context<'_>,
@@ -532,7 +532,7 @@ where
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let me = self.get_mut();
-        send(me.ws, &mut me.msg, cx)
+        send_helper(me.ws, &mut me.msg, cx)
     }
 }
 
@@ -545,7 +545,7 @@ where
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let me = self.get_mut();
         let mut ws = me.ws.lock();
-        send(&mut ws, &mut me.msg, cx)
+        send_helper(&mut ws, &mut me.msg, cx)
     }
 }
 
