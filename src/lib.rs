@@ -418,6 +418,7 @@ where
             })
     }
 
+    #[cfg(feature = "futures-03-sink")]
     fn poll_close(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), WsError>> {
         self.ready = true;
         let res = if self.closing {
