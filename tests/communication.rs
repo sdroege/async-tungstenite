@@ -100,7 +100,8 @@ async fn split_communication() {
     let (stream, _) = client_async(url, tcp)
         .await
         .expect("Client failed to connect");
-    let (mut tx, _rx) = stream.split();
+
+    let (mut tx, _rx) = futures::StreamExt::split(stream);
 
     for i in 1..10 {
         info!("Sending message");

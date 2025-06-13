@@ -61,6 +61,7 @@ pub mod stream;
 use std::{
     io::{Read, Write},
     pin::Pin,
+    sync::{Arc, Mutex},
     task::{ready, Context, Poll},
 };
 
@@ -322,6 +323,35 @@ impl<S> WebSocketStream<S> {
     {
         self.send(Message::Close(msg)).await
     }
+
+    /// Splits the websocket stream into separate
+    /// [sender](WebSocketSender) and [receiver](WebSocketReceiver) parts.
+    pub fn split(self) -> (WebSocketSender<S>, WebSocketReceiver<S>) {
+        let shared = Arc::new(Shared {
+            stream: Mutex::new(self),
+        });
+
+        let sender = WebSocketSender {
+            shared: shared.clone(),
+        };
+
+        let receiver = WebSocketReceiver { shared };
+        (sender, receiver)
+    }
+}
+
+/// The sender part of a [websocket](WebSocketStream) stream.
+pub struct WebSocketSender<S> {
+    shared: Arc<Shared<S>>,
+}
+
+/// The receiver part of a [websocket](WebSocketStream) stream.
+pub struct WebSocketReceiver<S> {
+    shared: Arc<Shared<S>>,
+}
+
+struct Shared<S> {
+    stream: Mutex<WebSocketStream<S>>,
 }
 
 impl<T> Stream for WebSocketStream<T>
