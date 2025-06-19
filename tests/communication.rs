@@ -101,7 +101,7 @@ async fn split_communication() {
         .await
         .expect("Client failed to connect");
 
-    let (tx, _rx) = stream.split();
+    let (tx, rx) = stream.split();
 
     for i in 1..10 {
         info!("Sending message");
@@ -115,6 +115,10 @@ async fn split_communication() {
     info!("Waiting for response messages");
     let messages = msg_rx.await.expect("Failed to receive messages");
     assert_eq!(messages.len(), 10);
+
+    assert!(tx.is_pair_of(&rx));
+    assert!(rx.is_pair_of(&tx));
+    WebSocketStream::reunite(tx, rx).expect("Failed to reunite the stream");
 }
 
 #[async_std::test]

@@ -335,6 +335,27 @@ impl<S> WebSocketStream<S> {
         let receiver = WebSocketReceiver { shared };
         (sender, receiver)
     }
+
+    /// Attempts to reunite the [sender](WebSocketSender) and [receiver](WebSocketReceiver)
+    /// parts back into a single stream. If both parts originate from the same
+    /// [`split`](WebSocketStream::split) call, returns `Ok` with the original stream.
+    /// Otherwise, returns `Err` containing the provided parts.
+    pub fn reunite(
+        sender: WebSocketSender<S>,
+        receiver: WebSocketReceiver<S>,
+    ) -> Result<Self, (WebSocketSender<S>, WebSocketReceiver<S>)> {
+        if sender.is_pair_of(&receiver) {
+            drop(receiver);
+            let stream = Arc::try_unwrap(sender.shared)
+                .ok()
+                .expect("reunite the stream")
+                .into_inner();
+
+            Ok(stream)
+        } else {
+            Err((sender, receiver))
+        }
+    }
 }
 
 impl<T> WebSocketStream<T>
@@ -551,6 +572,7 @@ where
 }
 
 /// The sender part of a [websocket](WebSocketStream) stream.
+#[derive(Debug)]
 pub struct WebSocketSender<S> {
     shared: Arc<Shared<S>>,
 }
@@ -574,6 +596,12 @@ impl<S> WebSocketSender<S> {
         S: AsyncRead + AsyncWrite + Unpin,
     {
         self.send(Message::Close(msg)).await
+    }
+
+    /// Checks if this [sender](WebSocketSender) and some [receiver](WebSocketReceiver)
+    /// were split from the same [websocket](WebSocketStream) stream.
+    pub fn is_pair_of(&self, other: &WebSocketReceiver<S>) -> bool {
+        Arc::ptr_eq(&self.shared, &other.shared)
     }
 }
 
@@ -602,8 +630,17 @@ where
 }
 
 /// The receiver part of a [websocket](WebSocketStream) stream.
+#[derive(Debug)]
 pub struct WebSocketReceiver<S> {
     shared: Arc<Shared<S>>,
+}
+
+impl<S> WebSocketReceiver<S> {
+    /// Checks if this [receiver](WebSocketReceiver) and some [sender](WebSocketSender)
+    /// were split from the same [websocket](WebSocketStream) stream.
+    pub fn is_pair_of(&self, other: &WebSocketSender<S>) -> bool {
+        Arc::ptr_eq(&self.shared, &other.shared)
+    }
 }
 
 impl<S> Stream for WebSocketReceiver<S>
@@ -626,11 +663,16 @@ where
     }
 }
 
+#[derive(Debug)]
 struct Shared<S>(Mutex<WebSocketStream<S>>);
 
 impl<S> Shared<S> {
     fn lock(&self) -> MutexGuard<'_, WebSocketStream<S>> {
         self.0.lock().expect("lock shared stream")
+    }
+
+    fn into_inner(self) -> WebSocketStream<S> {
+        self.0.into_inner().expect("get shared stream")
     }
 }
 
