@@ -2,7 +2,7 @@
 //! a [`WebSocketStream`](crate::WebSocketStream) or a [`WebSocketSender`](crate::WebSocketSender).
 
 use std::{
-    io,
+    fmt, io,
     pin::Pin,
     task::{Context, Poll},
 };
@@ -15,7 +15,6 @@ use crate::{tungstenite::Bytes, Message, WsError};
 ///
 /// Every write sends a binary message. If you want to group writes together, consider wrapping
 /// this with a `BufWriter`.
-#[derive(Debug)]
 pub struct ByteWriter<S> {
     sender: S,
     state: State,
@@ -41,7 +40,18 @@ impl<S> ByteWriter<S> {
     }
 }
 
-#[derive(Debug)]
+impl<S> fmt::Debug for ByteWriter<S>
+where
+    S: fmt::Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ByteWriter")
+            .field("sender", &self.sender)
+            .field("state", &"..")
+            .finish()
+    }
+}
+
 enum State {
     Open,
     Closing(Option<Message>),
