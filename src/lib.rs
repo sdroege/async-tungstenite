@@ -95,7 +95,6 @@ pub mod tokio;
 
 pub mod bytes;
 pub use bytes::ByteReader;
-#[cfg(feature = "futures-03-sink")]
 pub use bytes::ByteWriter;
 
 use tungstenite::protocol::CloseFrame;
@@ -530,8 +529,13 @@ where
         self.get_mut().poll_flush(cx)
     }
 
-    fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), WsError>> {
-        self.get_mut().poll_close(cx)
+    fn poll_close(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        msg: &mut Option<Message>,
+    ) -> Poll<Result<(), WsError>> {
+        let me = self.get_mut();
+        send_helper(me, msg, cx)
     }
 }
 
@@ -677,8 +681,14 @@ where
         self.shared.lock().poll_flush(cx)
     }
 
-    fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), WsError>> {
-        self.shared.lock().poll_close(cx)
+    fn poll_close(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        msg: &mut Option<Message>,
+    ) -> Poll<Result<(), WsError>> {
+        let me = self.get_mut();
+        let mut ws = me.shared.lock();
+        send_helper(&mut ws, msg, cx)
     }
 }
 

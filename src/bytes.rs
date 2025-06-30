@@ -4,7 +4,7 @@
 use std::{
     io,
     pin::Pin,
-    task::{ready, Context, Poll},
+    task::{Context, Poll},
 };
 
 use futures_core::stream::Stream;
@@ -16,22 +16,50 @@ use crate::{tungstenite::Bytes, Message, WsError};
 /// Every write sends a binary message. If you want to group writes together, consider wrapping
 /// this with a `BufWriter`.
 #[derive(Debug)]
-pub struct ByteWriter<S>(S);
+pub struct ByteWriter<S> {
+    sender: S,
+    state: State,
+}
 
 impl<S> ByteWriter<S> {
     /// Create a new `ByteWriter` from a [sender](Sender) that accepts a websocket [`Message`].
     #[inline(always)]
-    pub fn new(s: S) -> Self
+    pub fn new(sender: S) -> Self
     where
         S: Sender,
     {
-        Self(s)
+        Self {
+            sender,
+            state: State::Open,
+        }
     }
 
     /// Get the underlying [sender](Sender) back.
     #[inline(always)]
     pub fn into_inner(self) -> S {
-        self.0
+        self.sender
+    }
+}
+
+#[derive(Debug)]
+enum State {
+    Open,
+    Closing(Option<Message>),
+}
+
+impl State {
+    fn close(&mut self) -> &mut Option<Message> {
+        match self {
+            State::Open => {
+                *self = State::Closing(Some(Message::Close(None)));
+                if let State::Closing(msg) = self {
+                    msg
+                } else {
+                    unreachable!()
+                }
+            }
+            State::Closing(msg) => msg,
+        }
     }
 }
 
@@ -55,7 +83,12 @@ pub(crate) mod private {
         ) -> Poll<Result<usize, WsError>>;
 
         fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), WsError>>;
-        fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), WsError>>;
+
+        fn poll_close(
+            self: Pin<&mut Self>,
+            cx: &mut Context<'_>,
+            msg: &mut Option<Message>,
+        ) -> Poll<Result<(), WsError>>;
     }
 
     impl<S> Sender for S where S: SealedSender {}
@@ -71,6 +104,8 @@ where
         cx: &mut Context<'_>,
         buf: &[u8],
     ) -> Poll<Result<usize, WsError>> {
+        use std::task::ready;
+
         ready!(self.as_mut().poll_ready(cx))?;
         let len = buf.len();
         self.start_send(Message::binary(buf.to_owned()))?;
@@ -81,7 +116,11 @@ where
         <S as futures_util::Sink<_>>::poll_flush(self, cx)
     }
 
-    fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), WsError>> {
+    fn poll_close(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        _: &mut Option<Message>,
+    ) -> Poll<Result<(), WsError>> {
         <S as futures_util::Sink<_>>::poll_close(self, cx)
     }
 }
@@ -95,16 +134,20 @@ where
         cx: &mut Context<'_>,
         buf: &[u8],
     ) -> Poll<io::Result<usize>> {
-        <S as private::SealedSender>::poll_write(Pin::new(&mut self.0), cx, buf)
+        <S as private::SealedSender>::poll_write(Pin::new(&mut self.sender), cx, buf)
             .map_err(convert_err)
     }
 
     fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
-        <S as private::SealedSender>::poll_flush(Pin::new(&mut self.0), cx).map_err(convert_err)
+        <S as private::SealedSender>::poll_flush(Pin::new(&mut self.sender), cx)
+            .map_err(convert_err)
     }
 
-    fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
-        <S as private::SealedSender>::poll_close(Pin::new(&mut self.0), cx).map_err(convert_err)
+    fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
+        let me = self.get_mut();
+        let msg = me.state.close();
+        <S as private::SealedSender>::poll_close(Pin::new(&mut me.sender), cx, msg)
+            .map_err(convert_err)
     }
 }
 
@@ -118,16 +161,20 @@ where
         cx: &mut Context<'_>,
         buf: &[u8],
     ) -> Poll<io::Result<usize>> {
-        <S as private::SealedSender>::poll_write(Pin::new(&mut self.0), cx, buf)
+        <S as private::SealedSender>::poll_write(Pin::new(&mut self.sender), cx, buf)
             .map_err(convert_err)
     }
 
     fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
-        <S as private::SealedSender>::poll_flush(Pin::new(&mut self.0), cx).map_err(convert_err)
+        <S as private::SealedSender>::poll_flush(Pin::new(&mut self.sender), cx)
+            .map_err(convert_err)
     }
 
-    fn poll_shutdown(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
-        <S as private::SealedSender>::poll_close(Pin::new(&mut self.0), cx).map_err(convert_err)
+    fn poll_shutdown(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<io::Result<()>> {
+        let me = self.get_mut();
+        let msg = me.state.close();
+        <S as private::SealedSender>::poll_close(Pin::new(&mut me.sender), cx, msg)
+            .map_err(convert_err)
     }
 }
 
