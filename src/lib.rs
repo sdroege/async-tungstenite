@@ -358,9 +358,9 @@ impl<S> WebSocketStream<S> {
     }
 }
 
-impl<T> WebSocketStream<T>
+impl<S> WebSocketStream<S>
 where
-    T: AsyncRead + AsyncWrite + Unpin,
+    S: AsyncRead + AsyncWrite + Unpin,
 {
     fn poll_next(&mut self, cx: &mut Context<'_>) -> Poll<Option<Result<Message, WsError>>> {
         #[cfg(feature = "verbose-logging")]
@@ -465,9 +465,9 @@ where
     }
 }
 
-impl<T> Stream for WebSocketStream<T>
+impl<S> Stream for WebSocketStream<S>
 where
-    T: AsyncRead + AsyncWrite + Unpin,
+    S: AsyncRead + AsyncWrite + Unpin,
 {
     type Item = Result<Message, WsError>;
 
@@ -476,9 +476,9 @@ where
     }
 }
 
-impl<T> FusedStream for WebSocketStream<T>
+impl<S> FusedStream for WebSocketStream<S>
 where
-    T: AsyncRead + AsyncWrite + Unpin,
+    S: AsyncRead + AsyncWrite + Unpin,
 {
     fn is_terminated(&self) -> bool {
         self.ended
@@ -486,9 +486,9 @@ where
 }
 
 #[cfg(feature = "futures-03-sink")]
-impl<T> futures_util::Sink<Message> for WebSocketStream<T>
+impl<S> futures_util::Sink<Message> for WebSocketStream<S>
 where
-    T: AsyncRead + AsyncWrite + Unpin,
+    S: AsyncRead + AsyncWrite + Unpin,
 {
     type Error = WsError;
 
@@ -505,6 +505,32 @@ where
     }
 
     fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        self.get_mut().poll_close(cx)
+    }
+}
+
+#[cfg(not(feature = "futures-03-sink"))]
+impl<S> bytes::private::SealedSender for WebSocketStream<S>
+where
+    S: AsyncRead + AsyncWrite + Unpin,
+{
+    fn poll_write(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buf: &[u8],
+    ) -> Poll<Result<usize, WsError>> {
+        let me = self.get_mut();
+        ready!(me.poll_ready(cx))?;
+        let len = buf.len();
+        me.start_send(Message::binary(buf.to_owned()))?;
+        Poll::Ready(Ok(len))
+    }
+
+    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), WsError>> {
+        self.get_mut().poll_flush(cx)
+    }
+
+    fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), WsError>> {
         self.get_mut().poll_close(cx)
     }
 }
@@ -625,6 +651,33 @@ where
     }
 
     fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        self.shared.lock().poll_close(cx)
+    }
+}
+
+#[cfg(not(feature = "futures-03-sink"))]
+impl<S> bytes::private::SealedSender for WebSocketSender<S>
+where
+    S: AsyncRead + AsyncWrite + Unpin,
+{
+    fn poll_write(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buf: &[u8],
+    ) -> Poll<Result<usize, WsError>> {
+        let me = self.get_mut();
+        let mut ws = me.shared.lock();
+        ready!(ws.poll_ready(cx))?;
+        let len = buf.len();
+        ws.start_send(Message::binary(buf.to_owned()))?;
+        Poll::Ready(Ok(len))
+    }
+
+    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), WsError>> {
+        self.shared.lock().poll_flush(cx)
+    }
+
+    fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), WsError>> {
         self.shared.lock().poll_close(cx)
     }
 }
