@@ -51,7 +51,7 @@ default-features = false
 features = ["sink"]
 
 [dependencies.tungstenite]
-version = "0.26"
+version = "0.27"
 default-features = false
 
 [dependencies.async-std]
@@ -115,16 +115,16 @@ version = "1.0"
 
 [dependencies.gio]
 optional = true
-version = "0.20"
+version = "0.21"
 
 [dependencies.glib]
 optional = true
-version = "0.20"
+version = "0.21"
 
 [dev-dependencies]
 futures = "0.3"
 url = "2.0.0"
-env_logger = "0.10"
+env_logger = ">= 0.10, <= 0.11"
 async-std = { version = "1.0", features = ["attributes", "unstable"] }
 tokio = { version = "1.0", features = ["full"] }
 futures-channel = "0.3"
@@ -133,7 +133,7 @@ hyper-util = { version = "0.1", features = ["tokio"] }
 http-body-util = "0.1"
 
 [dev-dependencies.tungstenite]
-version = "0.26"
+version = "0.27"
 features = ["url"]
 
 [[example]]

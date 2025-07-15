@@ -9,7 +9,7 @@ use log::*;
 async fn accept_connection(peer: SocketAddr, stream: TcpStream) {
     if let Err(e) = handle_connection(peer, stream).await {
         match e {
-            Error::ConnectionClosed | Error::Protocol(_) | Error::Utf8 => (),
+            Error::ConnectionClosed | Error::Protocol(_) | Error::Utf8(_) => (),
             err => error!("Error processing connection: {}", err),
         }
     }
