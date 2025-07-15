@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.30.0] - 2025-07-15
+### Changed
+- Update to tungstenite 0.27.
+- Update to webpki-roots to 1.0.
+- Update to glib / gio 0.21.
+
+### Added
+- Add support for splitting a `WebSocketStream` into a sender and receiver
+  type without making use of the future's `Sink` trait, and re-combining them
+  again into a single value.
+
 ## [0.29.1] - 2025-02-18
 ### Added
 - Added wrappers that allow treating a WebSocket as a byte stream. `ByteWriter`
@@ -236,7 +247,8 @@ No changelog is available for older versions as of yet.
 -->
 
 
-[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.29.1...HEAD
+[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.30.0...HEAD
+[0.30.0]: https://github.com/sdroege/async-tungstenite/compare/0.30.0...0.29.1
 [0.29.1]: https://github.com/sdroege/async-tungstenite/compare/0.29.1...0.29.0
 [0.29.0]: https://github.com/sdroege/async-tungstenite/compare/0.29.0...0.28.2
 [0.28.2]: https://github.com/sdroege/async-tungstenite/compare/0.28.2...0.28.1
