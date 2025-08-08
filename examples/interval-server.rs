@@ -22,7 +22,7 @@ async fn accept_connection(peer: SocketAddr, stream: TcpStream) {
 async fn handle_connection(peer: SocketAddr, stream: TcpStream) -> Result<()> {
     let ws_stream = accept_async(stream).await.expect("Failed to accept");
     info!("New WebSocket connection: {}", peer);
-    let (ws_sender, mut ws_receiver) = ws_stream.split();
+    let (mut ws_sender, mut ws_receiver) = ws_stream.split();
     let mut interval = async_std::stream::interval(Duration::from_millis(1000));
 
     // Echo incoming WebSocket messages and send a message periodically every second.
