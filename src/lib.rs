@@ -609,7 +609,7 @@ pub struct WebSocketSender<S> {
 
 impl<S> WebSocketSender<S> {
     /// Send a message via [websocket](WebSocketStream).
-    pub async fn send(&self, msg: Message) -> Result<(), WsError>
+    pub async fn send(&mut self, msg: Message) -> Result<(), WsError>
     where
         S: AsyncRead + AsyncWrite + Unpin,
     {
@@ -621,7 +621,7 @@ impl<S> WebSocketSender<S> {
     }
 
     /// Close the underlying [websocket](WebSocketStream).
-    pub async fn close(&self, msg: Option<CloseFrame>) -> Result<(), WsError>
+    pub async fn close(&mut self, msg: Option<CloseFrame>) -> Result<(), WsError>
     where
         S: AsyncRead + AsyncWrite + Unpin,
     {
