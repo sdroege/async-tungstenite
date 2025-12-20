@@ -61,6 +61,12 @@ jobs:
       - name: Check async-std-runtime, async-tls, async-native-tls
         run: cargo check --features async-std-runtime,async-tls,async-native-tls
 
+      - name: Check smol-runtime, no tls
+        run: cargo check --features smol-runtime
+
+      - name: Check smol-runtime, native-tls
+        run: cargo check --features smol-runtime,smol-native-tls
+
       - name: Check tokio-runtime, tokio-native-tls
         run: cargo check --features tokio-runtime,tokio-native-tls
 
