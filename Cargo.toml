@@ -141,6 +141,11 @@ http-body-util = "0.1"
 version = "0.28"
 features = ["url"]
 
+# For smol examples
+[dependencies.smol]
+optional = true
+version = "2.0"
+
 [[example]]
 name = "autobahn-client"
 required-features = ["async-std-runtime"]
@@ -148,6 +153,10 @@ required-features = ["async-std-runtime"]
 [[example]]
 name = "async-std-echo"
 required-features = ["async-std-runtime"]
+
+[[example]]
+name = "smol-echo"
+required-features = ["smol-runtime", "smol"]
 
 [[example]]
 name = "client"
