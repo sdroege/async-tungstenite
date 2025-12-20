@@ -90,6 +90,8 @@ pub mod async_std;
 pub mod async_tls;
 #[cfg(feature = "gio-runtime")]
 pub mod gio;
+#[cfg(feature = "smol-runtime")]
+pub mod smol;
 #[cfg(feature = "tokio-runtime")]
 pub mod tokio;
 
@@ -747,6 +749,7 @@ impl<S> Shared<S> {
 #[cfg(any(
     feature = "async-tls",
     feature = "async-std-runtime",
+    feature = "smol-runtime",
     feature = "tokio-runtime",
     feature = "gio-runtime"
 ))]
@@ -779,6 +782,7 @@ pub(crate) fn domain(
 
 #[cfg(any(
     feature = "async-std-runtime",
+    feature = "smol-runtime",
     feature = "tokio-runtime",
     feature = "gio-runtime"
 ))]
@@ -805,6 +809,7 @@ mod tests {
     #[cfg(any(
         feature = "async-tls",
         feature = "async-std-runtime",
+        feature = "smol-runtime",
         feature = "tokio-runtime",
         feature = "gio-runtime"
     ))]
