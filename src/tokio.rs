@@ -19,6 +19,7 @@ mod tls;
     any(
         feature = "tokio-rustls-manual-roots",
         feature = "tokio-rustls-native-certs",
+        feature = "tokio-rustls-platform-verifier",
         feature = "tokio-rustls-webpki-roots"
     ),
     not(feature = "tokio-native-tls")
@@ -32,6 +33,7 @@ mod tls;
         feature = "tokio-native-tls",
         feature = "tokio-rustls-manual-roots",
         feature = "tokio-rustls-native-certs",
+        feature = "tokio-rustls-platform-verifier",
         feature = "tokio-rustls-webpki-roots"
     ))
 ))]
@@ -44,6 +46,7 @@ mod tls;
         feature = "tokio-native-tls",
         feature = "tokio-rustls-manual-roots",
         feature = "tokio-rustls-native-certs",
+        feature = "tokio-rustls-platform-verifier",
         feature = "tokio-rustls-webpki-roots",
         feature = "tokio-openssl"
     ))
@@ -55,6 +58,7 @@ mod tls;
     feature = "tokio-native-tls",
     feature = "tokio-rustls-manual-roots",
     feature = "tokio-rustls-native-certs",
+    feature = "tokio-rustls-platform-verifier",
     feature = "tokio-rustls-webpki-roots",
     feature = "tokio-openssl",
     feature = "async-tls"
@@ -66,6 +70,7 @@ mod tls;
     feature = "tokio-native-tls",
     feature = "tokio-rustls-manual-roots",
     feature = "tokio-rustls-native-certs",
+    feature = "tokio-rustls-platform-verifier",
     feature = "tokio-rustls-webpki-roots",
     feature = "tokio-openssl",
     feature = "async-tls",
@@ -75,6 +80,7 @@ pub use self::tls::client_async_tls_with_connector_and_config;
     feature = "tokio-native-tls",
     feature = "tokio-rustls-manual-roots",
     feature = "tokio-rustls-native-certs",
+    feature = "tokio-rustls-platform-verifier",
     feature = "tokio-rustls-webpki-roots",
     feature = "tokio-openssl",
     feature = "async-tls"
@@ -85,6 +91,7 @@ use self::tls::{AutoStream, Connector};
     feature = "tokio-native-tls",
     feature = "tokio-rustls-manual-roots",
     feature = "tokio-rustls-native-certs",
+    feature = "tokio-rustls-platform-verifier",
     feature = "tokio-rustls-webpki-roots",
     feature = "tokio-openssl",
     feature = "async-tls"
@@ -94,6 +101,7 @@ pub use self::tls::client_async_tls_with_connector_and_config;
     feature = "tokio-native-tls",
     feature = "tokio-rustls-manual-roots",
     feature = "tokio-rustls-native-certs",
+    feature = "tokio-rustls-platform-verifier",
     feature = "tokio-rustls-webpki-roots",
     feature = "tokio-openssl",
     feature = "async-tls"
@@ -203,6 +211,7 @@ pub type ClientStream<S> = AutoStream<S>;
 #[cfg(any(
     feature = "tokio-native-tls",
     feature = "tokio-rustls-native-certs",
+        feature = "tokio-rustls-platform-verifier",
     feature = "tokio-rustls-webpki-roots",
     all(feature = "__rustls-tls", not(feature = "tokio-rustls-manual-roots")), // No roots will be available
     all(feature = "async-tls", not(feature = "tokio-openssl"))
@@ -224,6 +233,7 @@ where
 #[cfg(any(
     feature = "tokio-native-tls",
     feature = "tokio-rustls-native-certs",
+        feature = "tokio-rustls-platform-verifier",
     feature = "tokio-rustls-webpki-roots",
     all(feature = "__rustls-tls", not(feature = "tokio-rustls-manual-roots")), // No roots will be available
     all(feature = "async-tls", not(feature = "tokio-openssl"))
@@ -248,6 +258,7 @@ where
     feature = "tokio-native-tls",
     feature = "tokio-rustls-manual-roots",
     feature = "tokio-rustls-native-certs",
+    feature = "tokio-rustls-platform-verifier",
     feature = "tokio-rustls-webpki-roots",
     all(feature = "async-tls", not(feature = "tokio-openssl"))
 ))]
@@ -273,6 +284,7 @@ where
         feature = "tokio-native-tls",
         feature = "tokio-rustls-manual-roots",
         feature = "tokio-rustls-native-certs",
+        feature = "tokio-rustls-platform-verifier",
         feature = "tokio-rustls-webpki-roots"
     ))
 ))]
@@ -302,6 +314,7 @@ where
         feature = "tokio-native-tls",
         feature = "tokio-rustls-manual-roots",
         feature = "tokio-rustls-native-certs",
+        feature = "tokio-rustls-platform-verifier",
         feature = "tokio-rustls-webpki-roots"
     ))
 ))]
@@ -333,6 +346,7 @@ where
         feature = "tokio-native-tls",
         feature = "tokio-rustls-manual-roots",
         feature = "tokio-rustls-native-certs",
+        feature = "tokio-rustls-platform-verifier",
         feature = "tokio-rustls-webpki-roots"
     ))
 ))]
@@ -412,6 +426,7 @@ where
     feature = "tokio-native-tls",
     feature = "tokio-rustls-manual-roots",
     feature = "tokio-rustls-native-certs",
+    feature = "tokio-rustls-platform-verifier",
     feature = "tokio-rustls-webpki-roots",
     feature = "tokio-openssl"
 ))]
@@ -431,6 +446,7 @@ where
     feature = "tokio-native-tls",
     feature = "tokio-rustls-manual-roots",
     feature = "tokio-rustls-native-certs",
+    feature = "tokio-rustls-platform-verifier",
     feature = "tokio-rustls-webpki-roots",
     feature = "tokio-openssl"
 ))]
