@@ -27,6 +27,7 @@ tokio-native-tls = ["tokio-runtime", "real-tokio-native-tls", "real-native-tls",
 tokio-rustls-manual-roots = ["__rustls-tls"]
 tokio-rustls-webpki-roots = ["__rustls-tls", "webpki-roots"]
 tokio-rustls-native-certs = ["__rustls-tls", "rustls-native-certs"]
+tokio-rustls-platform-verifier = ["__rustls-tls", "rustls-platform-verifier"]
 tokio-openssl = ["tokio-runtime", "real-tokio-openssl", "openssl"]
 verbose-logging = []
 url = ["tungstenite/url"]
@@ -108,6 +109,10 @@ version = "1.0.1"
 [dependencies.rustls-native-certs]
 optional = true
 version = "0.8"
+
+[dependencies.rustls-platform-verifier]
+optional = true
+version = "0.6"
 
 [dependencies.webpki-roots]
 optional = true

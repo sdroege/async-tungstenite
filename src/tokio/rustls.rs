@@ -1,4 +1,4 @@
-use real_tokio_rustls::rustls::{ClientConfig, RootCertStore};
+use real_tokio_rustls::rustls::ClientConfig;
 use real_tokio_rustls::{client::TlsStream, TlsConnector};
 use rustls_pki_types::ServerName;
 
@@ -41,36 +41,55 @@ where
                     #[cfg(feature = "tokio-rustls-manual-roots")]
                     log::error!("tokio-rustls-manual-roots was selected, but no connector was provided! No certificates can be verified in this state.");
 
-                    #[cfg(feature = "tokio-rustls-manual-roots")]
-                    let root_store = RootCertStore::empty();
-                    #[cfg(not(feature = "tokio-rustls-manual-roots"))]
-                    let mut root_store = RootCertStore::empty();
+                    let config_builder = ClientConfig::builder();
 
-                    #[cfg(feature = "tokio-rustls-native-certs")]
-                    {
-                        let mut native_certs = rustls_native_certs::load_native_certs();
-                        if let Some(err) = native_certs.errors.drain(..).next() {
-                            return Err(std::io::Error::new(std::io::ErrorKind::Other, err).into());
+                    let config_builder = {
+                        #[cfg(feature = "tokio-rustls-native-certs")]
+                        {
+                            use real_tokio_rustls::rustls::RootCertStore;
+
+                            let mut root_store = RootCertStore::empty();
+                            let mut native_certs = rustls_native_certs::load_native_certs();
+                            if let Some(err) = native_certs.errors.drain(..).next() {
+                                return Err(
+                                    std::io::Error::new(std::io::ErrorKind::Other, err).into()
+                                );
+                            }
+                            let native_certs = native_certs.certs;
+                            let total_number = native_certs.len();
+                            let (number_added, number_ignored) =
+                                root_store.add_parsable_certificates(native_certs);
+                            log::debug!("Added {number_added}/{total_number} native root certificates (ignored {number_ignored})");
+                            config_builder.with_root_certificates(root_store)
                         }
-                        let native_certs = native_certs.certs;
-                        let total_number = native_certs.len();
-                        let (number_added, number_ignored) =
-                            root_store.add_parsable_certificates(native_certs);
-                        log::debug!("Added {number_added}/{total_number} native root certificates (ignored {number_ignored})");
-                    }
-                    #[cfg(all(
-                        feature = "tokio-rustls-webpki-roots",
-                        not(feature = "tokio-rustls-native-certs"),
-                        not(feature = "tokio-rustls-manual-roots")
-                    ))]
-                    {
-                        root_store.extend(webpki_roots::TLS_SERVER_ROOTS.iter().cloned());
-                    }
-                    TlsConnector::from(std::sync::Arc::new(
-                        ClientConfig::builder()
-                            .with_root_certificates(root_store)
-                            .with_no_client_auth(),
-                    ))
+                        #[cfg(feature = "tokio-rustls-platform-verifier")]
+                        {
+                            use rustls_platform_verifier::BuilderVerifierExt;
+                            config_builder
+                                .with_platform_verifier()
+                                .map_err(|err| Error::Tls(TlsError::Rustls(err.into())))?
+                        }
+                        #[cfg(feature = "tokio-rustls-manual-roots")]
+                        {
+                            use real_tokio_rustls::rustls::RootCertStore;
+
+                            config_builder.with_root_certificates(RootCertStore::empty())
+                        }
+                        #[cfg(all(
+                            feature = "tokio-rustls-webpki-roots",
+                            not(feature = "tokio-rustls-native-certs"),
+                            not(feature = "tokio-rustls-platform-verifier"),
+                            not(feature = "tokio-rustls-manual-roots")
+                        ))]
+                        {
+                            use real_tokio_rustls::rustls::RootCertStore;
+
+                            let mut root_store = RootCertStore::empty();
+                            root_store.extend(webpki_roots::TLS_SERVER_ROOTS.iter().cloned());
+                            config_builder.with_root_certificates(root_store)
+                        }
+                    };
+                    TlsConnector::from(std::sync::Arc::new(config_builder.with_no_client_auth()))
                 };
                 let domain = ServerName::try_from(domain)
                     .map_err(|_| Error::Tls(TlsError::InvalidDnsName))?;

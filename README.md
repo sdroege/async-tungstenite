@@ -47,6 +47,10 @@ integration with various other crates can be enabled via feature flags
    module to implement TLS via [tokio-rustls](https://crates.io/crates/tokio-rustls)
    and uses native system certificates found with
    [rustls-native-certs](https://github.com/rustls/rustls-native-certs).
+ * `tokio-rustls-platform-verifier`: Enables the additional functions in the `tokio` 
+   module to implement TLS via [tokio-rustls](https://crates.io/crates/tokio-rustls)
+   and uses native system certificates via the platform verifier found with
+   [rustls-platform-verifier](https://github.com/rustls/rustls-platform-verifier).
  * `tokio-rustls-webpki-roots`: Enables the additional functions in the `tokio` 
    module to implement TLS via [tokio-rustls](https://crates.io/crates/tokio-rustls)
    and uses the certificates [webpki-roots](https://github.com/rustls/webpki-roots)
