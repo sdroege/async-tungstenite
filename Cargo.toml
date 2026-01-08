@@ -19,6 +19,7 @@ default = ["handshake", "futures-03-sink"]
 futures-03-sink = ["futures-util"]
 handshake = ["tungstenite/handshake"]
 async-std-runtime = ["async-std", "handshake"]
+smol-runtime = ["async-net", "handshake"]
 tokio-runtime = ["tokio", "handshake"]
 gio-runtime = ["gio", "glib", "handshake"]
 async-tls = ["real-async-tls", "handshake"]
@@ -35,7 +36,7 @@ url = ["tungstenite/url"]
 __rustls-tls = ["tokio-runtime", "real-tokio-rustls", "rustls-pki-types", "tungstenite/__rustls-tls"]
 
 [package.metadata.docs.rs]
-features = ["async-std-runtime", "tokio-runtime", "gio-runtime", "async-tls", "async-native-tls", "tokio-native-tls"]
+features = ["async-std-runtime", "smol-runtime", "tokio-runtime", "gio-runtime", "async-tls", "async-native-tls", "tokio-native-tls"]
 
 [dependencies]
 log = "0.4"
@@ -58,6 +59,10 @@ default-features = false
 [dependencies.async-std]
 optional = true
 version = "1.0"
+
+[dependencies.async-net]
+optional = true
+version = "2.0"
 
 [dependencies.real-tokio-openssl]
 optional = true
@@ -141,6 +146,11 @@ http-body-util = "0.1"
 version = "0.28"
 features = ["url"]
 
+# For smol examples
+[dependencies.smol]
+optional = true
+version = "2.0"
+
 [[example]]
 name = "autobahn-client"
 required-features = ["async-std-runtime"]
@@ -148,6 +158,10 @@ required-features = ["async-std-runtime"]
 [[example]]
 name = "async-std-echo"
 required-features = ["async-std-runtime"]
+
+[[example]]
+name = "smol-echo"
+required-features = ["smol-runtime", "smol"]
 
 [[example]]
 name = "client"
