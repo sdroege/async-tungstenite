@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.33.0] - 2026-02-20
 ### Changed
 - Update GLib/gio support to version 0.22 of the bindings.
+- Update MSRV to 1.85.
 
 ## [0.32.1] - 2026-01-05
 ### Added
