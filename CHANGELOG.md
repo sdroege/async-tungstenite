@@ -4,7 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.33.0] - 2026-02-20
+### Changed
+- Update GLib/gio support to version 0.22 of the bindings.
+
 ## [0.32.1] - 2026-01-05
+### Added
 - Add `tokio-rustls-platform-verifier` feature to use that crate for
   certificate verification.
 
@@ -262,7 +267,9 @@ No changelog is available for older versions as of yet.
 -->
 
 
-[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.32.0...HEAD
+[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.33.0...HEAD
+[0.33.0]: https://github.com/sdroege/async-tungstenite/compare/0.33.0...0.32.1
+[0.32.1]: https://github.com/sdroege/async-tungstenite/compare/0.32.1...0.32.0
 [0.32.0]: https://github.com/sdroege/async-tungstenite/compare/0.32.0...0.31.0
 [0.31.0]: https://github.com/sdroege/async-tungstenite/compare/0.31.0...0.30.0
 [0.30.0]: https://github.com/sdroege/async-tungstenite/compare/0.30.0...0.29.1
