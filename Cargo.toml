@@ -54,7 +54,7 @@ default-features = false
 features = ["sink"]
 
 [dependencies.tungstenite]
-version = "0.28"
+version = "0.29"
 default-features = false
 
 [dependencies.async-std]
