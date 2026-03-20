@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.34.0] - 2026-03-20
+### Changed
+- Update to tungstenite 0.29.
+- Update to async-native-tls 0.6.
+
+### Added
+- smol runtime support including smol-native-tls.
+
 ## [0.33.0] - 2026-02-20
 ### Changed
 - Update GLib/gio support to version 0.22 of the bindings.
@@ -268,7 +276,8 @@ No changelog is available for older versions as of yet.
 -->
 
 
-[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.33.0...HEAD
+[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.34.0...HEAD
+[0.34.0]: https://github.com/sdroege/async-tungstenite/compare/0.34.0...0.33.0
 [0.33.0]: https://github.com/sdroege/async-tungstenite/compare/0.33.0...0.32.1
 [0.32.1]: https://github.com/sdroege/async-tungstenite/compare/0.32.1...0.32.0
 [0.32.0]: https://github.com/sdroege/async-tungstenite/compare/0.32.0...0.31.0
