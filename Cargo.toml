@@ -83,7 +83,7 @@ features = ["client"]
 
 [dependencies.real-async-native-tls]
 optional = true
-version = "0.5.0"
+version = "0.6.0"
 package = "async-native-tls"
 
 [dependencies.real-native-tls]
