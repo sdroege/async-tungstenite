@@ -67,6 +67,18 @@ jobs:
       - name: Check smol-runtime, native-tls
         run: cargo check --features smol-runtime,smol-native-tls
 
+      - name: Check smol-runtime, futures-rustls-native-certs
+        run: cargo check --features smol-runtime,futures-rustls-native-certs
+
+      - name: Check smol-runtime, futures-rustls-platform-verifier
+        run: cargo check --features smol-runtime,futures-rustls-platform-verifier
+
+      - name: Check smol-runtime, futures-rustls-webpki-roots
+        run: cargo check --features smol-runtime,futures-rustls-webpki-roots
+
+      - name: Check smol-runtime, futures-rustls-manual-roots
+        run: cargo check --features smol-runtime,futures-rustls-manual-roots
+
       - name: Check tokio-runtime, tokio-native-tls
         run: cargo check --features tokio-runtime,tokio-native-tls
 
