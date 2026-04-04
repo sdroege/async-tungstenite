@@ -9,31 +9,31 @@ use async_net::TcpStream;
 
 use super::{domain, port, WebSocketStream};
 
-#[cfg(feature = "async-native-tls")]
+#[cfg(feature = "smol-native-tls")]
 use futures_io::{AsyncRead, AsyncWrite};
 
-#[cfg(feature = "async-native-tls")]
+#[cfg(feature = "smol-native-tls")]
 #[path = "smol/native_tls.rs"]
 mod tls;
 
-#[cfg(not(any(feature = "async-native-tls")))]
+#[cfg(not(any(feature = "smol-native-tls")))]
 #[path = "smol/dummy_tls.rs"]
 mod tls;
 
-#[cfg(not(any(feature = "async-native-tls")))]
+#[cfg(not(any(feature = "smol-native-tls")))]
 pub use self::tls::client_async_tls_with_connector_and_config;
-#[cfg(not(any(feature = "async-native-tls")))]
+#[cfg(not(any(feature = "smol-native-tls")))]
 use self::tls::AutoStream;
 
-#[cfg(feature = "async-native-tls")]
-pub use self::async_native_tls::client_async_tls_with_connector_and_config;
-#[cfg(feature = "async-native-tls")]
-use self::async_native_tls::{AutoStream, Connector};
+#[cfg(feature = "smol-native-tls")]
+pub use self::tls::client_async_tls_with_connector_and_config;
+#[cfg(feature = "smol-native-tls")]
+use self::tls::{AutoStream, Connector};
 
 /// Type alias for the stream type of the `client_async()` functions.
 pub type ClientStream<S> = AutoStream<S>;
 
-#[cfg(feature = "async-native-tls")]
+#[cfg(feature = "smol-native-tls")]
 /// Creates a WebSocket handshake from a request and a stream,
 /// upgrading the stream to TLS if required.
 pub async fn client_async_tls<R, S>(
@@ -48,7 +48,7 @@ where
     client_async_tls_with_connector_and_config(request, stream, None, None).await
 }
 
-#[cfg(feature = "async-native-tls")]
+#[cfg(feature = "smol-native-tls")]
 /// Creates a WebSocket handshake from a request and a stream,
 /// upgrading the stream to TLS if required and using the given
 /// WebSocket configuration.
@@ -65,7 +65,7 @@ where
     client_async_tls_with_connector_and_config(request, stream, None, config).await
 }
 
-#[cfg(feature = "async-native-tls")]
+#[cfg(feature = "smol-native-tls")]
 /// Creates a WebSocket handshake from a request and a stream,
 /// upgrading the stream to TLS if required and using the given
 /// connector.
@@ -131,7 +131,7 @@ where
     client_async_tls_with_connector_and_config(request, socket, None, config).await
 }
 
-#[cfg(any(feature = "async-native-tls"))]
+#[cfg(any(feature = "smol-native-tls"))]
 /// Connect to a given URL using the provided TLS connector.
 pub async fn connect_async_with_tls_connector<R>(
     request: R,
@@ -143,7 +143,7 @@ where
     connect_async_with_tls_connector_and_config(request, connector, None).await
 }
 
-#[cfg(any(feature = "async-native-tls"))]
+#[cfg(any(feature = "smol-native-tls"))]
 /// Connect to a given URL using the provided TLS connector.
 pub async fn connect_async_with_tls_connector_and_config<R>(
     request: R,

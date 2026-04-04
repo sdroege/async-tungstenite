@@ -54,6 +54,7 @@ mod handshake;
 #[cfg(any(
     feature = "async-tls",
     feature = "async-native-tls",
+    feature = "smol-native-tls",
     feature = "tokio-native-tls",
     feature = "tokio-rustls-manual-roots",
     feature = "tokio-rustls-native-certs",
