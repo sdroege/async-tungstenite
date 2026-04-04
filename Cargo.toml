@@ -21,6 +21,10 @@ handshake = ["tungstenite/handshake"]
 async-std-runtime = ["async-std", "handshake"]
 smol-runtime = ["async-net", "handshake"]
 smol-native-tls = ["real-async-native-tls", "tungstenite/native-tls"]
+futures-rustls-manual-roots = ["__futures-rustls"]
+futures-rustls-webpki-roots = ["__futures-rustls", "webpki-roots"]
+futures-rustls-native-certs = ["__futures-rustls", "rustls-native-certs"]
+futures-rustls-platform-verifier = ["__futures-rustls", "rustls-platform-verifier"]
 tokio-runtime = ["tokio", "handshake"]
 gio-runtime = ["gio", "glib", "handshake"]
 async-tls = ["real-async-tls", "handshake"]
@@ -36,6 +40,8 @@ url = ["tungstenite/url"]
 
 # rustls x tokio
 __tokio-rustls = ["__rustls-tls", "tokio-runtime", "real-tokio-rustls"]
+# rustls x futures-io
+__futures-rustls = ["__rustls-tls", "real-futures-rustls"]
 # base rustls features
 __rustls-tls = ["tungstenite/__rustls-tls", "rustls-pki-types"]
 
@@ -93,6 +99,11 @@ package = "async-native-tls"
 optional = true
 version = "0.2"
 package = "native-tls"
+
+[dependencies.real-futures-rustls]
+optional = true
+version = "0.26.0"
+package = "futures-rustls"
 
 [dependencies.tokio]
 optional = true
