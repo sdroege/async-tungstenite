@@ -26,15 +26,18 @@ gio-runtime = ["gio", "glib", "handshake"]
 async-tls = ["real-async-tls", "handshake"]
 async-native-tls = ["async-std-runtime", "real-async-native-tls", "tungstenite/native-tls"]
 tokio-native-tls = ["tokio-runtime", "real-tokio-native-tls", "real-native-tls", "tungstenite/native-tls"]
-tokio-rustls-manual-roots = ["__rustls-tls"]
-tokio-rustls-webpki-roots = ["__rustls-tls", "webpki-roots"]
-tokio-rustls-native-certs = ["__rustls-tls", "rustls-native-certs"]
-tokio-rustls-platform-verifier = ["__rustls-tls", "rustls-platform-verifier"]
+tokio-rustls-manual-roots = ["__tokio-rustls"]
+tokio-rustls-webpki-roots = ["__tokio-rustls", "webpki-roots"]
+tokio-rustls-native-certs = ["__tokio-rustls", "rustls-native-certs"]
+tokio-rustls-platform-verifier = ["__tokio-rustls", "rustls-platform-verifier"]
 tokio-openssl = ["tokio-runtime", "real-tokio-openssl", "openssl"]
 verbose-logging = []
 url = ["tungstenite/url"]
 
-__rustls-tls = ["tokio-runtime", "real-tokio-rustls", "rustls-pki-types", "tungstenite/__rustls-tls"]
+# rustls x tokio
+__tokio-rustls = ["__rustls-tls", "tokio-runtime", "real-tokio-rustls"]
+# base rustls features
+__rustls-tls = ["tungstenite/__rustls-tls", "rustls-pki-types"]
 
 [package.metadata.docs.rs]
 features = ["async-std-runtime", "smol-runtime", "tokio-runtime", "gio-runtime", "async-tls", "async-native-tls", "tokio-native-tls"]
