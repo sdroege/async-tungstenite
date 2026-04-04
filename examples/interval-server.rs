@@ -1,5 +1,3 @@
-use async_std::net::{TcpListener, TcpStream};
-use async_std::task;
 use async_tungstenite::{
     accept_async,
     tungstenite::{Error, Message, Result},
@@ -7,6 +5,7 @@ use async_tungstenite::{
 use futures::future::{select, Either};
 use futures::prelude::*;
 use log::*;
+use smol::net::{TcpListener, TcpStream};
 use std::net::SocketAddr;
 use std::time::Duration;
 
@@ -23,7 +22,7 @@ async fn handle_connection(peer: SocketAddr, stream: TcpStream) -> Result<()> {
     let ws_stream = accept_async(stream).await.expect("Failed to accept");
     info!("New WebSocket connection: {}", peer);
     let (mut ws_sender, mut ws_receiver) = ws_stream.split();
-    let mut interval = async_std::stream::interval(Duration::from_millis(1000));
+    let mut interval = smol::Timer::interval(Duration::from_millis(1000));
 
     // Echo incoming WebSocket messages and send a message periodically every second.
 
@@ -70,10 +69,10 @@ async fn run() {
             .expect("connected streams should have a peer address");
         info!("Peer address: {}", peer);
 
-        task::spawn(accept_connection(peer, stream));
+        smol::spawn(accept_connection(peer, stream)).detach();
     }
 }
 
 fn main() {
-    task::block_on(run());
+    smol::block_on(run());
 }
