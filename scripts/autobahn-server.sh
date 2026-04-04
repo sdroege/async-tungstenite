@@ -22,7 +22,7 @@ function test_diff() {
     fi
 }
 
-cargo run --release --features async-std-runtime --example autobahn-server & WSSERVER_PID=$!
+cargo run --release --features smol-runtime --example autobahn-server & WSSERVER_PID=$!
 sleep 5
 
 docker run --rm \

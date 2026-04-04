@@ -1,10 +1,9 @@
 #![cfg(feature = "handshake")]
 
-use async_std::net::{TcpListener, TcpStream};
-use async_std::task;
 use async_tungstenite::{accept_async, client_async, WebSocketStream};
 use futures::prelude::*;
 use log::*;
+use smol::net::{TcpListener, TcpStream};
 use tungstenite::Message;
 
 async fn run_connection<S>(
@@ -24,99 +23,107 @@ async fn run_connection<S>(
     msg_tx.send(messages).expect("Failed to send results");
 }
 
-#[async_std::test]
-async fn communication() {
-    let _ = env_logger::try_init();
+#[test]
+fn communication() {
+    let test = async {
+        let _ = env_logger::try_init();
 
-    let (con_tx, con_rx) = futures::channel::oneshot::channel();
-    let (msg_tx, msg_rx) = futures::channel::oneshot::channel();
+        let (con_tx, con_rx) = futures::channel::oneshot::channel();
+        let (msg_tx, msg_rx) = futures::channel::oneshot::channel();
 
-    let f = async move {
-        let listener = TcpListener::bind("127.0.0.1:12345").await.unwrap();
-        info!("Server ready");
-        con_tx.send(()).unwrap();
-        info!("Waiting on next connection");
-        let (connection, _) = listener.accept().await.expect("No connections to accept");
-        let stream = accept_async(connection).await;
-        let stream = stream.expect("Failed to handshake with connection");
-        run_connection(stream, msg_tx).await;
+        let f = async move {
+            let listener = TcpListener::bind("127.0.0.1:12345").await.unwrap();
+            info!("Server ready");
+            con_tx.send(()).unwrap();
+            info!("Waiting on next connection");
+            let (connection, _) = listener.accept().await.expect("No connections to accept");
+            let stream = accept_async(connection).await;
+            let stream = stream.expect("Failed to handshake with connection");
+            run_connection(stream, msg_tx).await;
+        };
+
+        smol::spawn(f).detach();
+
+        info!("Waiting for server to be ready");
+
+        con_rx.await.expect("Server not ready");
+        let tcp = TcpStream::connect("127.0.0.1:12345")
+            .await
+            .expect("Failed to connect");
+        let url = "ws://localhost:12345/";
+        let (mut stream, _) = client_async(url, tcp)
+            .await
+            .expect("Client failed to connect");
+
+        for i in 1..10 {
+            info!("Sending message");
+            stream
+                .send(Message::text(format!("{}", i)))
+                .await
+                .expect("Failed to send message");
+        }
+
+        stream.close(None).await.expect("Failed to close");
+
+        info!("Waiting for response messages");
+        let messages = msg_rx.await.expect("Failed to receive messages");
+        assert_eq!(messages.len(), 10);
     };
 
-    task::spawn(f);
-
-    info!("Waiting for server to be ready");
-
-    con_rx.await.expect("Server not ready");
-    let tcp = TcpStream::connect("127.0.0.1:12345")
-        .await
-        .expect("Failed to connect");
-    let url = "ws://localhost:12345/";
-    let (mut stream, _) = client_async(url, tcp)
-        .await
-        .expect("Client failed to connect");
-
-    for i in 1..10 {
-        info!("Sending message");
-        stream
-            .send(Message::text(format!("{}", i)))
-            .await
-            .expect("Failed to send message");
-    }
-
-    stream.close(None).await.expect("Failed to close");
-
-    info!("Waiting for response messages");
-    let messages = msg_rx.await.expect("Failed to receive messages");
-    assert_eq!(messages.len(), 10);
+    smol::block_on(test);
 }
 
-#[async_std::test]
-async fn split_communication() {
-    let _ = env_logger::try_init();
+#[test]
+fn split_communication() {
+    let test = async {
+        let _ = env_logger::try_init();
 
-    let (con_tx, con_rx) = futures::channel::oneshot::channel();
-    let (msg_tx, msg_rx) = futures::channel::oneshot::channel();
+        let (con_tx, con_rx) = futures::channel::oneshot::channel();
+        let (msg_tx, msg_rx) = futures::channel::oneshot::channel();
 
-    let f = async move {
-        let listener = TcpListener::bind("127.0.0.1:12346").await.unwrap();
-        info!("Server ready");
-        con_tx.send(()).unwrap();
-        info!("Waiting on next connection");
-        let (connection, _) = listener.accept().await.expect("No connections to accept");
-        let stream = accept_async(connection).await;
-        let stream = stream.expect("Failed to handshake with connection");
-        run_connection(stream, msg_tx).await;
+        let f = async move {
+            let listener = TcpListener::bind("127.0.0.1:12346").await.unwrap();
+            info!("Server ready");
+            con_tx.send(()).unwrap();
+            info!("Waiting on next connection");
+            let (connection, _) = listener.accept().await.expect("No connections to accept");
+            let stream = accept_async(connection).await;
+            let stream = stream.expect("Failed to handshake with connection");
+            run_connection(stream, msg_tx).await;
+        };
+
+        smol::spawn(f).detach();
+
+        info!("Waiting for server to be ready");
+
+        con_rx.await.expect("Server not ready");
+        let tcp = TcpStream::connect("127.0.0.1:12346")
+            .await
+            .expect("Failed to connect");
+        let url = url::Url::parse("ws://localhost:12346/").unwrap();
+        let (stream, _) = client_async(url, tcp)
+            .await
+            .expect("Client failed to connect");
+
+        let (mut tx, rx) = stream.split();
+
+        for i in 1..10 {
+            info!("Sending message");
+            tx.send(Message::text(format!("{}", i)))
+                .await
+                .expect("Failed to send message");
+        }
+
+        tx.close(None).await.expect("Failed to close");
+
+        info!("Waiting for response messages");
+        let messages = msg_rx.await.expect("Failed to receive messages");
+        assert_eq!(messages.len(), 10);
+
+        assert!(tx.is_pair_of(&rx));
+        assert!(rx.is_pair_of(&tx));
+        WebSocketStream::reunite(tx, rx).expect("Failed to reunite the stream");
     };
 
-    task::spawn(f);
-
-    info!("Waiting for server to be ready");
-
-    con_rx.await.expect("Server not ready");
-    let tcp = TcpStream::connect("127.0.0.1:12346")
-        .await
-        .expect("Failed to connect");
-    let url = url::Url::parse("ws://localhost:12346/").unwrap();
-    let (stream, _) = client_async(url, tcp)
-        .await
-        .expect("Client failed to connect");
-
-    let (mut tx, rx) = stream.split();
-
-    for i in 1..10 {
-        info!("Sending message");
-        tx.send(Message::text(format!("{}", i)))
-            .await
-            .expect("Failed to send message");
-    }
-
-    tx.close(None).await.expect("Failed to close");
-
-    info!("Waiting for response messages");
-    let messages = msg_rx.await.expect("Failed to receive messages");
-    assert_eq!(messages.len(), 10);
-
-    assert!(tx.is_pair_of(&rx));
-    assert!(rx.is_pair_of(&tx));
-    WebSocketStream::reunite(tx, rx).expect("Failed to reunite the stream");
+    smol::block_on(test);
 }
