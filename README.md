@@ -45,10 +45,30 @@ integration with various other crates can be enabled via feature flags
  * `smol-native-tls`: Enables the additional functions in the `smol`
    module to implement TLS via
    [async-native-tls](https://crates.io/crates/async-native-tls).
+ * `futures-rustls-manual-roots`: Enables the additional functions in the `smol` 
+   module to implement TLS via [futures-rustls](https://crates.io/crates/futures-rustls)
+   and uses native system certificates found with
+   [rustls-manual-roots](https://github.com/rustls/rustls-manual-roots).
+ * `futures-rustls-native-certs`: Enables the additional functions in the `smol` 
+   module to implement TLS via [futures-rustls](https://crates.io/crates/futures-rustls)
+   and uses native system certificates found with
+   [rustls-native-certs](https://github.com/rustls/rustls-native-certs).
+ * `futures-rustls-platform-verifier`: Enables the additional functions in the `smol` 
+   module to implement TLS via [futures-rustls](https://crates.io/crates/futures-rustls)
+   and uses native system certificates via the platform verifier found with
+   [rustls-platform-verifier](https://github.com/rustls/rustls-platform-verifier).
+ * `futures-rustls-webpki-roots`: Enables the additional functions in the `smol` 
+   module to implement TLS via [futures-rustls](https://crates.io/crates/futures-rustls)
+   and uses the certificates [webpki-roots](https://github.com/rustls/webpki-roots)
+   provides.
  * `tokio-runtime`: Enables the `tokio` module, which provides integration
    with the [tokio](https://tokio.rs) runtime.
  * `tokio-native-tls`: Enables the additional functions in the `tokio` module to
    implement TLS via [tokio-native-tls](https://crates.io/crates/tokio-native-tls).
+ * `tokio-rustls-manual-roots`: Enables the additional functions in the `tokio` 
+   module to implement TLS via [tokio-rustls](https://crates.io/crates/tokio-rustls)
+   and uses native system certificates found with
+   [rustls-manual-roots](https://github.com/rustls/rustls-manual-roots).
  * `tokio-rustls-native-certs`: Enables the additional functions in the `tokio` 
    module to implement TLS via [tokio-rustls](https://crates.io/crates/tokio-rustls)
    and uses native system certificates found with
