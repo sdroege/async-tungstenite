@@ -1,4 +1,5 @@
-//! `async-std` integration.
+//! `smol` integration.
+
 use tungstenite::client::IntoClientRequest;
 use tungstenite::handshake::client::{Request, Response};
 use tungstenite::protocol::WebSocketConfig;
