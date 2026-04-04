@@ -34,9 +34,11 @@ integration with various other crates can be enabled via feature flags
  * `async-tls`: Enables the `async_tls` module, which provides integration
    with the [async-tls](https://crates.io/crates/async-tls) TLS stack and can
    be used independent of any async runtime.
- * `async-std-runtime`: Enables the `async_std` module, which provides
+ * `async-std-runtime`: Deprecated, use the smol runtime instead for a similar
+   experience. Enables the `async_std` module, which provides
    integration with the [async-std](https://async.rs) runtime.
- * `async-native-tls`: Enables the additional functions in the `async_std`
+ * `async-native-tls`: Deprecated, use the smol runtime instead for a similar
+   experience. Enables the additional functions in the `async_std`
    module to implement TLS via
    [async-native-tls](https://crates.io/crates/async-native-tls).
  * `tokio-runtime`: Enables the `tokio` module, which provides integration
