@@ -66,28 +66,9 @@ mod tls;
 #[path = "tokio/dummy_tls.rs"]
 mod tls;
 
-#[cfg(any(
-    feature = "tokio-native-tls",
-    feature = "tokio-rustls-manual-roots",
-    feature = "tokio-rustls-native-certs",
-    feature = "tokio-rustls-platform-verifier",
-    feature = "tokio-rustls-webpki-roots",
-    feature = "tokio-openssl",
-    feature = "async-tls",
-))]
 pub use self::tls::client_async_tls_with_connector_and_config;
-#[cfg(any(
-    feature = "tokio-native-tls",
-    feature = "tokio-rustls-manual-roots",
-    feature = "tokio-rustls-native-certs",
-    feature = "tokio-rustls-platform-verifier",
-    feature = "tokio-rustls-webpki-roots",
-    feature = "tokio-openssl",
-    feature = "async-tls"
-))]
-use self::tls::{AutoStream, Connector};
 
-#[cfg(not(any(
+#[cfg(any(
     feature = "tokio-native-tls",
     feature = "tokio-rustls-manual-roots",
     feature = "tokio-rustls-native-certs",
@@ -95,17 +76,9 @@ use self::tls::{AutoStream, Connector};
     feature = "tokio-rustls-webpki-roots",
     feature = "tokio-openssl",
     feature = "async-tls"
-)))]
-pub use self::tls::client_async_tls_with_connector_and_config;
-#[cfg(not(any(
-    feature = "tokio-native-tls",
-    feature = "tokio-rustls-manual-roots",
-    feature = "tokio-rustls-native-certs",
-    feature = "tokio-rustls-platform-verifier",
-    feature = "tokio-rustls-webpki-roots",
-    feature = "tokio-openssl",
-    feature = "async-tls"
-)))]
+))]
+use self::tls::Connector;
+
 use self::tls::AutoStream;
 
 /// Creates a WebSocket handshake from a request and a stream.
