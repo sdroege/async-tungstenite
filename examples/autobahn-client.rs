@@ -1,4 +1,4 @@
-use async_tungstenite::{async_std::connect_async, tungstenite::Error, tungstenite::Result};
+use async_tungstenite::{smol::connect_async, tungstenite::Error, tungstenite::Result};
 use futures::prelude::*;
 use log::*;
 
@@ -58,5 +58,5 @@ async fn run() {
 }
 
 fn main() {
-    async_std::task::block_on(run());
+    smol::block_on(run());
 }

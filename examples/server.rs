@@ -6,11 +6,11 @@
 //!
 //! You can test this out by running:
 //!
-//!     cargo run --features="async-std-runtime" --example server 127.0.0.1:12345
+//!     cargo run --features="smol-runtime" --example server 127.0.0.1:12345
 //!
 //! And then in another window run:
 //!
-//!     cargo run --features="async-std-runtime" --example client ws://127.0.0.1:12345/
+//!     cargo run --features="smol-runtime" --example client ws://127.0.0.1:12345/
 //!
 //! You can run the second command in multiple windows and then chat between the
 //! two, seeing the messages from the other client as they're received. For all
@@ -31,9 +31,8 @@ use futures::{
     future, pin_mut,
 };
 
-use async_std::net::{TcpListener, TcpStream};
-use async_std::task;
 use async_tungstenite::tungstenite::protocol::Message;
+use smol::net::{TcpListener, TcpStream};
 
 type Tx = UnboundedSender<Message>;
 type PeerMap = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
@@ -102,12 +101,12 @@ async fn run() -> Result<(), IoError> {
 
     // Let's spawn the handling of each connection in a separate task.
     while let Ok((stream, addr)) = listener.accept().await {
-        task::spawn(handle_connection(state.clone(), stream, addr));
+        smol::spawn(handle_connection(state.clone(), stream, addr)).detach();
     }
 
     Ok(())
 }
 
 fn main() -> Result<(), IoError> {
-    task::block_on(run())
+    smol::block_on(run())
 }

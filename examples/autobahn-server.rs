@@ -1,10 +1,10 @@
-use async_std::net::{SocketAddr, TcpListener, TcpStream};
 use async_tungstenite::{
     accept_async,
     tungstenite::{Error, Result},
 };
 use futures::prelude::*;
 use log::*;
+use smol::net::{SocketAddr, TcpListener, TcpStream};
 
 async fn accept_connection(peer: SocketAddr, stream: TcpStream) {
     if let Err(e) = handle_connection(peer, stream).await {
@@ -45,10 +45,10 @@ async fn run() {
             .expect("connected streams should have a peer address");
         info!("Peer address: {}", peer);
 
-        async_std::task::spawn(accept_connection(peer, stream));
+        smol::spawn(accept_connection(peer, stream)).detach();
     }
 }
 
 fn main() {
-    async_std::task::block_on(run());
+    smol::block_on(run());
 }
