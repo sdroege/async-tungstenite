@@ -90,6 +90,7 @@ use tungstenite::{
 };
 
 #[cfg(feature = "async-std-runtime")]
+#[deprecated = "async-std is unmaintained upstream. Please use the smol runtime instead."]
 pub mod async_std;
 #[cfg(feature = "async-tls")]
 pub mod async_tls;
