@@ -136,7 +136,6 @@ version = "0.22"
 futures = "0.3"
 url = "2.0.0"
 env_logger = ">= 0.10, <= 0.11"
-async-std = { version = "1.0", features = ["attributes", "unstable"] }
 smol = "2.0"
 tokio = { version = "1.0", features = ["full"] }
 futures-channel = "0.3"
