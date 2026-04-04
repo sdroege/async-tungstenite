@@ -2,9 +2,21 @@ use async_tungstenite::{smol::connect_async, tungstenite::Message};
 use futures::prelude::*;
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
-    #[cfg(any(feature = "async-tls", feature = "async-native-tls"))]
+    #[cfg(any(
+        feature = "async-tls",
+        feature = "async-native-tls",
+        feature = "futures-rustls-native-certs",
+        feature = "futures-rustls-platform-verifier",
+        feature = "futures-rustls-webpki-roots"
+    ))]
     let url = "wss://echo.websocket.org/.ws";
-    #[cfg(not(any(feature = "async-tls", feature = "async-native-tls")))]
+    #[cfg(not(any(
+        feature = "async-tls",
+        feature = "async-native-tls",
+        feature = "futures-rustls-native-certs",
+        feature = "futures-rustls-platform-verifier",
+        feature = "futures-rustls-webpki-roots"
+    )))]
     let url = "ws://echo.websocket.org/.ws";
 
     println!("Connecting: \"{}\"", url);
