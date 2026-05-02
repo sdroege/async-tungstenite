@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.34.1] - 2026-04-02
+### Added
+- New `futures-rustls` features for rustls support via the smol runtime.
+
+### Fixed
+- Various docs and cargo-feature related fixes.
+
+### Changed
+- Add deprecation notice for async-std.
+
 ## [0.34.0] - 2026-03-20
 ### Changed
 - Update to tungstenite 0.29.
@@ -276,7 +286,8 @@ No changelog is available for older versions as of yet.
 -->
 
 
-[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.34.0...HEAD
+[Unreleased]: https://github.com/sdroege/async-tungstenite/compare/0.34.1...HEAD
+[0.34.1]: https://github.com/sdroege/async-tungstenite/compare/0.34.1...0.34.0
 [0.34.0]: https://github.com/sdroege/async-tungstenite/compare/0.34.0...0.33.0
 [0.33.0]: https://github.com/sdroege/async-tungstenite/compare/0.33.0...0.32.1
 [0.32.1]: https://github.com/sdroege/async-tungstenite/compare/0.32.1...0.32.0
