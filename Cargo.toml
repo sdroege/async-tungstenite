@@ -104,6 +104,7 @@ package = "native-tls"
 optional = true
 version = "0.26.0"
 package = "futures-rustls"
+default-features = false
 
 [dependencies.tokio]
 optional = true
