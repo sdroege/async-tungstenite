@@ -31,16 +31,6 @@ can use it with non-blocking/asynchronous `TcpStream`s from and couple it
 together with other crates from the async stack. In addition, optional
 integration with various other crates can be enabled via feature flags
 
- * `async-tls`: Enables the `async_tls` module, which provides integration
-   with the [async-tls](https://crates.io/crates/async-tls) TLS stack and can
-   be used independent of any async runtime.
- * `async-std-runtime`: Deprecated, use the smol runtime instead for a similar
-   experience. Enables the `async_std` module, which provides
-   integration with the [async-std](https://async.rs) runtime.
- * `async-native-tls`: Deprecated, use the smol runtime instead for a similar
-   experience. Enables the additional functions in the `async_std`
-   module to implement TLS via
-   [async-native-tls](https://crates.io/crates/async-native-tls).
  * `smol-runtime`: Enables the `smol` module, which provides integration with
    the [async-io](https://crates.io/crates/async-io) crate and the
    [smol](https://crates.io/crates/smol) runtime.
@@ -85,6 +75,23 @@ integration with various other crates can be enabled via feature flags
    provides.
  * `gio-runtime`: Enables the `gio` module, which provides integration with
    the [gio](https://gtk-rs.org) runtime.
+
+### Deprecated features
+
+These features depend on unmaintained crates / crates with security issues and are
+**deprecated**.
+
+ * `async-tls`: Use futures-rustls instead. Enables the `async_tls` module,
+   which provides integration with the
+   [async-tls](https://crates.io/crates/async-tls) TLS stack and can be used
+   independently of any async runtime.
+ * `async-std-runtime`: Use the smol runtime instead for a similar experience.
+   Enables the `async_std` module, which provides integration with the
+   [async-std](https://async.rs) runtime.
+ * `async-native-tls`: Use the smol runtime with the `smol-native-tls` feature
+   instead for a similar experience. Enables the additional functions in the
+   `async_std` module to implement TLS via
+   [async-native-tls](https://crates.io/crates/async-native-tls).
 
 ## Messages vs Streaming
 

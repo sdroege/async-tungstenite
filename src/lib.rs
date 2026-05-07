@@ -98,6 +98,9 @@ use tungstenite::{
 #[deprecated = "async-std is unmaintained upstream. Please use the smol runtime instead."]
 pub mod async_std;
 #[cfg(feature = "async-tls")]
+#[deprecated(
+    note = "async-tls has not seen an update for 2 years and depends on a vulnerable version of rustls. Use futures-rustls instead."
+)]
 pub mod async_tls;
 #[cfg(feature = "gio-runtime")]
 pub mod gio;
