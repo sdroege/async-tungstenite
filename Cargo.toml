@@ -151,7 +151,7 @@ version = "0.22"
 futures = "0.3"
 url = "2.0.0"
 env_logger = ">= 0.10, <= 0.11"
-async-std = { version = "1.0", features = ["attributes", "unstable"] }
+smol = "2.0"
 tokio = { version = "1.0", features = ["full"] }
 futures-channel = "0.3"
 hyper = { version = "1.0", default-features = false, features = ["http1", "server"] }
@@ -162,14 +162,9 @@ http-body-util = "0.1"
 version = "0.29"
 features = ["url"]
 
-# For smol examples
-[dependencies.smol]
-optional = true
-version = "2.0"
-
 [[example]]
 name = "autobahn-client"
-required-features = ["async-std-runtime"]
+required-features = ["smol-runtime"]
 
 [[example]]
 name = "async-std-echo"
@@ -177,35 +172,35 @@ required-features = ["async-std-runtime"]
 
 [[example]]
 name = "smol-echo"
-required-features = ["smol-runtime", "smol"]
+required-features = ["smol-runtime"]
 
 [[example]]
 name = "client"
-required-features = ["async-std-runtime"]
+required-features = ["smol-runtime"]
 
 [[example]]
 name = "client-bytes"
-required-features = ["async-std-runtime"]
+required-features = ["smol-runtime"]
 
 [[example]]
 name = "autobahn-server"
-required-features = ["async-std-runtime", "futures-03-sink"]
+required-features = ["smol-runtime", "futures-03-sink"]
 
 [[example]]
 name = "server"
-required-features = ["async-std-runtime"]
+required-features = ["smol-runtime"]
 
 [[example]]
 name = "echo-server"
-required-features = ["async-std-runtime"]
+required-features = ["smol-runtime"]
 
 [[example]]
 name = "server-headers"
-required-features = ["async-std-runtime", "handshake", "futures-util"]
+required-features = ["smol-runtime", "handshake", "futures-util"]
 
 [[example]]
 name = "interval-server"
-required-features = ["async-std-runtime"]
+required-features = ["smol-runtime"]
 
 [[example]]
 name = "gio-echo"

@@ -9,10 +9,6 @@
 //! ```sh
 //! cmd /c "set RUST_LOG=debug && cargo run --example server-headers"
 //! ```
-use async_std::{
-    net::{TcpListener, TcpStream},
-    task,
-};
 use async_tungstenite::{
     accept_hdr_async,
     tungstenite::{
@@ -21,26 +17,29 @@ use async_tungstenite::{
         Message,
     },
 };
+use smol::net::{TcpListener, TcpStream};
 use url::Url;
 #[macro_use]
 extern crate log;
 use futures_util::StreamExt;
 
-#[async_std::main]
-async fn main() {
-    env_logger::builder().format_timestamp(None).init();
+fn main() {
+    smol::block_on(async {
+        env_logger::builder().format_timestamp(None).init();
 
-    task::spawn(async move {
-        server().await;
+        smol::spawn(async move {
+            server().await;
+        })
+        .detach();
+        client();
     });
-    client();
 }
 
 async fn server() {
     let server = TcpListener::bind("127.0.0.1:8080").await.unwrap();
 
     while let Ok((stream, _)) = server.accept().await {
-        task::spawn(accept_connection(stream));
+        smol::spawn(accept_connection(stream)).detach();
     }
 }
 

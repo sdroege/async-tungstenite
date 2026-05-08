@@ -14,11 +14,9 @@ use std::env;
 
 use futures::{future, pin_mut, StreamExt};
 
-use async_std::io;
-use async_std::prelude::*;
-use async_std::task;
-use async_tungstenite::async_std::connect_async;
+use async_tungstenite::smol::connect_async;
 use async_tungstenite::tungstenite::protocol::Message;
+use smol::io::{AsyncReadExt, AsyncWriteExt};
 
 async fn run() {
     let connect_addr = env::args()
@@ -26,7 +24,7 @@ async fn run() {
         .unwrap_or_else(|| panic!("this program requires at least one argument"));
 
     let (stdin_tx, stdin_rx) = futures::channel::mpsc::unbounded();
-    task::spawn(read_stdin(stdin_tx));
+    smol::spawn(read_stdin(stdin_tx)).detach();
 
     let (ws_stream, _) = connect_async(&connect_addr)
         .await
@@ -39,7 +37,9 @@ async fn run() {
     let ws_to_stdout = {
         read.for_each(|message| async {
             let data = message.unwrap().into_data();
-            async_std::io::stdout().write_all(&data).await.unwrap();
+            let mut stdout = smol::Unblock::new(std::io::stdout());
+            stdout.write_all(&data).await.unwrap();
+            stdout.flush().await.unwrap();
         })
     };
 
@@ -50,7 +50,7 @@ async fn run() {
 // Our helper method which will read data from stdin and send it along the
 // sender provided.
 async fn read_stdin(tx: futures::channel::mpsc::UnboundedSender<Message>) {
-    let mut stdin = io::stdin();
+    let mut stdin = smol::Unblock::new(std::io::stdin());
     loop {
         let mut buf = vec![0; 1024];
         let n = match stdin.read(&mut buf).await {
@@ -63,5 +63,5 @@ async fn read_stdin(tx: futures::channel::mpsc::UnboundedSender<Message>) {
 }
 
 fn main() {
-    task::block_on(run())
+    smol::block_on(run())
 }

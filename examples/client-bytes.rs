@@ -12,10 +12,11 @@
 
 use std::env;
 
-use async_std::io;
-use async_std::task;
-use async_tungstenite::async_std::connect_async;
+use async_tungstenite::smol::connect_async;
 use async_tungstenite::{ByteReader, ByteWriter};
+
+use smol::io::AsyncWriteExt;
+use smol::Unblock;
 
 async fn run() {
     let connect_addr = env::args()
@@ -28,14 +29,25 @@ async fn run() {
     println!("WebSocket handshake has been successfully completed");
 
     let (write, read) = ws_stream.split();
-    let byte_writer = ByteWriter::new(write);
-    let byte_reader = ByteReader::new(read);
-    let stdin_to_ws = task::spawn(io::copy(io::stdin(), byte_writer));
-    let ws_to_stdout = task::spawn(io::copy(byte_reader, io::stdout()));
+
+    let stdin_to_ws: smol::Task<std::io::Result<()>> = smol::spawn(async {
+        let mut stdin = Unblock::new(std::io::stdin());
+        let mut byte_writer = ByteWriter::new(write);
+        smol::io::copy(&mut stdin, &mut byte_writer).await?;
+        byte_writer.flush().await
+    });
+
+    let ws_to_stdout: smol::Task<std::io::Result<()>> = smol::spawn(async {
+        let mut byte_reader = ByteReader::new(read);
+        let mut stdout = Unblock::new(std::io::stdout());
+        smol::io::copy(&mut byte_reader, &mut stdout).await?;
+        stdout.flush().await
+    });
+
     stdin_to_ws.await.unwrap();
     ws_to_stdout.await.unwrap();
 }
 
 fn main() {
-    task::block_on(run())
+    smol::block_on(run())
 }
