@@ -46,7 +46,7 @@ __futures-rustls = ["__rustls-tls", "real-futures-rustls"]
 __rustls-tls = ["tungstenite/__rustls-tls", "rustls-pki-types"]
 
 [package.metadata.docs.rs]
-features = ["async-std-runtime", "smol-runtime", "tokio-runtime", "gio-runtime", "async-tls", "async-native-tls", "tokio-native-tls"]
+features = ["async-std-runtime", "smol-runtime", "tokio-runtime", "gio-runtime", "async-tls", "async-native-tls", "tokio-native-tls", "smol-native-tls"]
 
 [dependencies]
 log = "0.4"
