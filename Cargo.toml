@@ -133,7 +133,7 @@ version = "0.8"
 
 [dependencies.rustls-platform-verifier]
 optional = true
-version = "0.6"
+version = "0.7"
 
 [dependencies.webpki-roots]
 optional = true
