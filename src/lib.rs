@@ -38,6 +38,7 @@
 //! Each WebSocket stream implements the required `Stream` and `Sink` traits,
 //! making the socket a stream of WebSocket messages coming in and going out.
 
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![deny(
     missing_docs,
     unused_must_use,
