@@ -75,7 +75,7 @@ where
         .await
         .map_err(to_std_io_error)?;
     let socket = IOStreamAsyncReadWrite::new(socket)
-        .map_err(|_| io::Error::new(io::ErrorKind::Other, "Unsupported gio::IOStream"))?;
+        .map_err(|_| io::Error::other("Unsupported gio::IOStream"))?;
 
     client_async_with_config(request, socket, config).await
 }
@@ -138,7 +138,7 @@ where
     C: Callback + Unpin,
 {
     let stream = IOStreamAsyncReadWrite::new(stream)
-        .map_err(|_| io::Error::new(io::ErrorKind::Other, "Unsupported gio::IOStream"))?;
+        .map_err(|_| io::Error::other("Unsupported gio::IOStream"))?;
 
     crate::accept_hdr_async_with_config(stream, callback, config).await
 }
@@ -216,6 +216,6 @@ impl<T: IsA<gio::IOStream> + Unpin> AsyncWrite for IOStreamAsyncReadWrite<T> {
 fn to_std_io_error(error: glib::Error) -> io::Error {
     match error.kind::<gio::IOErrorEnum>() {
         Some(io_error_enum) => io::Error::new(io_error_enum.into(), error),
-        None => io::Error::new(io::ErrorKind::Other, error),
+        None => io::Error::other(error),
     }
 }

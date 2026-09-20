@@ -34,7 +34,7 @@ where
         Mode::Plain => Ok(StreamSwitcher::Plain(socket)),
         Mode::Tls => {
             let stream = {
-                let connector = connector.unwrap_or_else(AsyncTlsConnector::new);
+                let connector = connector.unwrap_or_default();
                 connector.connect(&domain, socket).await?
             };
             Ok(StreamSwitcher::Tls(stream))

@@ -281,6 +281,6 @@ where
 fn convert_err(e: WsError) -> io::Error {
     match e {
         WsError::Io(io) => io,
-        _ => io::Error::new(io::ErrorKind::Other, e),
+        _ => io::Error::other(e),
     }
 }

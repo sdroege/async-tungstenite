@@ -83,7 +83,7 @@ async fn handle_connection(peer_map: PeerMap, raw_stream: TcpStream, addr: Socke
     pin_mut!(broadcast_incoming, receive_from_others);
     future::select(broadcast_incoming, receive_from_others).await;
 
-    println!("{} disconnected", &addr);
+    println!("{} disconnected", addr);
     peer_map.lock().unwrap().remove(&addr);
 }
 

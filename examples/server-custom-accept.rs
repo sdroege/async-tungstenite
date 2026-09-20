@@ -91,7 +91,7 @@ async fn handle_connection(
     pin_mut!(broadcast_incoming, receive_from_others);
     future::select(broadcast_incoming, receive_from_others).await;
 
-    println!("{} disconnected", &addr);
+    println!("{} disconnected", addr);
     peer_map.lock().unwrap().remove(&addr);
 }
 
@@ -117,7 +117,7 @@ async fn handle_request(
             .get(CONNECTION)
             .and_then(|h| h.to_str().ok())
             .map(|h| {
-                h.split(|c| c == ' ' || c == ',')
+                h.split([' ', ','])
                     .any(|p| p.eq_ignore_ascii_case(upgrade.to_str().unwrap()))
             })
             .unwrap_or(false)

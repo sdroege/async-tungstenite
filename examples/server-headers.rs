@@ -64,7 +64,7 @@ async fn accept_connection(stream: TcpStream) {
     while let Some(msg) = ws_stream.next().await {
         let msg = msg.unwrap();
         if msg.is_text() || msg.is_binary() {
-            debug!("Server on message: {:?}", &msg);
+            debug!("Server on message: {:?}", msg);
             ws_stream.send(msg).await.unwrap();
         }
     }
