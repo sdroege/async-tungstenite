@@ -93,7 +93,7 @@ use self::tls::AutoStream;
 ///
 /// This is typically used for clients who have already established, for
 /// example, a TCP connection to the remote server.
-pub async fn client_async<'a, R, S>(
+pub async fn client_async<R, S>(
     request: R,
     stream: S,
 ) -> Result<(WebSocketStream<TokioAdapter<S>>, Response), Error>
@@ -106,7 +106,7 @@ where
 
 /// The same as `client_async()` but the one can specify a websocket configuration.
 /// Please refer to `client_async()` for more details.
-pub async fn client_async_with_config<'a, R, S>(
+pub async fn client_async_with_config<R, S>(
     request: R,
     stream: S,
     config: Option<WebSocketConfig>,
