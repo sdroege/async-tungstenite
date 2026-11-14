@@ -400,6 +400,11 @@ where
             return Poll::Ready(None);
         }
 
+        // Reading queues the pongs and close replies it owes, so the next `poll_ready` has to write
+        // them out before admitting a message; otherwise a finite `max_write_buffer_size` filled by
+        // them refuses the message with `WriteBufferFull`.
+        self.ready = false;
+
         match ready!(self.with_context(Some((ContextWaker::Read, cx)), |s| {
             #[cfg(feature = "verbose-logging")]
             trace!(
@@ -468,6 +473,15 @@ where
 
     #[cfg(feature = "futures-03-sink")]
     fn poll_close(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), WsError>> {
+        if !self.closing {
+            // Like any other message, the close frame is only admitted once what reading and
+            // earlier sends queued is written out.
+            match ready!(self.poll_ready(cx)) {
+                Ok(()) => {}
+                Err(WsError::ConnectionClosed) => return Poll::Ready(Ok(())),
+                Err(err) => return Poll::Ready(Err(err)),
+            }
+        }
         self.ready = true;
         let res = if self.closing {
             // After queueing it, we call `flush` to drive the close handshake to completion.
