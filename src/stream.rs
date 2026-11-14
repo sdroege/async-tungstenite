@@ -17,6 +17,24 @@ pub enum Stream<S, T> {
     Tls(T),
 }
 
+impl<S, T> Stream<S, T> {
+    /// Returns a shared reference to the inner stream.
+    pub fn get_ref(&self) -> Stream<&S, &T> {
+        match self {
+            Stream::Plain(s) => Stream::Plain(s),
+            Stream::Tls(t) => Stream::Tls(t),
+        }
+    }
+
+    /// Returns a mutable reference to the inner stream.
+    pub fn get_mut(&mut self) -> Stream<&mut S, &mut T> {
+        match self {
+            Stream::Plain(s) => Stream::Plain(s),
+            Stream::Tls(t) => Stream::Tls(t),
+        }
+    }
+}
+
 impl<S: AsyncRead + Unpin, T: AsyncRead + Unpin> AsyncRead for Stream<S, T> {
     fn poll_read(
         self: Pin<&mut Self>,

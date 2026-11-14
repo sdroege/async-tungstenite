@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Added
+- `Stream::get_ref()` and `Stream::get_mut()` to access the underlying
+  plain or TLS stream.
+
 ## [0.35.0] - 2026-07-28
 ### Fixed
 - Fix docs.rs build.
